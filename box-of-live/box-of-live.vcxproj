@@ -109,6 +109,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,7 +156,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bacterium.cpp" />
     <ClCompile Include="box-of-live.cpp" />
+    <ClCompile Include="cell.cpp" />
+    <ClCompile Include="cell_factory.cpp" />
+    <ClCompile Include="graphic_scene.cpp" />
+    <ClCompile Include="grass.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="bacterium.h" />
+    <ClInclude Include="cell.h" />
+    <ClInclude Include="cell_factory.h" />
+    <ClInclude Include="domain.h" />
+    <ClInclude Include="graphic_scene.h" />
+    <ClInclude Include="grass.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
