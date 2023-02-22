@@ -1,10 +1,10 @@
 #pragma once
 #include "cell.h"
 
-class CellFactory
+class FieldState
 {
 public:
-	CellFactory();
+	FieldState() = default;
 
 	void addBacterium(unsigned int amount_species, unsigned int max_count);
 
@@ -12,18 +12,9 @@ public:
 
 	void update();
 
-	const std::unordered_map<Position, std::shared_ptr<Cell>, PosHasher>& getData() const { return data_cell_; }
+	const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& getData() const { return data_cell_; }
 
 private:
-	std::unordered_map<Position, std::shared_ptr<Cell>, PosHasher> data_cell_;
-
-	struct DataPositions {
-		DataPositions() {
-			coord_x.reserve(1000);
-			coord_y.reserve(1000);
-		}
-		std::vector<unsigned int> coord_x;
-		std::vector<unsigned int> coord_y;
-	} data_positions_;
+	std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell_;
 };
 

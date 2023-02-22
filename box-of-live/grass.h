@@ -3,10 +3,8 @@
 
 class Grass final : public Cell {
 public:
-	Grass() { setColor(tgui::Color::Green); }
+	Grass() { setCellType(TypeCell::GRASS); }
 
 	void update() override {}
-
-	~Grass() = default;
 };
 

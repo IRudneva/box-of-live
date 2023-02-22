@@ -5,13 +5,22 @@
 
 class Bacterium: public Cell{
 public:
-	Bacterium() {
-		setColor(tgui::Color::Red);
+	Bacterium(unsigned int id_type)
+		:id_type_(id_type)
+	{
+		setCellType(TypeCell::BACTERIUM);
 	}
+
+	void setIdType(unsigned int id) { id_type_ = id; }
+
+	const unsigned int getIdType() { return id_type_; }
 
 	void update() override {}
 
-	~Bacterium() = default;
+private:
+	unsigned int id_type_ = 0;
 };
+
+
 
 

@@ -12,18 +12,10 @@ public:
 
 	virtual void update() = 0;
 
-	const Position& getPosition() const { return position_; }
+	TypeCell getCellType() const { return type_; }
 
-	const tgui::Layout2d& getSize() const { return size_; }
-
-	const tgui::Color getColor() const { return color_; }
-
-	void setColor(const tgui::Color& color) { color_ = color; }
-
-	void setPosition(const Position& new_pos) { position_ = new_pos; }
+	void setCellType(TypeCell type) { type_ = type; }
 
 private:
-	tgui::Color color_ = tgui::Color::White;
-	tgui::Layout2d size_ = { 8.0f, 8.0f };
-	Position position_;
+	TypeCell type_ = TypeCell::EMPTY;
 };

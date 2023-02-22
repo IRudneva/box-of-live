@@ -24,8 +24,8 @@ void GraphicScene::init()
 		{ 150, 70 }, { 500, 55 }, "START");
 
 	start_button->onPress([=] { 
-		cf.addGrass(30);
-		cf.addBacterium(1, 30);
+		field_state_->addGrass(50);
+		field_state_->addBacterium(3, 30);
 	});
 
 	buttons->add(start_button);
@@ -99,17 +99,30 @@ void GraphicScene::update()
 			line[1].position.x += 8;
 		}
 
-		cf.update();
+		field_state_->update();
 
-		auto m = cf.getData();
-		for (auto&[p, c] : m)
+		auto field_data = field_state_->getData();
+
+		for (const auto&[pos, cell] : field_data)
 		{
-			sf::RectangleShape cell;
-			cell.setSize(sf::Vector2f(c->getSize().x.getValue(), c->getSize().y.getValue()));
-			cell.setPosition(p.x, p.y);
-			cell.setFillColor(c->getColor());
-			cell.setOutlineColor(sf::Color::Black);
-			canvas->draw(cell);
+			sf::RectangleShape cell_shape;
+			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+			cell_shape.setPosition(pos.x, pos.y);
+			switch (auto type = cell->getCellType(); type)
+			{
+			case TypeCell::GRASS:
+				cell_shape.setFillColor(tgui::Color::Green);
+				break;
+			case TypeCell::BACTERIUM:
+				////////////////////////
+				cell_shape.setFillColor(tgui::Color::Red);
+				break;
+			case TypeCell::EMPTY:
+				cell_shape.setFillColor(tgui::Color::White);
+				break;
+			}
+			cell_shape.setOutlineColor(sf::Color::Black);
+			canvas->draw(cell_shape);
 		}
 
 		canvas->display();

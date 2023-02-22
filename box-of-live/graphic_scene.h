@@ -34,6 +34,6 @@ private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
 	tgui::GuiSFML gui_;
 	std::vector<sf::RectangleShape> cells_;
-	CellFactory cf;
+	std::unique_ptr<FieldState> field_state_ = std::make_unique<FieldState>();
 	tgui::Button::Ptr start_button;
 };
