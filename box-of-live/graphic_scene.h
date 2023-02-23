@@ -1,11 +1,29 @@
 #pragma once
 #include "bacterium.h"
-#include "cell_factory.h"
+#include "field_state.h"
 
 struct ConfigLabel
 {
 	std::string label;
+	unsigned int text_size;
 	tgui::Layout2d position;
+};
+
+struct ConfigButton
+{
+	tgui::Color color_background;
+	tgui::Color color_down;
+	tgui::Color color_hover;
+	tgui::Layout2d position;
+	tgui::Layout2d size;
+	std::string text;
+};
+
+struct ConfigLayout
+{
+	tgui::Color color;
+	tgui::Layout2d position;
+	tgui::Layout height;
 };
 
 class GraphicScene final
@@ -24,16 +42,21 @@ public:
 	tgui::Button::Ptr start() { return start_button; }
 
 private:
-	tgui::Panel::Ptr createLayout(const tgui::Color& color, const tgui::Layout2d& pos, const tgui::Layout& height);
-
-	tgui::Button::Ptr createButton(const tgui::Color& col, const tgui::Color& col_down, const tgui::Color& col_hover, const tgui::Layout2d& pos, const tgui::Layout2d& size, const std::string& text);
-
-	tgui::Label::Ptr createLabel(const std::string& text, unsigned int text_size, const tgui::Layout2d& pos);
-
-
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
 	tgui::GuiSFML gui_;
-	std::vector<sf::RectangleShape> cells_;
-	std::unique_ptr<FieldState> field_state_ = std::make_unique<FieldState>();
+	std::unique_ptr<FieldState> game_state_ = std::make_unique<FieldState>();
+	std::map<unsigned int, tgui::Color> color_bacterium_by_type_;
 	tgui::Button::Ptr start_button;
+
+	tgui::Panel::Ptr createLayout(const ConfigLayout& conf) const;
+
+	tgui::Button::Ptr createButton(const ConfigButton& conf) const;
+
+	tgui::Label::Ptr createLabel(const ConfigLabel& conf) const;
+
+	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canv) const;
+
+	tgui::Color getCellColorByBacteriumId(unsigned int id);
+
+	tgui::Color getColorCellByType(std::shared_ptr<Cell> cell);
 };

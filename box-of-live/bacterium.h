@@ -3,7 +3,7 @@
 #include <TGUI/TGUI.hpp>
 #include "cell.h"
 
-class Bacterium: public Cell{
+class Bacterium: public Cell {
 public:
 	Bacterium(unsigned int id_type)
 		:id_type_(id_type)

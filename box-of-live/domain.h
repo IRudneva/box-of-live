@@ -11,6 +11,8 @@ constexpr static unsigned int WIDTH_PLAYING_FIELD = 800;
 
 constexpr static unsigned int CELL_SIZE = 8;
 
+constexpr static unsigned int NUMBER_BACTERIAL_COLONIES = 3;
+
 enum class TypeCell
 {
 	BACTERIUM,

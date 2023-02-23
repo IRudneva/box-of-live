@@ -13,45 +13,54 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="logic">
+      <UniqueIdentifier>{af4054b3-88bc-4342-9a30-b3795f6264e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gui">
+      <UniqueIdentifier>{25c57c88-f648-4c9a-83b8-99875832c395}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="helpers">
+      <UniqueIdentifier>{fbb4fe58-4567-41aa-b47a-d7911e65e913}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="box-of-live.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="bacterium.cpp">
+      <Filter>logic</Filter>
     </ClCompile>
-    <ClCompile Include="graphic_scene.cpp">
+    <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="cell.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>logic</Filter>
+    </ClCompile>
+    <ClCompile Include="field_state.cpp">
+      <Filter>logic</Filter>
     </ClCompile>
     <ClCompile Include="grass.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>logic</Filter>
     </ClCompile>
-    <ClCompile Include="bacterium.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="cell_factory.cpp">
-      <Filter>Исходные файлы</Filter>
+    <ClCompile Include="graphic_scene.cpp">
+      <Filter>gui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bacterium.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="graphic_scene.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="domain.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>logic</Filter>
     </ClInclude>
     <ClInclude Include="cell.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="field_state.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="domain.h">
+      <Filter>helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="graphic_scene.h">
+      <Filter>gui</Filter>
     </ClInclude>
     <ClInclude Include="grass.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="cell_factory.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>logic</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -157,16 +157,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bacterium.cpp" />
-    <ClCompile Include="box-of-live.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="cell.cpp" />
-    <ClCompile Include="cell_factory.cpp" />
+    <ClCompile Include="field_state.cpp" />
     <ClCompile Include="graphic_scene.cpp" />
     <ClCompile Include="grass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bacterium.h" />
     <ClInclude Include="cell.h" />
-    <ClInclude Include="cell_factory.h" />
+    <ClInclude Include="field_state.h" />
     <ClInclude Include="domain.h" />
     <ClInclude Include="graphic_scene.h" />
     <ClInclude Include="grass.h" />

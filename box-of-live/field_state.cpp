@@ -1,11 +1,11 @@
-﻿#include "cell_factory.h"
+﻿#include "field_state.h"
 #include "bacterium.h"
 #include "grass.h"
 
-void FieldState::addBacterium(unsigned int amount_species, unsigned int max_count)
+void FieldState::addBacterium(unsigned int max_count)
 {
 	srand(time(NULL));
-	for (unsigned int id_bac = 0; id_bac <= amount_species; id_bac++) {
+	for (unsigned int id_bac = 0; id_bac < NUMBER_BACTERIAL_COLONIES; id_bac++) {
 		Position pos_base_bac;
 		while (true)
 		{//позиция первой бактерии для колонии
