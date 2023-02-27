@@ -82,8 +82,10 @@ void GraphicScene::update()
 		for (const auto&[pos, cell] : field_data)
 		{
 			sf::RectangleShape cell_shape;
-			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); // 
-			cell_shape.setPosition( pos.x *CELL_SIZE ,  pos.y * CELL_SIZE); // 
+			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
+			float pos_x = pos.x *CELL_SIZE;
+			float pos_y = pos.y * CELL_SIZE;
+			cell_shape.setPosition( pos_x,  pos_y); // 
 			cell_shape.setFillColor(getColorCellByType(cell));
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canvas->draw(cell_shape);

@@ -5,104 +5,63 @@
 
 void FieldState::addColonyBacterium(unsigned int max_count)
 {
-	data_cell_.insert({ {0,0}, std::make_shared < Bacterium > (0) });
-	//srand(time(NULL));
-	//for (unsigned int id_bacterium = 0; id_bacterium < NUMBER_BACTERIAL_COLONIES; id_bacterium++)
-	//{
-	//	auto new_bacterium = std::make_shared<Bacterium>(id_bacterium);
-	//	new_bacterium->setEnergy(5);
-	//	new_bacterium->setSpeed(2);
+	srand(time(NULL));
+	for (unsigned int id_bacterium = 0; id_bacterium < NUMBER_BACTERIAL_COLONIES; id_bacterium++)
+	{
+		auto base_bacterium = std::make_shared<Bacterium>(id_bacterium); // создаем базовую бактерию
+		Position base_bac_position = getRandomPosition(); // получаем рандомную позицию на поле
+		while (data_cell_.find(base_bac_position) != data_cell_.end()) 
+		{
+			base_bac_position = getRandomPosition();
+		}
+		base_bacterium->setPosition(base_bac_position);
+		data_cell_.insert({ base_bac_position, base_bacterium });
+		
+		int count_bacterium = 1; // текущее кол-во бактерий в колонии
 
-	//	const unsigned int colony_size = getRandomUInt(10, max_count);
-	//	std::vector<std::shared_ptr<Bacterium>> colony(colony_size, new_bacterium);
+		const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
+		int curr_adjacent = 0; // текущее кол-во соседей
 
-	//	Position base_bac_position = getRandomPosition();
-	//	/*while(data_cell_.find(base_bac_position) != data_cell_.end())
-	//	{
-	//		base_bac_position = getRandomPosition();
-	//	}*/
-	//	int min_neigh = 4;
-	//	int count_neigh = 0;
-	//	data_cell_.insert({ base_bac_position, std::move(new_bacterium) });
+		const auto colony_size = getRandomUInt(10, max_count);
 
-	//	auto pos_neigh = base_bac_position.getRandomDirection();
+		while (count_bacterium < colony_size) {
 
-	//	for(auto bac:colony)
-	//	{
-	//		while (data_cell_.find(pos_neigh) != data_cell_.end())
-	//		{
-	//			pos_neigh = base_bac_position.getRandomDirection();
-	//		}
+			auto adjacent_position = base_bac_position.getRandomDirection(); //получаем рандомную соседнюю клетку
+			if (data_cell_.find(adjacent_position) != data_cell_.end())// если такая позиция есть, получаем другую позицию
+				continue;
 
-	//		data_cell_.insert({ pos_neigh, std::move(bac) });
-	//		count_neigh++;
-	//		if(count_neigh == min_neigh)
-	//		{
-	//			base_bac_position = pos_neigh;
-	//			count_neigh = 0;
-	//		}
-	//	}
-	//}
+			auto adjacent = std::make_shared<Bacterium>(id_bacterium);
+			adjacent->setPosition(adjacent_position);
+			auto last_bacterium = data_cell_.insert({ adjacent_position, adjacent });
+			auto last_pos = last_bacterium.first->first;
+			count_bacterium++; //увеличиваем счётчик бактерий
+			curr_adjacent++; //увеличиваем счётчик соседей
 
-	//srand(time(NULL));
-	//for (unsigned int id_bac = 0; id_bac < NUMBER_BACTERIAL_COLONIES; id_bac++) {
-	//	int count_bacterium = 0;
-	//	Position  base_bac_position;
-	//	while (count_bacterium <= 1)
-	//	{//позиция первой бактерии для колонии
-	//		 base_bac_position = getRandomPosition();
-	//		if (data_cell_.find(base_bac_position) != data_cell_.end())
-	//			continue;
-	//		auto new_bacterium = std::make_shared<Bacterium>(id_bac);
-	//		new_bacterium->setEnergy(5);
-	//		new_bacterium->setSpeed(2);
-	//		data_cell_.insert({ base_bac_position , std::move(new_bacterium) });
-	//		++count_bacterium;
-	//	}
-	//	//строим колонию
-	//	unsigned int colony_size = getRandomUInt(20, max_count); //кол-во бактерий(клеток, которые нужно заполнить) (рандом от 20 до 30)
-
-	//	//Position base = pos_base_bac; // Позиция начала колонии 
-	//	unsigned int min_neigh = 3; //  Минимальное кол-во соседей у одной бактерии, кол-во клеток, которые нужно заполнить
-	//	unsigned int curr_neigh = 0;
-	//	while(count_bacterium <= colony_size)
-	//	{
-	//		auto neigh_pos = base_bac_position.getRandomDirection();
-	//	/*	if (data_cell_.find(neigh_pos) != data_cell_.end())
-	//			continue;*/
-	//		auto new_bacterium = std::make_shared<Bacterium>(id_bac);
-	//		new_bacterium->setEnergy(5);
-	//		new_bacterium->setSpeed(2);
-	//		data_cell_.insert({ neigh_pos,std::move(new_bacterium) });
-	//		++count_bacterium;
-	//		++curr_neigh;
-	//		if(curr_neigh == min_neigh)
-	//		{
-	//			base_bac_position = neigh_pos;
-	//			curr_neigh = 0;
-	//		}
-	//	}
-	//}
+			if (curr_adjacent == max_adjacent) // когда соседей станет max_adjacent, базовой позицией станет последняя успешно добавленная
+			{
+				base_bac_position = last_pos;
+				curr_adjacent = 0;
+			}
+		}
+	}
 }
+
 
 void FieldState::addGrass(unsigned int amount_grass)
 {
-	/*int count = 0;
+	int count = 0;
 	srand(time(NULL));
 	while (count <= amount_grass)
 	{
-		Position new_position(getRandomPosition());
-		if (data_cell_.find(new_position) == data_cell_.end())
+		Position new_position = getRandomPosition();
+		if (data_cell_.find(new_position) != data_cell_.end())
 		{
-			data_cell_.insert({ new_position, std::make_shared<EmptyCell>() });
+			new_position = getRandomPosition();
 		}
-		if (data_cell_[new_position]->getCellType() == TypeCell::EMPTY)
-		{
-			data_cell_[new_position] = std::make_shared<Grass>();
-			++count;
-		}
-	}*/
 
+		data_cell_[new_position] = std::make_shared<Grass>();
+		++count;
+	}
 }
 
 void FieldState::update()

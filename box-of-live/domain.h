@@ -126,22 +126,41 @@ struct Position
 	const Position& getRandomDirection() const
 	{
 		Position curr_pos = { x,y };
-
-		/*if(curr_pos == Position{0,0})
+		
+		std::vector<Position> adjacent_position;
+		
+		if(curr_pos == Position{0,0})
 		{
-			std::vector<Position> neighbour_pos = {
+			adjacent_position = {
 			curr_pos + PositionDelta{1,0},
 			curr_pos + PositionDelta{1, 1},
-			curr_pos + PositionDelta{1,1},
-			curr_pos + PositionDelta{1, 0},
-			curr_pos + PositionDelta{1, -1},
-			curr_pos + PositionDelta{0, -1},
-			curr_pos + PositionDelta{-1,-1},
-			curr_pos + PositionDelta{-1,0}
+			curr_pos + PositionDelta{0,1},
 			};
-		}*/
+		}
+		
+		if(curr_pos.x == 0 && curr_pos.y != 0)
+		{
+			adjacent_position = {
+			curr_pos + PositionDelta{0,-1},
+			curr_pos + PositionDelta{0, 1},
+			curr_pos + PositionDelta{1,1},
+			curr_pos + PositionDelta{1,0},
+			curr_pos + PositionDelta{1,-1},
+			};
+		}
 
-		std::vector<Position> neighbour_pos = {
+		if(curr_pos.y == 0 && curr_pos.x != 0)
+		{
+			adjacent_position = {
+			curr_pos + PositionDelta{-1,0},
+			curr_pos + PositionDelta{1, 0},
+			curr_pos + PositionDelta{-1,1},
+			curr_pos + PositionDelta{0,1},
+			curr_pos + PositionDelta{1,1},
+			};
+		}
+
+		adjacent_position = {
 			curr_pos + PositionDelta{-1,1},
 			curr_pos + PositionDelta{0, 1},
 			curr_pos + PositionDelta{1,1},
@@ -152,11 +171,11 @@ struct Position
 			curr_pos + PositionDelta{-1,0}
 		};
 		
-		unsigned int rand_neig = getRandomUInt(0, neighbour_pos.size() - 1);
+		unsigned int rand_neig = getRandomUInt(0, adjacent_position.size() - 1);
 
-		auto neigh_pos = neighbour_pos[rand_neig];
+		auto position = adjacent_position[rand_neig];
 
-		return neigh_pos;
+		return position;
 	}
 
 	bool operator== (const Position& other) const { return x == other.x && y == other.y; }
@@ -169,6 +188,7 @@ struct PositionHasher
 		size_t h_x = ui_hasher_(p.x);
 		size_t h_y = ui_hasher_(p.y);
 		return h_x * 137 + h_y * (137 * 137);
+		//return p.x + p.y * 10000;
 	}
 private:
 	std::hash<unsigned int> ui_hasher_;
@@ -177,7 +197,7 @@ private:
 inline Position getRandomPosition()
 {
 	unsigned int rand_x = getRandomUInt(0, COUNT_POSITION_X);
-	unsigned int rand_y = getRandomUInt(0, COUNT_POSITION_X);
+	unsigned int rand_y = getRandomUInt(0, COUNT_POSITION_Y);
 	return { rand_x, rand_y };
 }
 

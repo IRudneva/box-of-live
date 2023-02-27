@@ -1,6 +1,5 @@
 ﻿#include "graphic_scene.h"
 
-
 void mainLoop(sf::RenderWindow& window, GraphicScene& scene)
 {
 	while (window.isOpen())
