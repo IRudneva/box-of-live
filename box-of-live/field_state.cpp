@@ -93,7 +93,7 @@ void FieldState::update()
 						auto new_pos = pos.getRandomDirection();
 						if (data_cell_.find(new_pos) == data_cell_.end())
 							data_cell_.insert({ new_pos, std::make_shared<EmptyCell>() });
-						auto new_pos_cell_type = cell->getCellType();
+						auto new_pos_cell_type = data_cell_[new_pos]->getCellType();
 						
 						if(new_pos_cell_type == TypeCell::BACTERIUM)
 						{
@@ -101,18 +101,39 @@ void FieldState::update()
 							auto new_pos_cell_bacterium = dynamic_cast<Bacterium&>(new_pos_cell);
 							if(curr_bacterium.getIdType() != new_pos_cell_bacterium.getIdType())
 							{
-								////////////////////////////////////////////////////////////
-								data_cell_[new_pos] = cell;
-								data_cell_[pos] = std::make_shared<EmptyCell>();
+								if(curr_bacterium.getEnergy()>new_pos_cell_bacterium.getEnergy())
+								{
+									curr_bacterium.setEnergy(new_pos_cell_bacterium.getEnergy() / 2);
+									data_cell_[new_pos] = cell;
+									data_cell_[pos] = std::make_shared<EmptyCell>();
+								}
+								///////////////////////////////////////////////////////////
 							}
 						}
 						else if(new_pos_cell_type == TypeCell::GRASS)
 						{
-							
+							curr_bacterium.setEnergy(curr_bacterium.getEnergy() + 5);
+							auto curr_energy = curr_bacterium.getEnergy();
+							if(curr_energy > 6)
+							{
+								curr_bacterium.setEnergy(curr_energy / 2);
+								curr_energy = curr_bacterium.getEnergy();
+								data_cell_[new_pos] = cell;
+								auto chaild_bacterium = std::make_shared<Bacterium>(curr_bacterium.getIdType());
+								chaild_bacterium->setEnergy(curr_energy);
+								data_cell_[pos] = chaild_bacterium;
+
+							}
+							else
+							{
+								data_cell_[new_pos] = cell;
+								data_cell_[pos] = std::make_shared<EmptyCell>();
+							}
 						}
 						else if(new_pos_cell_type == TypeCell::EMPTY)
 						{
-							
+							data_cell_[new_pos] = cell;
+							data_cell_[pos] = std::make_shared<EmptyCell>();
 						}
 					}
 				}
