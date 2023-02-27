@@ -16,7 +16,7 @@ void GraphicScene::init()
 	start_button = createButton({ tgui::Color::Green, tgui::Color::Red, tgui::Color::Magenta,
 		{ 500, 55 }, { 150, 70 }, "START" });
 	start_button->onPress([=] { 
-		game_state_->addGrass(100);
+		game_state_->addGrass(200);
 		game_state_->addBacterium(30);
 	});
 	buttons->add(start_button);
@@ -72,10 +72,10 @@ void GraphicScene::update()
 
 	if (auto canvas = canvas_.lock(); canvas != nullptr) {
 		canvas->clear(tgui::Color::White);
-		
-		drawMarkupField(canvas);
 
-		game_state_->update();
+		if (timer_.timedOut()) {
+			game_state_->update();
+		}
 
 		auto field_data = game_state_->getData();
 		
@@ -88,6 +88,8 @@ void GraphicScene::update()
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canvas->draw(cell_shape);
 		}
+		
+		drawMarkupField(canvas);
 
 		canvas->display();
 	}
@@ -155,7 +157,7 @@ tgui::Color GraphicScene::getColorCellByType(std::shared_ptr<Cell> cell)
 	case TypeCell::BACTERIUM:
 	{
 		Cell& a = *cell;
-		auto id = static_cast<Bacterium&>(a).getIdType();
+		auto id = dynamic_cast<Bacterium&>(a).getIdType();
 		return getCellColorByBacteriumId(id);
 	}
 	case TypeCell::EMPTY:

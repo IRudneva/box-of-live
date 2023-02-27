@@ -59,4 +59,6 @@ private:
 	tgui::Color getCellColorByBacteriumId(unsigned int id);
 
 	tgui::Color getColorCellByType(std::shared_ptr<Cell> cell);
+
+	Timer timer_ = {0.5};
 };

@@ -5,7 +5,7 @@ class FieldState
 {
 public:
 	FieldState() = default;
-
+	
 	void addBacterium(unsigned int max_count);
 
 	void addGrass(unsigned int amount_grass);
@@ -16,5 +16,8 @@ public:
 
 private:
 	std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell_;
+	GameConfig game_config_;
+	Timer timer_grass_ = { 5 };
+	Timer timer_bacterium_ = { 2 };
 };
 

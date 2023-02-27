@@ -19,3 +19,11 @@ public:
 private:
 	TypeCell type_ = TypeCell::EMPTY;
 };
+
+
+class EmptyCell final :public Cell
+{
+public:
+	EmptyCell() { setCellType(TypeCell::EMPTY); }
+	void update() override {}
+};
