@@ -16,6 +16,10 @@ constexpr static unsigned int CELL_SIZE = 8;
 
 constexpr static unsigned int NUMBER_BACTERIAL_COLONIES = 3;
 
+constexpr static unsigned int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
+
+constexpr static unsigned int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
+
 //epBase - базовое количество энергии у бактерии
 //epActionCost - количество энергии потраченное на действие
 //epToClone - количество энергии необходимое для деления
@@ -102,22 +106,50 @@ enum class TypeCell
 
 inline unsigned int getRandomUInt(unsigned int from, unsigned int to) { return from + std::rand() % (to - from); }
 
+
+struct PositionDelta
+{
+	int x = 0;
+	int y = 0;
+};
+
 struct Position
 {
 	unsigned int x = 0;
 	unsigned int y = 0;
 
+	Position operator+(const PositionDelta& delta) const
+	{
+		return Position{ x + delta.x, y + delta.y };
+	}
+
 	const Position& getRandomDirection() const
 	{
-		std::vector<Position> neighbour_pos = { 
-		{x - CELL_SIZE, y + CELL_SIZE},
-		{x, y + CELL_SIZE},
-		{x + CELL_SIZE, y + CELL_SIZE},
-		{ x + CELL_SIZE, y},
-		{ x + CELL_SIZE, y - CELL_SIZE},
-		{ x, y - CELL_SIZE},
-		{ x - CELL_SIZE, y - CELL_SIZE} ,
-		{ x - CELL_SIZE, y}
+		Position curr_pos = { x,y };
+
+		/*if(curr_pos == Position{0,0})
+		{
+			std::vector<Position> neighbour_pos = {
+			curr_pos + PositionDelta{1,0},
+			curr_pos + PositionDelta{1, 1},
+			curr_pos + PositionDelta{1,1},
+			curr_pos + PositionDelta{1, 0},
+			curr_pos + PositionDelta{1, -1},
+			curr_pos + PositionDelta{0, -1},
+			curr_pos + PositionDelta{-1,-1},
+			curr_pos + PositionDelta{-1,0}
+			};
+		}*/
+
+		std::vector<Position> neighbour_pos = {
+			curr_pos + PositionDelta{-1,1},
+			curr_pos + PositionDelta{0, 1},
+			curr_pos + PositionDelta{1,1},
+			curr_pos + PositionDelta{1, 0},
+			curr_pos + PositionDelta{1, -1},
+			curr_pos + PositionDelta{0, -1},
+			curr_pos + PositionDelta{-1,-1},
+			curr_pos + PositionDelta{-1,0}
 		};
 		
 		unsigned int rand_neig = getRandomUInt(0, neighbour_pos.size() - 1);
@@ -132,16 +164,20 @@ struct Position
 
 struct PositionHasher
 {
-	size_t operator() (const Position& p) const { return p.x + 100 + p.y < p.x + 100 + p.y; }
+	size_t operator() (const Position& p) const
+	{
+		size_t h_x = ui_hasher_(p.x);
+		size_t h_y = ui_hasher_(p.y);
+		return h_x * 137 + h_y * (137 * 137);
+	}
+private:
+	std::hash<unsigned int> ui_hasher_;
 };
-
-//static bool operator<(const Position& lhs, const Position& rhs) { return lhs.x < rhs.x && lhs.y < rhs.y; }
-
 
 inline Position getRandomPosition()
 {
-	unsigned int rand_x = CELL_SIZE * getRandomUInt(0, WIDTH_PLAYING_FIELD / CELL_SIZE);
-	unsigned int rand_y = CELL_SIZE * getRandomUInt(0, HEIGHT_PLAYING_FIELD / CELL_SIZE);
+	unsigned int rand_x = getRandomUInt(0, COUNT_POSITION_X);
+	unsigned int rand_y = getRandomUInt(0, COUNT_POSITION_X);
 	return { rand_x, rand_y };
 }
 

@@ -10,7 +10,7 @@ protected:
 public:
 	virtual ~Cell() = default;
 
-	virtual void update() = 0;
+	virtual void update(std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell) = 0;
 
 	TypeCell getCellType() const { return type_; }
 
@@ -20,10 +20,10 @@ private:
 	TypeCell type_ = TypeCell::EMPTY;
 };
 
-
-class EmptyCell final :public Cell
-{
-public:
-	EmptyCell() { setCellType(TypeCell::EMPTY); }
-	void update() override {}
-};
+//
+//class EmptyCell final :public Cell
+//{
+//public:
+//	EmptyCell() { setCellType(TypeCell::EMPTY); }
+//	void update(std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell) override {}
+//};

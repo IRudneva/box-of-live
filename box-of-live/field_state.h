@@ -6,7 +6,7 @@ class FieldState
 public:
 	FieldState() = default;
 	
-	void addBacterium(unsigned int max_count);
+	void addColonyBacterium(unsigned int max_count);
 
 	void addGrass(unsigned int amount_grass);
 

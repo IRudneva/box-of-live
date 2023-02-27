@@ -17,7 +17,7 @@ void GraphicScene::init()
 		{ 500, 55 }, { 150, 70 }, "START" });
 	start_button->onPress([=] { 
 		game_state_->addGrass(200);
-		game_state_->addBacterium(30);
+		game_state_->addColonyBacterium(20);
 	});
 	buttons->add(start_button);
 
@@ -82,8 +82,8 @@ void GraphicScene::update()
 		for (const auto&[pos, cell] : field_data)
 		{
 			sf::RectangleShape cell_shape;
-			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-			cell_shape.setPosition(pos.x, pos.y);
+			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); // 
+			cell_shape.setPosition( pos.x *CELL_SIZE ,  pos.y * CELL_SIZE); // 
 			cell_shape.setFillColor(getColorCellByType(cell));
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canvas->draw(cell_shape);

@@ -11,6 +11,10 @@ public:
 		setCellType(TypeCell::BACTERIUM);
 	}
 
+	/*void createColony(unsigned int count, std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell)
+	{
+		
+	}*/
 	//void setPosition(Position pos) { position_ = pos; }
 
 	//Position getPosition() { return  position_; }
@@ -31,7 +35,7 @@ public:
 	bool canMove()
 	{
 		const auto old_energy = energy_base_;
-		update();
+	//	update();
 		const auto new_energy = energy_base_;
 		if (old_energy > new_energy)
 		{
@@ -40,7 +44,7 @@ public:
 		return false;
 	}
 	
-	void update() override
+	void update(std::unordered_map<Position,std::shared_ptr<Cell>,PositionHasher> data_cell) override
 	{
 		if (energy_base_ != 0)
 		{
