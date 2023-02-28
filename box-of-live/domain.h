@@ -178,6 +178,24 @@ struct Position
 		return position;
 	}
 
+	const std::vector<Position> getAllAdjacentPosition()
+	{
+		Position curr_pos = { x,y };
+
+		std::vector<Position> adjacent_position = {
+			curr_pos + PositionDelta{-1,1},
+			curr_pos + PositionDelta{0, 1},
+			curr_pos + PositionDelta{1,1},
+			curr_pos + PositionDelta{1, 0},
+			curr_pos + PositionDelta{1, -1},
+			curr_pos + PositionDelta{0, -1},
+			curr_pos + PositionDelta{-1,-1},
+			curr_pos + PositionDelta{-1,0}
+		};
+
+		return adjacent_position;
+	}
+
 	bool operator== (const Position& other) const { return x == other.x && y == other.y; }
 };
 

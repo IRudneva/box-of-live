@@ -51,13 +51,11 @@ void FieldState::addGrass(unsigned int amount_grass)
 {
 	int count = 0;
 	srand(time(NULL));
-	while (count <= amount_grass)
+	while (count < amount_grass)
 	{
 		Position new_position = getRandomPosition();
 		if (data_cell_.find(new_position) != data_cell_.end())
-		{
-			new_position = getRandomPosition();
-		}
+			continue;
 
 		data_cell_[new_position] = std::make_shared<Grass>();
 		++count;
@@ -70,9 +68,8 @@ void FieldState::update()
 		return;
 	
 	if (timer_grass_.timedOut())
-	{
 		addGrass(50);
-	}
+	// ПРОВЕРИТЬ, ПРИШЛО ЛИ ВРЕМЯ БАКТЕРИИ ПЕРЕМЕСТИТЬСЯ, ЕСЛИ ДА, ПОЛОЖИТЬ ЕЕ В ДРГОЙ КОНТЕЙНЕР И ОБНОВИТЬ
 
 	//if (timer_bacterium_.timedOut())
 	//{
