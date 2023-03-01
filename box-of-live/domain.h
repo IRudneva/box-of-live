@@ -219,6 +219,14 @@ inline Position getRandomPosition()
 	return { rand_x, rand_y };
 }
 
+struct UpdateState
+{
+	Position old_position;
+	Position new_position;
+
+	std::optional<Position> chaild_position;
+};
+
 static time_t getCurrentTime() {
 
 	std::chrono::system_clock::time_point p = std::chrono::system_clock::now();

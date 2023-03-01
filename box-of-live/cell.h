@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include "domain.h"
 #include <TGUI/TGUI.hpp>
 
@@ -10,7 +11,7 @@ protected:
 public:
 	virtual ~Cell() = default;
 
-	virtual void update(std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell) = 0;
+	virtual std::optional<UpdateState> update(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell) = 0;
 
 	TypeCell getCellType() const { return type_; }
 
