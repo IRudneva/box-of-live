@@ -15,10 +15,7 @@ void GraphicScene::init()
 	auto buttons = tgui::Group::create();
 	start_button = createButton({ tgui::Color::Green, tgui::Color::Red, tgui::Color::Magenta,
 		{ 500, 55 }, { 150, 70 }, "START" });
-	start_button->onPress([=] { 
-		game_state_->addGrass(200);
-		game_state_->addColonyBacterium(20);
-	});
+	
 	buttons->add(start_button);
 
 	tgui::Group::Ptr labels = tgui::Group::create();
@@ -73,27 +70,31 @@ void GraphicScene::update()
 	if (auto canvas = canvas_.lock(); canvas != nullptr) {
 		canvas->clear(tgui::Color::White);
 
-		if (timer_.timedOut()) {
-			game_state_->update();
-		}
+		if (start_button->isMouseDown())
+			game_state_->restart();
 
-		auto field_data = game_state_->getData();
+		if (timer_.timedOut()) 
+			game_state_->update();
 		
+		auto field_data = game_state_->getData();
+
 		for (const auto&[pos, cell] : field_data)
 		{
 			sf::RectangleShape cell_shape;
 			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
 			float pos_x = pos.x *CELL_SIZE;
 			float pos_y = pos.y * CELL_SIZE;
-			cell_shape.setPosition( pos_x,  pos_y); // 
+			cell_shape.setPosition(pos_x, pos_y); // 
 			cell_shape.setFillColor(getColorCellByType(cell));
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canvas->draw(cell_shape);
 		}
-		
+
+
 		drawMarkupField(canvas);
 
 		canvas->display();
+
 	}
 }
 
@@ -170,13 +171,13 @@ tgui::Color GraphicScene::getColorCellByType(std::shared_ptr<Cell> cell)
 tgui::Color GraphicScene::getCellColorByBacteriumId(unsigned int id)
 {
 	if (color_bacterium_by_type_.find(id) != color_bacterium_by_type_.end())
-	{
 		return color_bacterium_by_type_.at(id);
-	}
+	
 
 	auto red = getRandomUInt(0, 255);
 	auto blue = getRandomUInt(0, 255);
 	auto green = getRandomUInt(0, 255);
+
 	color_bacterium_by_type_[id] = tgui::Color(red, green, blue);
 	return color_bacterium_by_type_.at(id);
 }

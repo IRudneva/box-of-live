@@ -18,10 +18,6 @@ public:
 	{
 		setCellType(TypeCell::BACTERIUM);
 	}
-
-	void setPosition(Position pos) { position_ = pos; }
-
-	Position getPosition() const { return  position_; }
 	
 	void setIdType(unsigned int id) { id_type_ = id; }
 
@@ -35,26 +31,26 @@ public:
 
 	unsigned int getSpeed() const { return speed_; }
 	   	
-	std::optional<UpdateState> update(const std::unordered_map<Position,std::shared_ptr<Cell>,PositionHasher>& data_cell) override
+	UpdateState update(const std::unordered_map<Position,std::shared_ptr<Cell>,PositionHasher>& data_cell) override
 	{
-		spendEnergy(ENERGY_ACTION_COST); //тратит энергию 
-		if (!canMove()) // если энергии недостаточно для перемещения - стоит на месте
-			return std::nullopt;
-		// если енергии хватает для перемещения
-		auto update_position = tryMove(data_cell);
-		if (update_position.has_value())
-		{
-			if (canClone())
-				clone(update_position.value(), data_cell);
-			
-			return update_position;
-		}
-		return std::nullopt;
+		//spendEnergy(ENERGY_ACTION_COST); //тратит энергию 
+		//if (!canMove()) // если энергии недостаточно для перемещения - стоит на месте
+		//	return std::nullopt;
+		//// если енергии хватает для перемещения
+		//auto update_position = tryMove(data_cell);
+		//if (update_position.has_value())
+		//{
+		//	if (canClone())
+		//		clone(update_position.value(), data_cell);
+		//	
+		//	return update_position;
+		//}
+		//return std::nullopt;
+		return {};
 	}
 
 private:
 	unsigned int id_type_ = 0;
-	Position position_;
 	unsigned int energy_base_ = ENERGY_BASE;
 	unsigned int speed_ = UPDATE_TIME;
 	std::chrono::time_point<std::chrono::steady_clock> last_action_time_;
@@ -98,7 +94,7 @@ private:
 	{
 		std::optional<UpdateState> result;
 
-		auto all_adjacent = position_.getAllAdjacentPosition();
+		const auto all_adjacent = position_.getAllAdjacentPosition();
 		
 		// логика энергиии!!
 		
@@ -132,14 +128,18 @@ private:
 		}
 		
 		srand(time(NULL));
-		auto empty_pos = position_.getRandomDirection();
 
-		while (data_cell.find(empty_pos) != data_cell.end())
+		for(const auto& a : all_adjacent)
 		{
-			empty_pos = position_.getRandomDirection();
+			if(data_cell.find(a) != data_cell.end())
+			{
+				result.emplace(UpdateState{ position_, a, std::nullopt });
+				return result;
+			}
 		}
-		result.emplace(UpdateState{ position_, empty_pos, std::nullopt });
-		return result;
+		return std::nullopt;
+		/*result.emplace(UpdateState{ position_, empty_pos, std::nullopt });
+		return result;*/
 		// перемещаемся на свободную позицию
 
 	}

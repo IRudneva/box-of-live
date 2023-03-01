@@ -196,6 +196,8 @@ struct Position
 		return adjacent_position;
 	}
 
+	int getCountAdjacent() { return getAllAdjacentPosition().size(); }
+
 	bool operator== (const Position& other) const { return x == other.x && y == other.y; }
 };
 
