@@ -10,11 +10,15 @@ void FieldState::addColonyBacterium(unsigned int max_count)
 	{
 		auto base_bacterium = std::make_shared<Bacterium>(id_bacterium); // создаем базовую бактерию
 
+		//base_bacterium->setIdCell(data_bacterium_.size());
+
 		Position base_bac_position = getRandomEmptyPosition(); // находим для нее пустую клетку
 
 		base_bacterium->setPosition(base_bac_position); // присваиваем бактерии эту позицию
 
-		data_bacterium_.push_back(base_bacterium); // добавляем в хранилище бактерий
+		cells_.insert({ base_bacterium->getIdCell(), base_bacterium });
+
+		//data_bacterium_.insert(base_bacterium); // добавляем в хранилище бактерий
 
 		data_cell_.insert({ base_bac_position, base_bacterium }); // добавляем на поле
 		
@@ -38,7 +42,8 @@ void FieldState::addColonyBacterium(unsigned int max_count)
 
 			adjacent->setPosition(adjacent_position); // присваиваем бактерии найденную позицию
 
-			data_bacterium_.push_back(base_bacterium); // добавляем в хранилище бактерий
+			cells_.insert({ adjacent->getIdCell(), adjacent });
+			//data_bacterium_.insert(base_bacterium); // добавляем в хранилище бактерий
 
 			auto last_bacterium = data_cell_.insert({ adjacent_position, adjacent }).first; // добавляем на поле и возвращаем итератор на добавленную бактерию
 
@@ -63,7 +68,9 @@ void FieldState::addGrass(unsigned int amount_grass)
 	while (count < amount_grass)
 	{
 		Position new_position = getRandomEmptyPosition();
-		data_cell_.insert({ new_position, std::make_shared<Grass>() });
+		auto new_grass = std::make_shared<Grass>();
+		data_cell_.insert({ new_position, new_grass });
+		cells_.insert({ new_grass->getIdCell(), new_grass });
 		++count;
 	}
 }
@@ -117,6 +124,7 @@ void FieldState::update()
 void FieldState::restart()
 {
 	data_cell_.clear();
+	IdCell::reset();
 	addColonyBacterium(20);
 	addGrass(200);
 }

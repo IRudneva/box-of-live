@@ -3,10 +3,24 @@
 #include "domain.h"
 #include <TGUI/TGUI.hpp>
 
+struct IdCell
+{
+	static int generateID(){
+		id++;
+		return id;
+	}
+	static void reset() { id = 0; }
+private:
+	inline static int id = 0;
+};
+
 class Cell
 {
 protected:
-	Cell() = default;
+	Cell()
+	{
+		id_ = IdCell::generateID();
+	}
 
 	Position position_;
 
@@ -23,6 +37,11 @@ public:
 
 	Position getPosition() const { return  position_; }
 
+	int getIdCell() const { return id_; }
+
+	//void setIdCell(int id) { id_cell_ = id; }
+
 private:
+	int id_ = 0;
 	TypeCell type_ = TypeCell::EMPTY;
 };
