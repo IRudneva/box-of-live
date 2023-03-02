@@ -7,7 +7,7 @@
 constexpr static int ENERGY_ACTION_COST = 1;
 constexpr static int ENERGY_BASE = 5;
 constexpr static int ENERGY_TO_CLONE = 4;
-constexpr static int UPDATE_TIME = 2;
+constexpr static time_t UPDATE_TIME = 2;
 constexpr static int ENERGY_GRASS = 3;
 
 
@@ -18,7 +18,16 @@ public:
 	{
 		setCellType(TypeCell::BACTERIUM);
 	}
-	
+
+	bool isReadyUpdate() override
+	{
+		if(getCurrentTime() - last_action_time_ >= UPDATE_TIME)
+		{
+			return true;
+		}
+		return false;
+	}
+
 	void setIdType(unsigned int id) { id_type_ = id; }
 
 	unsigned int getIdType() const { return id_type_; }
@@ -31,13 +40,15 @@ public:
 
 	unsigned int getSpeed() const { return speed_; }
 	   	
-	UpdateState update(const std::unordered_map<Position,std::shared_ptr<Cell>,PositionHasher>& data_cell) override
+	void update(std::map<int, std::shared_ptr<Cell>>& cells) override
 	{
-		//spendEnergy(ENERGY_ACTION_COST); //тратит энергию 
-		//if (!canMove()) // если энергии недостаточно для перемещения - стоит на месте
-		//	return std::nullopt;
+		spendEnergy(ENERGY_ACTION_COST); //тратит энергию 
+		if (!canMove()) // если энергии недостаточно для перемещения - стоит на месте
+			return;
 		//// если енергии хватает для перемещения
-		//auto update_position = tryMove(data_cell);
+		tryMovePriorityCell(cells);
+
+		
 		//if (update_position.has_value())
 		//{
 		//	if (canClone())
@@ -46,14 +57,13 @@ public:
 		//	return update_position;
 		//}
 		//return std::nullopt;
-		return {};
 	}
 
 private:
 	unsigned int id_type_ = 0;
 	unsigned int energy_base_ = ENERGY_BASE;
 	unsigned int speed_ = UPDATE_TIME;
-	std::chrono::time_point<std::chrono::steady_clock> last_action_time_;
+	time_t last_action_time_;
 
 
 	bool canMove() const
@@ -74,15 +84,15 @@ private:
 
 	bool canClone() { return energy_base_ >= ENERGY_TO_CLONE; }
 
-	void clone(UpdateState state, const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell)
-	{
+	void clone(UpdateState state, const std::map<int, std::shared_ptr<Cell>>& cells)
+	{/*
 		auto all_adjacent = state.new_position.getAllAdjacentPosition();
 		for (auto adj : all_adjacent)
 		{
 			if (data_cell.find(adj) == data_cell.end())
 				state.chaild_position = adj;
 		}
-		state.chaild_position = std::nullopt;
+		state.chaild_position = std::nullopt;*/
 	}
 
 	/*пытается переместиться в случайную точку рядом с собой, если не получается - стоит на месте
@@ -90,94 +100,119 @@ private:
 		не может перемещаться на точку если у другой бактерии энергии больше
 		приоритет выбора точек : бактерия другого типа, трава, пустая клетка*/
 
-	std::optional<UpdateState> tryMove(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell)
+	bool tryMovePriorityCell(const std::map<int, std::shared_ptr<Cell>>& cells)
 	{
-		std::optional<UpdateState> result;
+		bool successful_move = false;
 
-		const auto all_adjacent = position_.getAllAdjacentPosition();
-		
-		// логика энергиии!!
-		
-		auto another_bacterium_pos = tryFindBacteriumAnotherType(data_cell);
-		if(another_bacterium_pos.has_value())
+		const auto all_adjacent = position_.getAllAdjacentPosition(); // смотрим соседей
+		//
+		auto id_another_bacterium = tryFindBacteriumAnotherType(cells);
+
+		if (id_another_bacterium != NO_RESULT)
 		{
-			if(another_bacterium_pos.value() == position_)
-			{
-				return std::nullopt; // у бактерии все соседи ее типа
-			}
-			
-			Cell& another_cell = *data_cell.at(another_bacterium_pos.value());
+			Cell& another_cell = *cells.at(id_another_bacterium);
 			const auto another_bacterium = dynamic_cast<Bacterium&>(another_cell);
-			if(energy_base_ > another_bacterium.getEnergy())
+			if (energy_base_ > another_bacterium.getEnergy())
 			{
-				result.emplace(UpdateState{ position_, another_bacterium_pos.value(), std::nullopt });
+				erase_id_ = id_another_bacterium;
+				position_ = another_cell.getPosition();
 				spendEnergy(another_bacterium.getEnergy() * 0.5);
-				return result;
-				// перемещаемся на клетку другой бактерии и зануляем текущую позицию
+				successful_move = true;
+				return successful_move;
 			}
-		}// если у другой бактерии энергии больше - ищем другую позицию - траву
+			// если у другой бактерии энергии больше - ищем другую позицию - траву
+		}
 
-		auto grass_pos = tryFindGrass(data_cell);
+		auto grass_id = tryFindGrass(cells);
 
-		if(grass_pos.has_value())
+		if(grass_id != NO_RESULT)
 		{
-			result.emplace(UpdateState{ position_, grass_pos.value(), std::nullopt });
+			erase_id_ = grass_id;
+			position_ = cells.at(grass_id)->getPosition();
 			increaseEnergy(ENERGY_GRASS);
-			return result;
-			// перемещаемся на клетку с травой и зануляем текущую позицию
 		}
-		
-		srand(time(NULL));
 
-		for(const auto& a : all_adjacent)
+		auto empty_cell_pos = tryMoveEmptyCell(cells);
+
+		if (empty_cell_pos != position_)
 		{
-			if(data_cell.find(a) != data_cell.end())
-			{
-				result.emplace(UpdateState{ position_, a, std::nullopt });
-				return result;
-			}
+			position_ = empty_cell_pos;
+			successful_move = true;
+			return successful_move;
 		}
-		return std::nullopt;
-		/*result.emplace(UpdateState{ position_, empty_pos, std::nullopt });
-		return result;*/
-		// перемещаемся на свободную позицию
 
+		return  successful_move;
 	}
 
-	std::optional<Position> tryFindBacteriumAnotherType(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell)
+	int tryFindBacteriumAnotherType(const std::map<int, std::shared_ptr<Cell>>& cells)
 	{
-		int count_bacterium = 0;
+		int count_adj = 0;
 		auto all_adjacent = position_.getAllAdjacentPosition();
-		for (const auto& adj_pos : all_adjacent) 
+
+		for (const auto&[id, cell] : cells)
 		{
-			if(data_cell.find(adj_pos) != data_cell.end() && data_cell.at(adj_pos)->getCellType() == TypeCell::BACTERIUM)
-			{
-				count_bacterium++;
-				Cell& adj_cell = *data_cell.at(adj_pos);
-				const auto adj_bacterium = dynamic_cast<Bacterium&>(adj_cell);
-				if (adj_bacterium.getIdType() != id_type_) // если хоть одна бактерия другого типа
-				{
-					return adj_pos; // возвращаем позицию этой бактерии 
-				}
-			}
+			if (count_adj == all_adjacent.size())
+				return -NO_RESULT;
+
+			if (cell->getCellType() != TypeCell::BACTERIUM)
+				continue;
+
+			auto is_found = std::find(all_adjacent.begin(), all_adjacent.end(), cell->getPosition());
+
+			if (is_found == all_adjacent.end())
+				continue;
+
+			count_adj++;
+			Cell& adj_cell = *cell;
+			const auto adj_bacterium = dynamic_cast<Bacterium&>(adj_cell);
+			if (adj_bacterium.getIdType() != id_type_) // если хоть одна бактерия другого типа
+				return adj_bacterium.getIdCell(); // возвращаем id этой бактерии 
+
+			return NO_RESULT;
 		}
-		if (count_bacterium == all_adjacent.size())
-			return position_;
-		
-		return std::nullopt; // если рядом нет бактерии другого типа возвращаемся
 	}
 
-	std::optional<Position> tryFindGrass(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell)
+	int tryFindGrass(const std::map<int, std::shared_ptr<Cell>>& cells)
 	{
 		auto all_adjacent = position_.getAllAdjacentPosition();
-		for (const auto& adj_pos : all_adjacent)
+
+		for (const auto&[id, cell] : cells)
 		{
-			if (data_cell.find(adj_pos) != data_cell.end() && data_cell.at(adj_pos)->getCellType() == TypeCell::GRASS)
-			{
-				return  adj_pos;
-			}
+			if (cell->getCellType() != TypeCell::GRASS)
+				continue;
+			auto is_found = std::find(all_adjacent.begin(), all_adjacent.end(), cell->getPosition());
+
+			if (is_found == all_adjacent.end())
+				continue;
+
+			return id;
 		}
-		return std::nullopt;
+		return NO_RESULT;
+	}
+
+	Position tryMoveEmptyCell(const std::map<int, std::shared_ptr<Cell>>& cells)
+	{
+		int count_adj = 0;
+		auto all_adjacent = position_.getAllAdjacentPosition();
+
+		for (const auto&[id, cell] : cells)
+		{
+			if (count_adj == all_adjacent.size())
+				return position_;
+
+			auto is_found = std::find(all_adjacent.begin(), all_adjacent.end(), cell->getPosition());
+
+			if (is_found != all_adjacent.end())
+			{
+				all_adjacent.erase(is_found);
+			}
+
+			count_adj++;
+		}
+
+		if (!all_adjacent.empty())
+			return *(all_adjacent.begin());
+		return position_;
 	}
 };
 

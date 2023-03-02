@@ -5,6 +5,8 @@ class Grass final : public Cell {
 public:
 	Grass() { setCellType(TypeCell::GRASS); }
 
-	UpdateState update(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell) override { return{}; }
+	void update(std::map<int, std::shared_ptr<Cell>>& cells) override { }
+
+	bool isReadyUpdate() override { return false; }
 };
 

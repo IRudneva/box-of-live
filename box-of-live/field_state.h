@@ -12,18 +12,15 @@ public:
 
 	void update();
 
-	const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& getData() const { return data_cell_; }
+	const std::map<int, std::shared_ptr<Cell>>& getData() const { return cells_; }
 
 	void restart();
 
 private:
-	std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell_;
+//	std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> data_cell_;
 	std::map<int, std::shared_ptr<Cell>> cells_;
-	//std::unordered_set<std::shared_ptr<Cell>> data_bacterium_; // ץור?
-	//GameConfig game_config_;
 	Timer timer_grass_ = { 5 };
-	//size_t auto_id_ = 0;
-	//Timer timer_bacterium_ = { 2 };
+	Timer tb = { 2 };
 
 	Position getRandomEmptyPosition() const;
 

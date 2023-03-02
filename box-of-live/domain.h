@@ -20,6 +20,8 @@ constexpr static unsigned int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE
 
 constexpr static unsigned int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
 
+constexpr  static int NO_RESULT = -1;
+
 //epBase - базовое количество энергии у бактерии
 //epActionCost - количество энергии потраченное на действие
 //epToClone - количество энергии необходимое для деления
@@ -200,6 +202,8 @@ struct Position
 
 	bool operator== (const Position& other) const { return x == other.x && y == other.y; }
 };
+
+inline bool operator!= (const Position& lhs, const Position& rhs) { return !(rhs == lhs); }
 
 struct PositionHasher
 {

@@ -23,11 +23,16 @@ protected:
 	}
 
 	Position position_;
+	std::optional<int> erase_id_ = std::nullopt;
 
 public:
 	virtual ~Cell() = default;
 
-	virtual UpdateState update(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& data_cell) = 0;
+	virtual void update(std::map<int, std::shared_ptr<Cell>>& cells) = 0;
+
+	virtual bool isReadyUpdate() = 0;
+
+	virtual std::optional<int> getEraseId() { return erase_id_; }
 
 	TypeCell getCellType() const { return type_; }
 
