@@ -28,11 +28,15 @@ protected:
 public:
 	virtual ~Cell() = default;
 
-	virtual void update(std::map<int, std::shared_ptr<Cell>>& cells) = 0;
+	virtual void update(const std::map<int, std::shared_ptr<Cell>>& cells) = 0;
 
 	virtual bool isReadyUpdate() = 0;
 
 	virtual std::optional<int> getEraseId() { return erase_id_; }
+
+	virtual bool canClone() = 0;
+
+	virtual std::shared_ptr<Cell> clone(const std::map<int, std::shared_ptr<Cell>>& cells) = 0;
 
 	TypeCell getCellType() const { return type_; }
 
@@ -44,7 +48,6 @@ public:
 
 	int getIdCell() const { return id_; }
 
-	//void setIdCell(int id) { id_cell_ = id; }
 
 private:
 	int id_ = 0;

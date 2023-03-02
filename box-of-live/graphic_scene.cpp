@@ -175,9 +175,9 @@ tgui::Color GraphicScene::getCellColorByBacteriumId(unsigned int id)
 		return color_bacterium_by_type_.at(id);
 	
 
-	auto red = getRandomUInt(0, 255);
-	auto blue = getRandomUInt(0, 255);
-	auto green = getRandomUInt(0, 255);
+	auto red = getRandomInt(0, 255);
+	auto blue = getRandomInt(0, 255);
+	auto green = getRandomInt(0, 255);
 
 	color_bacterium_by_type_[id] = tgui::Color(red, green, blue);
 	return color_bacterium_by_type_.at(id);
