@@ -66,15 +66,18 @@ bool Bacterium::tryMovePriorityCell(const std::map<int, std::shared_ptr<Cell>>& 
 
 	if (id_another_bacterium != NO_RESULT)
 	{
-		Cell& another_cell = *cells.at(id_another_bacterium);
-		const auto another_bacterium = dynamic_cast<Bacterium&>(another_cell);
-		if (energy_base_ > another_bacterium.getEnergy())
+		if (cells.find(id_another_bacterium) != cells.end())
 		{
-			erase_id_ = id_another_bacterium;
-			position_ = another_cell.getPosition();
-			spendEnergy(another_bacterium.getEnergy() * 0.5);
-			successful_move = true;
-			return successful_move;
+			Cell& another_cell = *cells.at(id_another_bacterium);
+			const auto another_bacterium = dynamic_cast<Bacterium&>(another_cell);
+			if (energy_base_ > another_bacterium.getEnergy())
+			{
+				erase_id_ = id_another_bacterium;
+				position_ = another_cell.getPosition();
+				spendEnergy(another_bacterium.getEnergy() * 0.5);
+				successful_move = true;
+				return successful_move;
+			}
 		}
 		// если у другой бактерии энергии больше - ищем другую позицию - траву
 	}
