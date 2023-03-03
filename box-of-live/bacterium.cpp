@@ -18,8 +18,11 @@ bool Bacterium::isReadyUpdate()
 void Bacterium::update(const std::map<int, std::shared_ptr<Cell>>& cells)
 {
 	spendEnergy(ENERGY_ACTION_COST); //тратит энергию 
-	if (!canMove()) // если энергии недостаточно для перемещения - стоит на месте
+	if (!canMove())
+	{
+		energy_base_ += 2;
 		return;
+	}// если энергии недостаточно для перемещения - стоит на месте
 	//// если енергии хватает для перемещения
 	tryMovePriorityCell(cells);
 	last_action_time_ = getCurrentTime();
@@ -46,6 +49,8 @@ std::shared_ptr<Cell> Bacterium::clone(const std::map<int, std::shared_ptr<Cell>
 	if (pos_clone != position_) {
 		auto child_bacterium = std::make_shared<Bacterium>(id_type_);
 		child_bacterium->setPosition(pos_clone);
+		child_bacterium->setEnergy(energy_base_ * 0.5);
+		energy_base_ *= 0.5;
 		return std::move(child_bacterium);
 	}
 	return nullptr;

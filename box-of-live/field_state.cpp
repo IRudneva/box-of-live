@@ -97,11 +97,7 @@ void FieldState::update()
 			
 		}
 	}
-	
-	for (const auto& ch : child_bacterium)
-	{
-		cells_.insert({ ch->getIdCell(), ch });
-	}
+
 	
 	for (const auto&[id, cell] : cells_)
 	{
@@ -124,6 +120,11 @@ void FieldState::update()
 		{
 			++it;
 		}
+	}
+
+	for (const auto& ch : child_bacterium)
+	{
+		cells_.insert({ ch->getIdCell(), ch });
 	}
 
 }

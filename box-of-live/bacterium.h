@@ -6,7 +6,7 @@
 
 constexpr static int ENERGY_ACTION_COST = 1;
 constexpr static int ENERGY_BASE = 5;
-constexpr static int ENERGY_TO_CLONE = 4;
+constexpr static int ENERGY_TO_CLONE = 8;
 constexpr static time_t UPDATE_TIME = 2;
 constexpr static int ENERGY_GRASS = 3;
 
@@ -33,7 +33,7 @@ public:
 
 private:
 	unsigned int id_type_ = 0;
-	unsigned int energy_base_ = ENERGY_BASE;
+	double energy_base_ = ENERGY_BASE;
 	unsigned int speed_ = UPDATE_TIME;
 	time_t last_action_time_;
 
