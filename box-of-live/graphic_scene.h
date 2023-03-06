@@ -35,7 +35,7 @@ public:
 
 	void init();
 
-	void handleEvent(const sf::Event & event) { gui_.handleEvent(event); }
+	void handleEvent(const sf::Event& event) { gui_.handleEvent(event); }
 
 	void update();
 
@@ -45,21 +45,21 @@ private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
 	tgui::GuiSFML gui_;
 	std::unique_ptr<FieldState> game_state_ = std::make_unique<FieldState>();
-	std::map<unsigned int, tgui::Color> color_bacterium_by_type_;
+	std::map<int, tgui::Color> color_bacterium_by_type_;
 	tgui::Button::Ptr start_button;
 	ConfigHelper conf_helper_;
+	Timer timer_ = { std::chrono::milliseconds(500) };
 
+	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
+	
 	tgui::Panel::Ptr createLayout(const ConfigLayout& conf) const;
 
 	tgui::Button::Ptr createButton(const ConfigButton& conf) const;
 
 	tgui::Label::Ptr createLabel(const ConfigLabel& conf) const;
 
-	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canv) const;
-
-	tgui::Color getCellColorByBacteriumId(unsigned int id);
+	tgui::Color getCellColorByBacteriumId(int id);
 
 	tgui::Color getColorCellByType(std::shared_ptr<Cell> cell);
 
-	Timer timer_ = {0.5};
 };

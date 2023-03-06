@@ -14,9 +14,7 @@ void mainLoop(sf::RenderWindow& window, GraphicScene& scene)
 		}
 
 		window.clear();
-
 		scene.update();
-
 		window.display();
 	}
 }

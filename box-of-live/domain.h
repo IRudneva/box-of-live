@@ -6,29 +6,23 @@
 #include <memory>
 #include <optional>
 
-constexpr static unsigned int HEIGHT_WINDOW = 600;
+constexpr static int unsigned HEIGHT_WINDOW = 600;
 
 constexpr static unsigned int WIDTH_WINDOW = 800;
 
-constexpr static unsigned int HEIGHT_PLAYING_FIELD = 400;
+constexpr static int HEIGHT_PLAYING_FIELD = 400;
 
-constexpr static unsigned int WIDTH_PLAYING_FIELD = 800;
+constexpr static int WIDTH_PLAYING_FIELD = 800;
 
-constexpr static unsigned int CELL_SIZE = 8;
+constexpr static int CELL_SIZE = 8;
 
-constexpr static unsigned int NUMBER_BACTERIAL_COLONIES = 3;
+constexpr static int NUMBER_BACTERIAL_COLONIES = 3;
 
-constexpr static unsigned int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
+constexpr static int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
 
-constexpr static unsigned int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
+constexpr static int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
 
 constexpr  static int NO_RESULT = -1;
-
-//epBase - базовое количество энергии у бактерии
-//epActionCost - количество энергии потраченное на действие
-//epToClone - количество энергии необходимое для деления
-//updateTime - время как часто бактерия делает действие
-//grassUpdateTime - время как часто появляется новая трава
 
 struct GameConfig
 {
@@ -47,45 +41,45 @@ struct ConfigHelper
 		std::function<void(int)> setterFunction;
 	};
 
-void init(GameConfig& config)
+void init(std::shared_ptr<GameConfig> config)
 {
 	ConfigRecord energy_base_record;
 	energy_base_record.setterFunction = [&config](int value) {
-		config.energy_base = value;
+		config->energy_base = value;
 	};
 	energy_base_record.defaultValue = 5;
 	records["enegry_base"] = energy_base_record;
 
 	ConfigRecord energy_action_record;
 	energy_action_record.setterFunction = [&config](int value) {
-		config.energy_action_cost = value;
+		config->energy_action_cost = value;
 	};
 	energy_action_record.defaultValue = 1;
 	records["energy_action_cost"] = energy_action_record;
 
 	ConfigRecord energy_clone_record;
 	energy_clone_record.setterFunction = [&config](int value) {
-		config.energy_to_clone = value;
+		config->energy_to_clone = value;
 	};
 	energy_clone_record.defaultValue = 8;
 	records["enegry_to_clone"] = energy_clone_record;
 
 	ConfigRecord update_record;
 	update_record.setterFunction = [&config](int value) {
-		config.update_time = value;
+		config->update_time = value;
 	};
 	update_record.defaultValue = 2;
 	records["update_time"] = update_record;
 
 	ConfigRecord grass_update_record;
 	grass_update_record.setterFunction = [&config](int value) {
-		config.grass_update_time = value;
+		config->grass_update_time = value;
 	};
 	grass_update_record.defaultValue = 5;
 	records["grass_update_time"] = grass_update_record;
 }
 
-	void setOption(GameConfig& gameConfig, const std::string & str, int value)
+	void setOption(std::shared_ptr<GameConfig> gameConfig, const std::string & str, int value)
 	{
 		records[str].setterFunction(value);
 	}
@@ -97,7 +91,7 @@ void init(GameConfig& config)
 		}
 	}
 
-	std::map<std::string, ConfigRecord> getRecords() const { return records; }
+	const std::map<std::string, ConfigRecord>& getRecords() const { return records; }
 	
 	std::map<std::string, ConfigRecord> records;
 };
@@ -128,15 +122,15 @@ struct PositionDelta
 
 struct Position
 {
-	unsigned int x = 0;
-	unsigned int y = 0;
+	int x = 0;
+	int y = 0;
 
 	Position operator+(const PositionDelta& delta) const
 	{
 		return Position{ x + delta.x, y + delta.y };
 	}
 
-	const Position& getRandomDirection() const
+	const Position getRandomDirection() const
 	{
 		Position curr_pos = { x,y };
 
@@ -153,9 +147,8 @@ struct Position
 		};
 		return curr_pos + positionDelta;
 	}
-	
 
-	const std::vector<Position> getAllAdjacentPosition()
+	const std::vector<Position> getAllAdjacentPosition() const
 	{
 		Position curr_pos = { x,y };
 
@@ -173,8 +166,6 @@ struct Position
 		return adjacent_position;
 	}
 
-	int getCountAdjacent() { return getAllAdjacentPosition().size(); }
-
 	bool operator== (const Position& other) const { return x == other.x && y == other.y; }
 };
 
@@ -187,45 +178,44 @@ struct PositionHasher
 		size_t h_x = ui_hasher_(p.x);
 		size_t h_y = ui_hasher_(p.y);
 		return h_x * 137 + h_y * (137 * 137);
-		//return p.x + p.y * 10000;
 	}
 private:
-	std::hash<unsigned int> ui_hasher_;
+	std::hash<int> ui_hasher_;
 };
 
-inline Position getRandomPosition()
+static Position getRandomPosition()
 {
-	unsigned int rand_x = getRandomInt(0, COUNT_POSITION_X);
-	unsigned int rand_y = getRandomInt(0, COUNT_POSITION_Y);
+	int rand_x = getRandomInt(0, COUNT_POSITION_X);
+	int rand_y = getRandomInt(0, COUNT_POSITION_Y);
 	return { rand_x, rand_y };
 }
 
-static time_t getCurrentTime() {
+static std::chrono::steady_clock::time_point getCurrentTime() {
 
-	std::chrono::system_clock::time_point p = std::chrono::system_clock::now();
+	std::chrono::steady_clock::time_point time = std::chrono::steady_clock::now();
 
-	return  std::chrono::system_clock::to_time_t(p);
+	return time;
 }
 
 class Timer {
 public:
-	Timer(time_t interval) : interval(interval) {
+	Timer(std::chrono::milliseconds interval) : interval(interval) {
 		reset();
 	}
 
 	bool timedOut() {
-		if (getCurrentTime() >= deadline) {
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(getCurrentTime() - start)  >= interval) {
 			reset();
 			return true;
 		}
-		else return false;
+		return false;
 	}
 
 	void reset() {
-		deadline = getCurrentTime() + interval;
+		start = getCurrentTime();
 	}
 
 private:
-	time_t deadline;
-	const time_t interval;
+	std::chrono::steady_clock::time_point start;
+	const std::chrono::milliseconds interval;
 };

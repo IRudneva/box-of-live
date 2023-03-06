@@ -1,43 +1,26 @@
 #include "bacterium.h"
 
-Bacterium::Bacterium(unsigned int id_type)
-	:id_type_(id_type)
+bool Bacterium::isReadyUpdate()
 {
-	setCellType(TypeCell::BACTERIUM);
-}
-
-bool Bacterium::isReadyUpdate() const
-{
-	if (getCurrentTime() - last_action_time_ >= UPDATE_TIME)
+	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= UPDATE_TIME)
 	{
+		last_action_time_ = getCurrentTime();
 		return true;
 	}
 	return false;
 }
 
-
-void Bacterium::spendEnergy(unsigned int count)
+void Bacterium::spendEnergy(int count)
 {
 	if (energy_base_ >= count)
 		energy_base_ -= count;
 }
+
 void Bacterium::update(FieldState& field_state)
 {
-	/*алгоритм бактерии :
-	1. проверить что время делать действие
-		2. уменьшить энергию
-		3. выбрать клетку куда идти
-		4. в зависимости от результата сделать действие :
-	-съесть траву - возможно создать новую бактерию
-		- съесть другую бактерию
-		- переместиться
-		- ничего не делать
-		5. проверить что количество энергии больше 0
-		- если нет - удалить бактерию*/
-	
 	if (isReadyUpdate())
 	{
-		spendEnergy(ENERGY_ACTION_COST); //тратит энергию 
+		spendEnergy(ENERGY_ACTION_COST);
 		changeDirection(field_state);
 
 		if(energy_base_ <= 0)
@@ -45,16 +28,14 @@ void Bacterium::update(FieldState& field_state)
 			field_state.resetCell(getIdCell());
 			return;
 		}
-		last_action_time_ = getCurrentTime();
 	}
-
 }
 
 void Bacterium::changeDirection(FieldState& field_state)
 {
-	const auto all_adjacent = field_state.getPositionsAround(position_); // смотрим соседей
+	const auto all_adjacent = field_state.getPositionsAround(position_);
 
-	if (checkAllBacteriaAroundSameType(all_adjacent))
+	if (checkAllBacteriumAroundSameType(all_adjacent))
 		return;
 	
 	auto id_bacterium = findPriorytyCell(all_adjacent, TypeCell::BACTERIUM);
@@ -86,7 +67,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 	position_ = pos_empty_cell;
 }
 
-int Bacterium::findPriorytyCell(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells, TypeCell type) const
+int Bacterium::findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell type) const
 {
 	for (const auto&[pos, cell] : adj_cells)
 	{
@@ -114,7 +95,7 @@ bool Bacterium::tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium)
 	if (energy_base_ > bacterium.getEnergy())
 	{
 		position_ = cell.getPosition();
-		spendEnergy(bacterium.getEnergy() * 0.5);
+		spendEnergy(static_cast<int>(bacterium.getEnergy() * 0.5));
 		return true;
 	}
 	return false;
@@ -126,7 +107,7 @@ void Bacterium::eatGrass(std::shared_ptr<Cell> grass)
 	increaseEnergy(ENERGY_GRASS);
 }
 
-std::shared_ptr<Bacterium> Bacterium::clone(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells)
+std::shared_ptr<Bacterium> Bacterium::clone(const AdjacentCellsUMap& adj_cells)
 {
 	auto child_pos = findEmptyCell(adj_cells);
 	
@@ -134,14 +115,14 @@ std::shared_ptr<Bacterium> Bacterium::clone(const std::unordered_map<Position, s
 	{
 		auto child_bacterium = std::make_shared<Bacterium>(id_type_);
 		child_bacterium->setPosition(child_pos);
-		child_bacterium->setEnergy(energy_base_ * 0.5);
-		spendEnergy(energy_base_*0.5);
+		child_bacterium->setEnergy(static_cast<int>(energy_base_ * 0.5));
+		spendEnergy(static_cast<int>(energy_base_ * 0.5));
 		return child_bacterium;
 	}
 	return nullptr;
 }
 
-Position Bacterium::findEmptyCell(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells) const
+Position Bacterium::findEmptyCell(const AdjacentCellsUMap& adj_cells) const
 {
 	std::vector<Position> empty_cells;
 	for (const auto&[pos, cell] : adj_cells)
@@ -152,13 +133,13 @@ Position Bacterium::findEmptyCell(const std::unordered_map<Position, std::shared
 	}
 	if (!empty_cells.empty())
 	{
-		auto rand_pos = *(empty_cells.begin() + getRandomInt(0, empty_cells.size() - 1));
+		auto rand_pos = *(empty_cells.begin() + getRandomInt(0, static_cast<int>(empty_cells.size() - 1)));
 		return rand_pos;
 	}
 	return position_;
 }
 
-bool Bacterium::checkAllBacteriaAroundSameType(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells) const
+bool Bacterium::checkAllBacteriumAroundSameType(const AdjacentCellsUMap& adj_cells) const
 {
 	int count = 0;
 	for (const auto& [pos, cell]: adj_cells)
@@ -172,9 +153,7 @@ bool Bacterium::checkAllBacteriaAroundSameType(const std::unordered_map<Position
 			Cell& c = *cell;
 			const auto bacterium = dynamic_cast<Bacterium&>(c);
 			if(bacterium.getIdType() == id_type_)
-			{
 				++count;
-			}
 		}
 	}
 	if(count == adj_cells.size())

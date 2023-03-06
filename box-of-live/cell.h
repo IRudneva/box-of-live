@@ -4,12 +4,13 @@
 
 struct IdCell
 {
-	static int generateID(){
-		id++;
+	static int generateId(){
+		++id;
 		return id;
 	}
 	static void reset() { id = 0; }
 private:
+	IdCell() = default;
 	inline static int id = 0;
 };
 
@@ -18,7 +19,7 @@ class FieldState;
 class Cell
 {
 protected:
-	Cell() { id_ = IdCell::generateID(); }
+	Cell() { id_ = IdCell::generateId(); }
 	Position position_;
 
 public:
@@ -26,19 +27,19 @@ public:
 
 	virtual void update(FieldState& cells) = 0;
 
-	TypeCell getCellType() const { return type_; }
-
 	void setCellType(TypeCell type) { type_ = type; }
 
-	void setPosition(Position pos)
+	void setPosition(const Position& pos)
 	{
 		if (pos != position_)
 			position_ = pos;
 	}
 
-	Position getPosition() const { return  position_; }
+	const Position& getPosition() const { return  position_; }
 
 	int getIdCell() const { return id_; }
+	
+	TypeCell getCellType() const { return type_; }
 
 private:
 	int id_ = 0;

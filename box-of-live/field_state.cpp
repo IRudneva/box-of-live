@@ -5,7 +5,7 @@
 
 void FieldState::addColonyBacterium(int max_count)
 {
-	srand(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 	for (unsigned int id_bacterium = 0; id_bacterium < NUMBER_BACTERIAL_COLONIES; id_bacterium++)
 	{
 		auto base_bacterium = std::make_shared<Bacterium>(id_bacterium); // создаем базовую бактерию
@@ -54,23 +54,19 @@ void FieldState::addColonyBacterium(int max_count)
 void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
 {
 	if(cells_.find(bacterium->getIdCell()) == cells_.end())
-	{
 		cells_.insert({ bacterium->getIdCell(), bacterium });
-	}
 }
 
 void FieldState::resetCell(int id_cell)
 {
 	if (cells_.find(id_cell) != cells_.end())
-	{
 		cells_.at(id_cell) = nullptr;
-	}
 }
 
 void FieldState::addGrass(int amount_grass)
 {
 	int count = 0;
-	srand(time(NULL));
+	srand(static_cast<unsigned int>(time(NULL)));
 	while (count < amount_grass)
 	{
 		Position new_position = getRandomEmptyPosition();
@@ -121,10 +117,9 @@ Position FieldState::getRandomEmptyPosition() const
 	return position;
 }
 
-Position FieldState::getRandomEmptyAdjacent(Position position) const
+Position FieldState::getRandomEmptyAdjacent(const Position& position) const
 {
 	auto adj_cells = getPositionsAround(position);
-	
 	std::vector<Position> empty_cells;
 	for (const auto&[pos, cell] : adj_cells)
 	{
@@ -134,13 +129,13 @@ Position FieldState::getRandomEmptyAdjacent(Position position) const
 	}
 	if (!empty_cells.empty())
 	{
-		auto rand_pos = *(empty_cells.begin() + getRandomInt(0, empty_cells.size() - 1));
+		auto rand_pos = *(empty_cells.begin() + getRandomInt(0, static_cast<int>(empty_cells.size() - 1)));
 		return rand_pos;
 	}
 	return position;
 }
 
-std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> FieldState::getPositionsAround(Position pos) const
+AdjacentCellsUMap FieldState::getPositionsAround(const Position& pos) const
 {
 	std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> adjacent_cells;
 	auto all_adj_pos = pos.getAllAdjacentPosition();
@@ -148,7 +143,6 @@ std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> FieldState::
 	{
 		adjacent_cells.insert({ adj, nullptr });
 	}
-
 	for (const auto&[id, cell] : cells_)
 	{
 		if(cell == nullptr)
@@ -160,7 +154,6 @@ std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> FieldState::
 		{
 			if (*is_found == pos)
 				continue;
-			
 			adjacent_cells[cell->getPosition()] =  cell;
 		}
 	}

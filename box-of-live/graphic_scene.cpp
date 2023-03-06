@@ -24,13 +24,14 @@ void GraphicScene::init()
 		{"Bacteria energy:",14, {50, 60}},
 		{"Speed bacterium:",14, {50, 90}}
 	};
+	
 	for (auto& l : labels_conf)
 	{
 		auto label = createLabel(l);
 		labels->add(label);
 	}
 
-	GameConfig game_config;
+	auto game_config = std::make_shared<GameConfig>();
 	conf_helper_.init(game_config);
 	for (auto opt : conf_helper_.getRecords())
 	{
@@ -51,14 +52,14 @@ void GraphicScene::init()
 	editBox2->setSize(100, 16);
 	editBox2->setTextSize(14);
 	editBox2->setPosition(280, 60);
-	editBox2->setDefaultText(std::to_string(game_config.energy_base));
+	editBox2->setDefaultText(std::to_string(game_config->energy_base));
 	
 	auto editBox3 = tgui::EditBox::create();
 	editBox3->setInputValidator(tgui::EditBox::Validator::Int);
 	editBox3->setSize(100, 16);
 	editBox3->setTextSize(14);
 	editBox3->setPosition(280, 90);
-	editBox3->setDefaultText(std::to_string(game_config.update_time));
+	editBox3->setDefaultText(std::to_string(game_config->update_time));
 
 	e_box->add(editBox1);
 	e_box->add(editBox2);
@@ -92,8 +93,8 @@ void GraphicScene::update()
 			Position position = cell->getPosition();
 			sf::RectangleShape cell_shape;
 			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
-			float pos_x = position.x *CELL_SIZE;
-			float pos_y = position.y * CELL_SIZE;
+			float pos_x = static_cast<float>(position.x *CELL_SIZE);
+			float pos_y = static_cast<float>(position.y * CELL_SIZE);
 			cell_shape.setPosition(pos_x, pos_y); // 
 			cell_shape.setFillColor(getColorCellByType(cell));
 			cell_shape.setOutlineColor(sf::Color::Black);
@@ -138,7 +139,7 @@ tgui::Label::Ptr GraphicScene::createLabel(const ConfigLabel& conf) const
 	return label;
 }
 
-void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canv) const
+void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const
 {
 	sf::Vertex line[] = {
 			sf::Vertex(sf::Vector2f(0, 0), sf::Color::Black),
@@ -147,7 +148,7 @@ void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canv) const
 
 	for (auto i = 0; i < HEIGHT_PLAYING_FIELD / CELL_SIZE; i++)
 	{
-		canv->draw(line, 2, sf::Lines);
+		canvas->draw(line, 2, sf::Lines);
 		line[0].position.y += CELL_SIZE;
 		line[1].position.y += CELL_SIZE;
 	}
@@ -155,7 +156,7 @@ void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canv) const
 	line[1].position = sf::Vector2f(0, HEIGHT_PLAYING_FIELD);
 	for (auto i = 0; i < WIDTH_PLAYING_FIELD / CELL_SIZE; i++)
 	{
-		canv->draw(line, 2, sf::Lines);
+		canvas->draw(line, 2, sf::Lines);
 		line[0].position.x += CELL_SIZE;
 		line[1].position.x += CELL_SIZE;
 	}
@@ -176,18 +177,18 @@ tgui::Color GraphicScene::getColorCellByType(std::shared_ptr<Cell> cell)
 	case TypeCell::EMPTY:
 		return tgui::Color::White;
 	}
+	return tgui::Color::White;
 }
 
-tgui::Color GraphicScene::getCellColorByBacteriumId(unsigned int id)
+tgui::Color GraphicScene::getCellColorByBacteriumId(int id)
 {
 	if (color_bacterium_by_type_.find(id) != color_bacterium_by_type_.end())
 		return color_bacterium_by_type_.at(id);
 	
-
 	auto red = getRandomInt(0, 255);
 	auto blue = getRandomInt(0, 255);
 	auto green = getRandomInt(0, 255);
 
-	color_bacterium_by_type_[id] = tgui::Color(red, green, blue);
+	color_bacterium_by_type_.insert({ id,tgui::Color(red, green, blue) });
 	return color_bacterium_by_type_.at(id);
 }
