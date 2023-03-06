@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include <memory>
-#include <optional>
 #include <TGUI/TGUI.hpp>
 #include "cell.h"
 
@@ -13,10 +12,10 @@ constexpr static int ENERGY_GRASS = 3;
 
 class Bacterium: public Cell {
 public:
-	Bacterium(unsigned int id_type);
+	explicit Bacterium(unsigned int id_type);
 	
-	bool isReadyUpdate() override;
-
+	void update(FieldState& cells) override;
+	
 	void setIdType(unsigned int id) { id_type_ = id; }
 
 	unsigned int getIdType() const { return id_type_; }
@@ -28,33 +27,34 @@ public:
 	void setSpeed(unsigned int speed) { speed_ = speed; }
 
 	unsigned int getSpeed() const { return speed_; }
-	   	
-	void update(const std::map<int, std::shared_ptr<Cell>>& cells) override;
 
 private:
 	unsigned int id_type_ = 0;
-	double energy_base_ = ENERGY_BASE;
-	unsigned int speed_ = UPDATE_TIME;
+	int energy_base_ = ENERGY_BASE;
+	int speed_ = UPDATE_TIME;
 	time_t last_action_time_;
 
+	bool isReadyUpdate() const;
 
-	bool canMove() const;
+	bool canClone() const { return energy_base_ >= ENERGY_TO_CLONE; }
 	
-	bool canClone() { return energy_base_ >= ENERGY_TO_CLONE; }
+	bool tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium);
+
+	bool checkAllBacteriaAroundSameType(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells) const;
+	
+	void eatGrass(std::shared_ptr<Cell> grass);
 
 	void spendEnergy(unsigned int count);
 
 	void increaseEnergy(unsigned int count) { energy_base_ += count; }
 
-	std::shared_ptr<Cell> clone(const std::map<int, std::shared_ptr<Cell>>& cells);
+	void changeDirection(FieldState& field_state);
 
-	bool tryMovePriorityCell(const std::map<int, std::shared_ptr<Cell>>& cells);
+	int findPriorytyCell(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells, TypeCell type) const;
 
-	int tryFindBacteriumAnotherType(const std::map<int, std::shared_ptr<Cell>>& cells);
+	std::shared_ptr<Bacterium> clone(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells);
 
-	int tryFindGrass(const std::map<int, std::shared_ptr<Cell>>& cells);
-
-	Position tryMoveEmptyCell(const std::map<int, std::shared_ptr<Cell>>& cells);
+	Position findEmptyCell(const std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>& adj_cells) const;
 };
 
 

@@ -3,6 +3,8 @@
 #include <chrono>
 #include <map>
 #include <random>
+#include <memory>
+#include <optional>
 
 constexpr static unsigned int HEIGHT_WINDOW = 600;
 
@@ -42,59 +44,61 @@ struct ConfigHelper
 	struct ConfigRecord
 	{
 		int defaultValue;
-		std::function<void(GameConfig&, int)> setterFunction;
+		std::function<void(int)> setterFunction;
 	};
 
-void init()
+void init(GameConfig& config)
 {
 	ConfigRecord energy_base_record;
-	energy_base_record.setterFunction = [](GameConfig& config, int value) {
+	energy_base_record.setterFunction = [&config](int value) {
 		config.energy_base = value;
 	};
 	energy_base_record.defaultValue = 5;
 	records["enegry_base"] = energy_base_record;
 
 	ConfigRecord energy_action_record;
-	energy_action_record.setterFunction = [](GameConfig& config, int value) {
+	energy_action_record.setterFunction = [&config](int value) {
 		config.energy_action_cost = value;
 	};
 	energy_action_record.defaultValue = 1;
 	records["energy_action_cost"] = energy_action_record;
 
 	ConfigRecord energy_clone_record;
-	energy_clone_record.setterFunction = [](GameConfig& config, int value) {
+	energy_clone_record.setterFunction = [&config](int value) {
 		config.energy_to_clone = value;
 	};
-	energy_clone_record.defaultValue = 3;
+	energy_clone_record.defaultValue = 8;
 	records["enegry_to_clone"] = energy_clone_record;
 
 	ConfigRecord update_record;
-	update_record.setterFunction = [](GameConfig& config, int value) {
+	update_record.setterFunction = [&config](int value) {
 		config.update_time = value;
 	};
 	update_record.defaultValue = 2;
 	records["update_time"] = update_record;
 
 	ConfigRecord grass_update_record;
-	grass_update_record.setterFunction = [](GameConfig& config, int value) {
+	grass_update_record.setterFunction = [&config](int value) {
 		config.grass_update_time = value;
 	};
 	grass_update_record.defaultValue = 5;
 	records["grass_update_time"] = grass_update_record;
 }
 
-	void SetOption(GameConfig & gameConfig, const std::string & str, int value)
+	void setOption(GameConfig& gameConfig, const std::string & str, int value)
 	{
-		records[str].setterFunction(gameConfig, value);
+		records[str].setterFunction(value);
 	}
 
-	void DoWithAll(const std::function<void(const std::string &, int)> & aVisitor)
+	void doWithAll(const std::function<void(const std::string &, int)> & aVisitor)
 	{
 		for (const auto &[optionName, configRecord] : records) {
 			aVisitor(optionName, configRecord.defaultValue);
 		}
 	}
 
+	std::map<std::string, ConfigRecord> getRecords() const { return records; }
+	
 	std::map<std::string, ConfigRecord> records;
 };
 
@@ -195,14 +199,6 @@ inline Position getRandomPosition()
 	unsigned int rand_y = getRandomInt(0, COUNT_POSITION_Y);
 	return { rand_x, rand_y };
 }
-
-struct UpdateState
-{
-	Position old_position;
-	Position new_position;
-
-	std::optional<Position> chaild_position;
-};
 
 static time_t getCurrentTime() {
 

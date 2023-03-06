@@ -47,6 +47,7 @@ private:
 	std::unique_ptr<FieldState> game_state_ = std::make_unique<FieldState>();
 	std::map<unsigned int, tgui::Color> color_bacterium_by_type_;
 	tgui::Button::Ptr start_button;
+	ConfigHelper conf_helper_;
 
 	tgui::Panel::Ptr createLayout(const ConfigLayout& conf) const;
 

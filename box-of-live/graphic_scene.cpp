@@ -15,51 +15,60 @@ void GraphicScene::init()
 	auto buttons = tgui::Group::create();
 	start_button = createButton({ tgui::Color::Green, tgui::Color::Red, tgui::Color::Magenta,
 		{ 500, 55 }, { 150, 70 }, "START" });
-	
+
 	buttons->add(start_button);
 
 	tgui::Group::Ptr labels = tgui::Group::create();
 	std::vector<ConfigLabel> labels_conf = {
 		{"Number of bacterial species:",14, {50, 30}},
 		{"Bacteria energy:",14, {50, 60}},
-		{"Speed:",14, {50, 90}}
+		{"Speed bacterium:",14, {50, 90}}
 	};
 	for (auto& l : labels_conf)
 	{
 		auto label = createLabel(l);
 		labels->add(label);
 	}
+
+	GameConfig game_config;
+	conf_helper_.init(game_config);
+	for (auto opt : conf_helper_.getRecords())
+	{
+		conf_helper_.setOption(game_config, opt.first, opt.second.defaultValue);
+	}
+
+	tgui::Group::Ptr e_box = tgui::Group::create();
+
+	auto editBox1 = tgui::EditBox::create();
+	editBox1->setInputValidator(tgui::EditBox::Validator::Int);
+	editBox1->setSize(100, 16);
+	editBox1->setTextSize(14);
+	editBox1->setPosition(280, 30);
+	editBox1->setDefaultText(std::to_string(3));
+
+	auto editBox2 = tgui::EditBox::create();
+	editBox2->setInputValidator(tgui::EditBox::Validator::Int);
+	editBox2->setSize(100, 16);
+	editBox2->setTextSize(14);
+	editBox2->setPosition(280, 60);
+	editBox2->setDefaultText(std::to_string(game_config.energy_base));
 	
+	auto editBox3 = tgui::EditBox::create();
+	editBox3->setInputValidator(tgui::EditBox::Validator::Int);
+	editBox3->setSize(100, 16);
+	editBox3->setTextSize(14);
+	editBox3->setPosition(280, 90);
+	editBox3->setDefaultText(std::to_string(game_config.update_time));
+
+	e_box->add(editBox1);
+	e_box->add(editBox2);
+	e_box->add(editBox3);
+
 	gui_.add(fields);
 	gui_.add(buttons);
 	gui_.add(labels);
-	/*tgui::Group::Ptr e_box = tgui::Group::create();
-
-	auto editBox1 = tgui::EditBox::create();
-	editBox1->setSize(100, 16);
-	editBox1->setTextSize(14);
-	editBox1->setPosition(tgui::bindRight(label1) + 20, tgui::bindTop(label1) );
-	editBox1->setDefaultText("Value1");
-
-	e_box->add(editBox1);
-
-	auto editBox2 = tgui::EditBox::create();
-	editBox2->setSize(100, 16);
-	editBox2->setTextSize(14);
-	editBox2->setPosition(tgui::bindRight(label2) + 20, tgui::bindTop(label2));
-	editBox2->setDefaultText("Value2");
-
-	e_box->add(editBox2);
-
-	auto editBox3 = tgui::EditBox::create();
-	editBox3->setSize(100, 16);
-	editBox3->setTextSize(14);
-	editBox3->setPosition(tgui::bindRight(label3) + 20, tgui::bindTop(label3));
-	editBox3->setDefaultText("Value3");
-
-	e_box->add(editBox3);
-
-	gui_.add(e_box);*/
+	gui_.add(e_box);
+	game_state_->init(game_config);
 }
 
 

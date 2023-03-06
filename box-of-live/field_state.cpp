@@ -14,51 +14,58 @@ void FieldState::addColonyBacterium(int max_count)
 
 		base_bacterium->setPosition(base_bac_position); // присваиваем бактерии эту позицию
 
-		cells_.insert({ base_bacterium->getIdCell(), base_bacterium });
+		addBacterium(base_bacterium);
 
+		int count_bacterium = 1; // текущее кол-во бактерий в колонии
 
-		//
-		//
-		//int count_bacterium = 1; // текущее кол-во бактерий в колонии
+		const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
+		int curr_adjacent = 0; // текущее кол-во соседей
 
-		//const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
-		//int curr_adjacent = 0; // текущее кол-во соседей
+		const auto colony_size = getRandomInt(10, max_count);
 
-		//const auto colony_size = getRandomInt(10, max_count);
+		while (count_bacterium < colony_size) {
 
-		//while (count_bacterium < colony_size) {
+			auto adjacent_position = getRandomEmptyAdjacent(base_bac_position); // получаем позицию нового соседа
+			if(adjacent_position == base_bac_position) // нет свободных соседний позиций
+			{
+				base_bac_position = base_bac_position.getRandomDirection(); // базовой становится любой сосед
+				continue; // пока не найдём свобоную клетку
+			}
 
-		//	auto adjacent_position = getRandomEmptyAdjacent(base_bac_position); // получаем позицию нового соседа
-		//	if(adjacent_position == base_bac_position) // нет свободных соседний позиций
-		//	{
-		//		base_bac_position = base_bac_position.getRandomDirection(); // базовой становится любой сосед
-		//		continue; // пока не найдём свобоную клетку
-		//	}
+			auto adjacent = std::make_shared<Bacterium>(id_bacterium); // создаём бактерию соседа
 
+			adjacent->setPosition(adjacent_position); // присваиваем бактерии найденную позицию
 
-		//	
-		//	auto adjacent = std::make_shared<Bacterium>(id_bacterium); // создаём бактерию соседа
+			addBacterium(adjacent);
+			
+			count_bacterium++; //увеличиваем счётчик бактерий
+			curr_adjacent++; //увеличиваем счётчик соседей
 
-		//	adjacent->setPosition(adjacent_position); // присваиваем бактерии найденную позицию
-		//	
-		//	auto last_bacterium = cells_.insert({ adjacent->getIdCell(), adjacent });
-
-
-		//	
-
-		//	count_bacterium++; //увеличиваем счётчик бактерий
-		//	curr_adjacent++; //увеличиваем счётчик соседей
-
-		//	if (curr_adjacent == max_adjacent) // когда соседей станет max_adjacent, базовой позицией станет последняя успешно добавленная
-		//	{
-		//		auto last_pos = last_bacterium.first->second->getPosition();
-		//		base_bac_position = last_pos;
-		//		curr_adjacent = 0;
-		//	}
-		//}
+			if (curr_adjacent == max_adjacent) // когда соседей станет max_adjacent, базовой позицией станет последняя успешно добавленная
+			{
+				auto last_pos = adjacent->getPosition();
+				base_bac_position = last_pos;
+				curr_adjacent = 0;
+			}
+		}
 	}
 }
 
+void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
+{
+	if(cells_.find(bacterium->getIdCell()) == cells_.end())
+	{
+		cells_.insert({ bacterium->getIdCell(), bacterium });
+	}
+}
+
+void FieldState::resetCell(int id_cell)
+{
+	if (cells_.find(id_cell) != cells_.end())
+	{
+		cells_.at(id_cell) = nullptr;
+	}
+}
 
 void FieldState::addGrass(int amount_grass)
 {
@@ -81,58 +88,22 @@ void FieldState::update()
 
 	if (timer_grass_.timedOut())
 		addGrass(50);
-	std::vector<std::shared_ptr<Cell>> child_bacterium;
 	
 	for (const auto&[id, cell] : cells_)
 	{
-		if (cell->isReadyUpdate())
-		{
-			cell->update(cells_);
-			if (cell->canClone())
-			{
-				auto child = cell->clone(cells_);
-				if (child != nullptr)
-					child_bacterium.push_back(child);
-			}
-			
-		}
-	}
-
-	
-	for (const auto&[id, cell] : cells_)
-	{
-		if (cell != nullptr) {
-			if (auto t = cell->getEraseId(); t.has_value())
-			{
-				cells_[t.value()] = nullptr;
-			}
-		}
+		if(cell != nullptr)
+			cell->update(*this);
 	}
 
 	for (auto it = cells_.begin(); it != cells_.end(); )
 	{
-
-		if (it->second == nullptr)
-		{
-			it = cells_.erase(it);
-		}
-		else
-		{
-			++it;
-		}
+		it->second == nullptr ? it = cells_.erase(it) : ++it;
 	}
-
-	for (const auto& ch : child_bacterium)
-	{
-		cells_.insert({ ch->getIdCell(), ch });
-	}
-
 }
 
 void FieldState::restart()
 {
 	cells_.clear();
-	//data_cell_.clear();
 	IdCell::reset();
 	addColonyBacterium(20);
 	addGrass(300);
@@ -144,9 +115,7 @@ Position FieldState::getRandomEmptyPosition() const
 	for(const auto& [id, cell] : cells_)
 	{
 		if(cell->getPosition()==position)
-		{
 			position = getRandomPosition();
-		}
 	}
 	
 	return position;
@@ -154,17 +123,46 @@ Position FieldState::getRandomEmptyPosition() const
 
 Position FieldState::getRandomEmptyAdjacent(Position position) const
 {
-	int count = 0;
-	auto adjacent_position = position.getRandomDirection(); //получаем рандомную соседнюю клетку
-	for(const auto& [id, cell] : cells_)
+	auto adj_cells = getPositionsAround(position);
+	
+	std::vector<Position> empty_cells;
+	for (const auto&[pos, cell] : adj_cells)
 	{
-		if (count == position.getCountAdjacent()) //если кол-во попыток найти пустую соседнюю клетку закончилось, выходим из цикла 
-			return position; // возвращаем текущую позицию
-		if (cell->getPosition() == adjacent_position)
-		{
-			adjacent_position = getRandomPosition();
-			count++;
+		if (cell == nullptr) {
+			empty_cells.push_back(pos);
 		}
 	}
-	return adjacent_position;
+	if (!empty_cells.empty())
+	{
+		auto rand_pos = *(empty_cells.begin() + getRandomInt(0, empty_cells.size() - 1));
+		return rand_pos;
+	}
+	return position;
+}
+
+std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> FieldState::getPositionsAround(Position pos) const
+{
+	std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher> adjacent_cells;
+	auto all_adj_pos = pos.getAllAdjacentPosition();
+	for(const auto& adj:all_adj_pos)
+	{
+		adjacent_cells.insert({ adj, nullptr });
+	}
+
+	for (const auto&[id, cell] : cells_)
+	{
+		if(cell == nullptr)
+			continue;
+		
+		auto is_found = std::find(all_adj_pos.begin(), all_adj_pos.end(), cell->getPosition());
+		
+		if (is_found != all_adj_pos.end())
+		{
+			if (*is_found == pos)
+				continue;
+			
+			adjacent_cells[cell->getPosition()] =  cell;
+		}
+	}
+	return adjacent_cells;
 }
