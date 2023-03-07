@@ -1,22 +1,21 @@
 ﻿#pragma once
 #include <memory>
 #include <TGUI/TGUI.hpp>
+#include <utility>
 #include "cell.h"
 
+using Sec = std::chrono::seconds;
 using Millisec = std::chrono::milliseconds;
 using TimePoint = std::chrono::steady_clock::time_point;
 using AdjacentCellsUMap = std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>;
 
-constexpr static int ENERGY_ACTION_COST = 1;
-constexpr static int ENERGY_BASE = 5;
-constexpr static int ENERGY_TO_CLONE = 8;
-constexpr static Millisec UPDATE_TIME = Millisec(2000);
-constexpr static int ENERGY_GRASS = 3;
-
-
 class Bacterium: public Cell {
 public:
-	explicit Bacterium(int id_type) :id_type_(id_type) { setCellType(TypeCell::BACTERIUM); }
+	explicit Bacterium(int id_type, std::shared_ptr<GameConfig> config) :id_type_(id_type), config_(std::move(config))
+	{
+		setCellType(TypeCell::BACTERIUM);
+		energy_base_ = config_->energy_base;
+	}
 	
 	void update(FieldState& cells) override;
 
@@ -25,24 +24,20 @@ public:
 
 	void setEnergy(int energy) { energy_base_ = energy; }
 
-	//void setSpeed(millisec speed) { speed_ = speed; }
-
 	int getIdType() const { return id_type_; }
 
 	int getEnergy() const { return energy_base_; }
 	
-	//millisec getSpeed() const { return speed_; }
-
 private:
 	int id_type_ = 0;
-	int energy_base_ = ENERGY_BASE;
-	//millisec speed_ = UPDATE_TIME;
+	int energy_base_ = 0;
 	TimePoint last_action_time_;
+	std::shared_ptr<GameConfig> config_;
 
 private:
 	bool isReadyUpdate();
 
-	bool canClone() const { return energy_base_ >= ENERGY_TO_CLONE; }
+	bool canClone() const { return energy_base_ >= config_->energy_to_clone; }
 	
 	bool tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium);
 

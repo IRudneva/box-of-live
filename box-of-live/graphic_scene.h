@@ -48,7 +48,7 @@ private:
 	std::map<int, tgui::Color> color_bacterium_by_type_;
 	tgui::Button::Ptr start_button;
 	ConfigHelper conf_helper_;
-	Timer timer_ = { std::chrono::milliseconds(500) };
+	Timer timer_;
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
 	

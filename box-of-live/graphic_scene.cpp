@@ -70,6 +70,8 @@ void GraphicScene::init()
 	gui_.add(labels);
 	gui_.add(e_box);
 	game_state_->init(game_config);
+
+	timer_.initDouble(0.5);
 }
 
 
@@ -105,7 +107,6 @@ void GraphicScene::update()
 		drawMarkupField(canvas);
 
 		canvas->display();
-
 	}
 }
 

@@ -31,6 +31,7 @@ struct GameConfig
 	int energy_to_clone = 0;
 	int update_time = 0;
 	int grass_update_time = 0;
+	int energy_from_grass = 0;
 };
 
 struct ConfigHelper
@@ -77,6 +78,13 @@ void init(std::shared_ptr<GameConfig> config)
 	};
 	grass_update_record.defaultValue = 5;
 	records["grass_update_time"] = grass_update_record;
+
+	ConfigRecord energy_from_grass;
+	energy_from_grass.setterFunction = [&config](int value) {
+		config->energy_from_grass = value;
+	};
+	energy_from_grass.defaultValue = 3;
+	records["energy_from_grass"] = energy_from_grass;
 }
 
 	void setOption(std::shared_ptr<GameConfig> gameConfig, const std::string & str, int value)
@@ -199,12 +207,19 @@ static std::chrono::steady_clock::time_point getCurrentTime() {
 
 class Timer {
 public:
-	Timer(std::chrono::milliseconds interval) : interval(interval) {
+	void initInt(int interval) {
+		interval_ = std::chrono::milliseconds(std::chrono::seconds(interval));
+		reset();
+	}
+	void initDouble(double interval) {
+		int seconds = (int)interval;
+		int milli = (int)((interval - seconds) * 1000);
+		interval_ = std::chrono::milliseconds(milli);
 		reset();
 	}
 
 	bool timedOut() {
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(getCurrentTime() - start)  >= interval) {
+		if (std::chrono::duration_cast<std::chrono::milliseconds>(getCurrentTime() - start_)  >= interval_) {
 			reset();
 			return true;
 		}
@@ -212,10 +227,10 @@ public:
 	}
 
 	void reset() {
-		start = getCurrentTime();
+		start_ = getCurrentTime();
 	}
 
 private:
-	std::chrono::steady_clock::time_point start;
-	const std::chrono::milliseconds interval;
+	std::chrono::steady_clock::time_point start_;
+	std::chrono::milliseconds interval_ = std::chrono::milliseconds(0);
 };

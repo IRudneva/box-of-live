@@ -2,7 +2,7 @@
 
 bool Bacterium::isReadyUpdate()
 {
-	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= UPDATE_TIME)
+	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= Millisec(Sec(config_->update_time)))
 	{
 		last_action_time_ = getCurrentTime();
 		return true;
@@ -20,7 +20,7 @@ void Bacterium::update(FieldState& field_state)
 {
 	if (isReadyUpdate())
 	{
-		spendEnergy(ENERGY_ACTION_COST);
+		spendEnergy(config_->energy_action_cost);
 		changeDirection(field_state);
 
 		if(energy_base_ <= 0)
@@ -104,7 +104,7 @@ bool Bacterium::tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium)
 void Bacterium::eatGrass(std::shared_ptr<Cell> grass)
 {
 	position_ = grass->getPosition();
-	increaseEnergy(ENERGY_GRASS);
+	increaseEnergy(config_->energy_from_grass);
 }
 
 std::shared_ptr<Bacterium> Bacterium::clone(const AdjacentCellsUMap& adj_cells)
@@ -113,7 +113,7 @@ std::shared_ptr<Bacterium> Bacterium::clone(const AdjacentCellsUMap& adj_cells)
 	
 	if (child_pos != position_) 
 	{
-		auto child_bacterium = std::make_shared<Bacterium>(id_type_);
+		auto child_bacterium = std::make_shared<Bacterium>(id_type_ , config_);
 		child_bacterium->setPosition(child_pos);
 		child_bacterium->setEnergy(static_cast<int>(energy_base_ * 0.5));
 		spendEnergy(static_cast<int>(energy_base_ * 0.5));
