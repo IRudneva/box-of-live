@@ -1,6 +1,7 @@
 #pragma once
 #include "domain.h"
-#include "field_state.h"
+#include "position.h"
+#include  "field_state.h"
 
 struct IdCell
 {

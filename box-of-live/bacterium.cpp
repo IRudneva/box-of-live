@@ -1,5 +1,11 @@
 #include "bacterium.h"
 
+Bacterium::Bacterium(int id_type, std::shared_ptr<GameConfig> config) :id_type_(id_type), config_(std::move(config))
+{
+	setCellType(TypeCell::BACTERIUM);
+	energy_base_ = config_->energy_base;
+}
+
 bool Bacterium::isReadyUpdate()
 {
 	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= Millisec(Sec(config_->update_time)))
@@ -24,10 +30,7 @@ void Bacterium::update(FieldState& field_state)
 		changeDirection(field_state);
 
 		if(energy_base_ <= 0)
-		{
 			field_state.resetCell(getIdCell());
-			return;
-		}
 	}
 }
 

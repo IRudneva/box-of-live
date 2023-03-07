@@ -143,13 +143,24 @@ tgui::Color GraphicScene::getColorCellByType(std::shared_ptr<Cell> cell)
 	case TypeCell::BACTERIUM:
 	{
 		Cell& a = *cell;
-		auto id = dynamic_cast<Bacterium&>(a).getIdType();
-		return getCellColorByBacteriumId(id);
+		auto bacterium = dynamic_cast<Bacterium&>(a);
+		tgui::Color color_bacterium = getCellColorByBacteriumId(bacterium.getIdType());
+		return getCellColorByBacteriumEnergy(bacterium.getEnergy(), color_bacterium);
 	}
 	case TypeCell::EMPTY:
 		return tgui::Color::White;
 	}
 	return tgui::Color::White;
+}
+
+tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int energy, tgui::Color color) const 
+{
+	auto energy_base = conf_helper_.getGameConfig()->energy_base;
+	if(energy < energy_base * 0.25)
+		return {color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.4)};
+	if (energy < energy_base * 0.7)
+		return {color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };
+	return color;
 }
 
 tgui::Color GraphicScene::getCellColorByBacteriumId(int id)

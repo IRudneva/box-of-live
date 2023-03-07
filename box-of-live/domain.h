@@ -1,121 +1,16 @@
 #pragma once
-#include <functional>
 #include <chrono>
-#include <map>
 #include <random>
-#include <memory>
-#include <optional>
 
 constexpr static int unsigned HEIGHT_WINDOW = 600;
-
 constexpr static unsigned int WIDTH_WINDOW = 800;
-
 constexpr static int HEIGHT_PLAYING_FIELD = 400;
-
 constexpr static int WIDTH_PLAYING_FIELD = 800;
-
 constexpr static int CELL_SIZE = 8;
-
 constexpr static int NUMBER_BACTERIAL_COLONIES = 3;
-
 constexpr static int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
-
 constexpr static int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
-
-constexpr  static int NO_RESULT = -1;
-
-struct GameConfig
-{
-	int energy_base = 0;
-	int energy_action_cost = 0;
-	int energy_to_clone = 0;
-	int update_time = 0;
-	int grass_update_time = 0;
-	int energy_from_grass = 0;
-};
-
-class ConfigHelper
-{
-public:
-	struct ConfigRecord
-	{
-		ConfigRecord() = default;
-		ConfigRecord(int col_id, int r_id) : column_id(col_id), row_id(r_id) {}
-		int column_id = 0;
-		int row_id = 0;
-		int defaultValue = 0;
-		std::function<void(int)> setterFunction;
-	};
-void init()
-{
-	ConfigRecord energy_base_record(0,0);
-	energy_base_record.setterFunction = [this](int value) {
-		game_config_->energy_base = value;
-	};
-	energy_base_record.defaultValue = 5;
-	records["enegry_base"] = energy_base_record;
-
-	ConfigRecord energy_action_record(0, 1);
-	energy_action_record.setterFunction = [this](int value) {
-		game_config_->energy_action_cost = value;
-	};
-	energy_action_record.defaultValue = 1;
-	records["energy_action_cost"] = energy_action_record;
-
-	ConfigRecord energy_clone_record(0, 2);
-	energy_clone_record.setterFunction = [this](int value) {
-		game_config_->energy_to_clone = value;
-	};
-	energy_clone_record.defaultValue = 8;
-	records["enegry_to_clone"] = energy_clone_record;
-
-	ConfigRecord update_record(0, 3);
-	update_record.setterFunction = [this](int value) {
-		game_config_->update_time = value;
-	};
-	update_record.defaultValue = 2;
-	records["update_time"] = update_record;
-
-	ConfigRecord grass_update_record(1, 0);
-	grass_update_record.setterFunction = [this](int value) {
-		game_config_->grass_update_time = value;
-	};
-	grass_update_record.defaultValue = 5;
-	records["grass_update_time"] = grass_update_record;
-
-	ConfigRecord energy_from_grass(1, 1);
-	energy_from_grass.setterFunction = [this](int value) {
-		game_config_->energy_from_grass = value;
-	};
-	energy_from_grass.defaultValue = 3;
-	records["energy_from_grass"] = energy_from_grass;
-
-	for (const auto& [option_name, config_record] : records)
-	{
-		setOption(option_name, config_record.defaultValue);
-	}
-}
-
-	void setOption(const std::string & str, int value)
-	{
-		records[str].setterFunction(value);
-	}
-
-	void doWithAll(const std::function<void(const std::string&, ConfigRecord&)> & visitor)
-	{
-		for (auto& [option_name, config_record] : records) {
-			visitor(option_name, config_record);
-		}
-	}
-
-	std::shared_ptr<GameConfig> getGameConfig() const { return game_config_; }
-
-	const std::map<std::string, ConfigRecord>& getRecords() const { return records; }
-
-private:
-	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
-	std::map<std::string, ConfigRecord> records;
-};
+constexpr static int NO_RESULT = -1;
 
 enum class TypeCell
 {
@@ -129,120 +24,13 @@ static int getRandomInt(int from, int to)
 {
 	std::random_device rd;
 	std::mt19937 rng(rd());
-	std::uniform_int_distribution<int> gen(from, to); // uniform, unbiased
+	std::uniform_int_distribution<int> gen(from, to); 
 
 	return gen(rng);
 }
 
-struct PositionDelta
-{
-	int x = 0;
-	int y = 0;
-};
-
-struct Position
-{
-	int x = 0;
-	int y = 0;
-
-	Position operator+(const PositionDelta& delta) const
-	{
-		return Position{ x + delta.x, y + delta.y };
-	}
-
-	const Position getRandomDirection() const
-	{
-		Position curr_pos = { x,y };
-
-		int minXDelta = x > 0 ? -1 : 0;
-		int maxXDelta = x < WIDTH_PLAYING_FIELD ? 1 : 0;
-
-		int minYDelta = y > 0 ? -1 : 0;
-		int maxYDelta = y < HEIGHT_PLAYING_FIELD ? 1 : 0;
-
-		auto positionDelta =
-			PositionDelta{
-			  getRandomInt(minXDelta, maxXDelta),
-			  getRandomInt(minYDelta, maxYDelta)
-		};
-		return curr_pos + positionDelta;
-	}
-
-	const std::vector<Position> getAllAdjacentPosition() const
-	{
-		Position curr_pos = { x,y };
-
-		std::vector<Position> adjacent_position = {
-			curr_pos + PositionDelta{-1,1},
-			curr_pos + PositionDelta{0, 1},
-			curr_pos + PositionDelta{1,1},
-			curr_pos + PositionDelta{1, 0},
-			curr_pos + PositionDelta{1, -1},
-			curr_pos + PositionDelta{0, -1},
-			curr_pos + PositionDelta{-1,-1},
-			curr_pos + PositionDelta{-1,0}
-		};
-
-		return adjacent_position;
-	}
-
-	bool operator== (const Position& other) const { return x == other.x && y == other.y; }
-};
-
-inline bool operator!= (const Position& lhs, const Position& rhs) { return !(rhs == lhs); }
-
-struct PositionHasher
-{
-	size_t operator() (const Position& p) const
-	{
-		size_t h_x = ui_hasher_(p.x);
-		size_t h_y = ui_hasher_(p.y);
-		return h_x * 137 + h_y * (137 * 137);
-	}
-private:
-	std::hash<int> ui_hasher_;
-};
-
-static Position getRandomPosition()
-{
-	int rand_x = getRandomInt(0, COUNT_POSITION_X);
-	int rand_y = getRandomInt(0, COUNT_POSITION_Y);
-	return { rand_x, rand_y };
-}
-
 static std::chrono::steady_clock::time_point getCurrentTime() {
-
 	std::chrono::steady_clock::time_point time = std::chrono::steady_clock::now();
-
 	return time;
 }
 
-class Timer {
-public:
-	void initInt(int interval) {
-		interval_ = std::chrono::milliseconds(std::chrono::seconds(interval));
-		reset();
-	}
-	void initDouble(double interval) {
-		int seconds = (int)interval;
-		int milli = (int)((interval - seconds) * 1000);
-		interval_ = std::chrono::milliseconds(milli);
-		reset();
-	}
-
-	bool timedOut() {
-		if (std::chrono::duration_cast<std::chrono::milliseconds>(getCurrentTime() - start_)  >= interval_) {
-			reset();
-			return true;
-		}
-		return false;
-	}
-
-	void reset() {
-		start_ = getCurrentTime();
-	}
-
-private:
-	std::chrono::steady_clock::time_point start_;
-	std::chrono::milliseconds interval_ = std::chrono::milliseconds(0);
-};

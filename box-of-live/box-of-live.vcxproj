@@ -157,19 +157,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bacterium.cpp" />
+    <ClCompile Include="config_helper.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="cell.cpp" />
     <ClCompile Include="field_state.cpp" />
     <ClCompile Include="graphic_scene.cpp" />
     <ClCompile Include="grass.cpp" />
+    <ClCompile Include="position.cpp" />
+    <ClCompile Include="timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bacterium.h" />
     <ClInclude Include="cell.h" />
+    <ClInclude Include="config_helper.h" />
     <ClInclude Include="field_state.h" />
     <ClInclude Include="domain.h" />
     <ClInclude Include="graphic_scene.h" />
     <ClInclude Include="grass.h" />
+    <ClInclude Include="gui_config.h" />
+    <ClInclude Include="position.h" />
+    <ClInclude Include="timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

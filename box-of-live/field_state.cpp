@@ -101,8 +101,10 @@ void FieldState::restart()
 {
 	cells_.clear();
 	IdCell::reset();
+	timer_grass_.initInt(config_->grass_update_time);
 	addColonyBacterium(20);
 	addGrass(300);
+
 }
 
 Position FieldState::getRandomEmptyPosition() const

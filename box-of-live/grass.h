@@ -7,4 +7,3 @@ public:
 
 	void update(FieldState& cells) override { }
 };
-

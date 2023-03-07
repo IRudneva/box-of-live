@@ -1,5 +1,8 @@
 #pragma once
 #include "cell.h"
+#include "position.h"
+#include "config_helper.h"
+#include "timer.h"
 
 class Cell;
 
@@ -11,11 +14,7 @@ using AdjacentCellsUMap = std::unordered_map<Position, std::shared_ptr<Cell>, Po
 class FieldState
 {
 public:
-	void init(std::shared_ptr<GameConfig> config)
-	{
-		config_ = std::move(config);
-		timer_grass_.initInt(config_->grass_update_time);
-	}
+	void init(std::shared_ptr<GameConfig> config) { config_ = std::move(config); }
 
 	void update();
 

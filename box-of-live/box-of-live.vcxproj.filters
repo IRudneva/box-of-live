@@ -42,6 +42,15 @@
     <ClCompile Include="graphic_scene.cpp">
       <Filter>gui</Filter>
     </ClCompile>
+    <ClCompile Include="timer.cpp">
+      <Filter>helpers</Filter>
+    </ClCompile>
+    <ClCompile Include="position.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
+    <ClCompile Include="config_helper.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bacterium.h">
@@ -60,6 +69,18 @@
       <Filter>gui</Filter>
     </ClInclude>
     <ClInclude Include="grass.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="position.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="timer.h">
+      <Filter>helpers</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_config.h">
+      <Filter>gui</Filter>
+    </ClInclude>
+    <ClInclude Include="config_helper.h">
       <Filter>logic</Filter>
     </ClInclude>
   </ItemGroup>

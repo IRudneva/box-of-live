@@ -1,8 +1,9 @@
 ﻿#pragma once
-#include <memory>
 #include <TGUI/TGUI.hpp>
-#include <utility>
+#include <unordered_map>
 #include "cell.h"
+#include "config_helper.h"
+#include "position.h"
 
 using Sec = std::chrono::seconds;
 using Millisec = std::chrono::milliseconds;
@@ -11,11 +12,7 @@ using AdjacentCellsUMap = std::unordered_map<Position, std::shared_ptr<Cell>, Po
 
 class Bacterium: public Cell {
 public:
-	explicit Bacterium(int id_type, std::shared_ptr<GameConfig> config) :id_type_(id_type), config_(std::move(config))
-	{
-		setCellType(TypeCell::BACTERIUM);
-		energy_base_ = config_->energy_base;
-	}
+	explicit Bacterium(int id_type, std::shared_ptr<GameConfig> config);
 	
 	void update(FieldState& cells) override;
 
