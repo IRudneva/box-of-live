@@ -34,73 +34,86 @@ struct GameConfig
 	int energy_from_grass = 0;
 };
 
-struct ConfigHelper
+class ConfigHelper
 {
+public:
 	struct ConfigRecord
 	{
-		int defaultValue;
+		ConfigRecord() = default;
+		ConfigRecord(int col_id, int r_id) : column_id(col_id), row_id(r_id) {}
+		int column_id = 0;
+		int row_id = 0;
+		int defaultValue = 0;
 		std::function<void(int)> setterFunction;
 	};
-
-void init(std::shared_ptr<GameConfig> config)
+void init()
 {
-	ConfigRecord energy_base_record;
-	energy_base_record.setterFunction = [&config](int value) {
-		config->energy_base = value;
+	ConfigRecord energy_base_record(0,0);
+	energy_base_record.setterFunction = [this](int value) {
+		game_config_->energy_base = value;
 	};
 	energy_base_record.defaultValue = 5;
 	records["enegry_base"] = energy_base_record;
 
-	ConfigRecord energy_action_record;
-	energy_action_record.setterFunction = [&config](int value) {
-		config->energy_action_cost = value;
+	ConfigRecord energy_action_record(0, 1);
+	energy_action_record.setterFunction = [this](int value) {
+		game_config_->energy_action_cost = value;
 	};
 	energy_action_record.defaultValue = 1;
 	records["energy_action_cost"] = energy_action_record;
 
-	ConfigRecord energy_clone_record;
-	energy_clone_record.setterFunction = [&config](int value) {
-		config->energy_to_clone = value;
+	ConfigRecord energy_clone_record(0, 2);
+	energy_clone_record.setterFunction = [this](int value) {
+		game_config_->energy_to_clone = value;
 	};
 	energy_clone_record.defaultValue = 8;
 	records["enegry_to_clone"] = energy_clone_record;
 
-	ConfigRecord update_record;
-	update_record.setterFunction = [&config](int value) {
-		config->update_time = value;
+	ConfigRecord update_record(0, 3);
+	update_record.setterFunction = [this](int value) {
+		game_config_->update_time = value;
 	};
 	update_record.defaultValue = 2;
 	records["update_time"] = update_record;
 
-	ConfigRecord grass_update_record;
-	grass_update_record.setterFunction = [&config](int value) {
-		config->grass_update_time = value;
+	ConfigRecord grass_update_record(1, 0);
+	grass_update_record.setterFunction = [this](int value) {
+		game_config_->grass_update_time = value;
 	};
 	grass_update_record.defaultValue = 5;
 	records["grass_update_time"] = grass_update_record;
 
-	ConfigRecord energy_from_grass;
-	energy_from_grass.setterFunction = [&config](int value) {
-		config->energy_from_grass = value;
+	ConfigRecord energy_from_grass(1, 1);
+	energy_from_grass.setterFunction = [this](int value) {
+		game_config_->energy_from_grass = value;
 	};
 	energy_from_grass.defaultValue = 3;
 	records["energy_from_grass"] = energy_from_grass;
+
+	for (const auto& [option_name, config_record] : records)
+	{
+		setOption(option_name, config_record.defaultValue);
+	}
 }
 
-	void setOption(std::shared_ptr<GameConfig> gameConfig, const std::string & str, int value)
+	void setOption(const std::string & str, int value)
 	{
 		records[str].setterFunction(value);
 	}
 
-	void doWithAll(const std::function<void(const std::string &, int)> & aVisitor)
+	void doWithAll(const std::function<void(const std::string&, ConfigRecord&)> & visitor)
 	{
-		for (const auto &[optionName, configRecord] : records) {
-			aVisitor(optionName, configRecord.defaultValue);
+		for (auto& [option_name, config_record] : records) {
+			visitor(option_name, config_record);
 		}
 	}
 
+	std::shared_ptr<GameConfig> getGameConfig() const { return game_config_; }
+
 	const std::map<std::string, ConfigRecord>& getRecords() const { return records; }
-	
+
+private:
+	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 	std::map<std::string, ConfigRecord> records;
 };
 
@@ -120,7 +133,6 @@ static int getRandomInt(int from, int to)
 
 	return gen(rng);
 }
-
 
 struct PositionDelta
 {

@@ -18,62 +18,36 @@ void GraphicScene::init()
 
 	buttons->add(start_button);
 
-	tgui::Group::Ptr labels = tgui::Group::create();
-	std::vector<ConfigLabel> labels_conf = {
-		{"Number of bacterial species:",14, {50, 30}},
-		{"Bacteria energy:",14, {50, 60}},
-		{"Speed bacterium:",14, {50, 90}}
-	};
-	
-	for (auto& l : labels_conf)
-	{
-		auto label = createLabel(l);
-		labels->add(label);
-	}
+	auto grid = tgui::Grid::create();
 
-	auto game_config = std::make_shared<GameConfig>();
-	conf_helper_.init(game_config);
-	for (auto opt : conf_helper_.getRecords())
-	{
-		conf_helper_.setOption(game_config, opt.first, opt.second.defaultValue);
-	}
+	grid->setAutoSize(true);
+	settings_layout->add(grid);
 
-	tgui::Group::Ptr e_box = tgui::Group::create();
+	conf_helper_.init();
 
-	auto editBox1 = tgui::EditBox::create();
-	editBox1->setInputValidator(tgui::EditBox::Validator::Int);
-	editBox1->setSize(100, 16);
-	editBox1->setTextSize(14);
-	editBox1->setPosition(280, 30);
-	editBox1->setDefaultText(std::to_string(3));
+	conf_helper_.doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
+		auto label = createLabel({ config_name, 14 });
+		grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
 
-	auto editBox2 = tgui::EditBox::create();
-	editBox2->setInputValidator(tgui::EditBox::Validator::Int);
-	editBox2->setSize(100, 16);
-	editBox2->setTextSize(14);
-	editBox2->setPosition(280, 60);
-	editBox2->setDefaultText(std::to_string(game_config->energy_base));
-	
-	auto editBox3 = tgui::EditBox::create();
-	editBox3->setInputValidator(tgui::EditBox::Validator::Int);
-	editBox3->setSize(100, 16);
-	editBox3->setTextSize(14);
-	editBox3->setPosition(280, 90);
-	editBox3->setDefaultText(std::to_string(game_config->update_time));
-
-	e_box->add(editBox1);
-	e_box->add(editBox2);
-	e_box->add(editBox3);
+		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.defaultValue) });
+		edit_box->onTextChange([edit_box, &config_record]() {
+			auto text = edit_box->getText();
+			if (!text.empty()) {
+				config_record.setterFunction(text.toInt());
+			}
+		});
+		grid->addWidget(edit_box,
+			config_record.row_id,
+			config_record.column_id * 2 + 1,
+			tgui::Grid::Alignment::Left);
+	});
 
 	gui_.add(fields);
 	gui_.add(buttons);
-	gui_.add(labels);
-	gui_.add(e_box);
-	game_state_->init(game_config);
+	game_state_->init(conf_helper_.getGameConfig());
 
 	timer_.initDouble(0.5);
 }
-
 
 void GraphicScene::update()
 {
@@ -102,8 +76,6 @@ void GraphicScene::update()
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canvas->draw(cell_shape);
 		}
-
-
 		drawMarkupField(canvas);
 
 		canvas->display();
@@ -136,7 +108,6 @@ tgui::Label::Ptr GraphicScene::createLabel(const ConfigLabel& conf) const
 	auto label = tgui::Label::create();
 	label->setText(conf.label);
 	label->setTextSize(conf.text_size);
-	label->setPosition(conf.position);
 	return label;
 }
 
@@ -192,4 +163,15 @@ tgui::Color GraphicScene::getCellColorByBacteriumId(int id)
 
 	color_bacterium_by_type_.insert({ id,tgui::Color(red, green, blue) });
 	return color_bacterium_by_type_.at(id);
+}
+
+
+tgui::EditBox::Ptr GraphicScene::createEditBox(const ConfigEditBox& conf) const
+{
+	auto edit_box = tgui::EditBox::create();
+	edit_box->setInputValidator(tgui::EditBox::Validator::Int);
+	edit_box->setSize(conf.size);
+	edit_box->setTextSize(conf.text_size);
+	edit_box->setDefaultText(conf.text);
+	return edit_box;
 }

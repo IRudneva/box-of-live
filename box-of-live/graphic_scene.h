@@ -6,7 +6,12 @@ struct ConfigLabel
 {
 	std::string label;
 	unsigned int text_size;
-	tgui::Layout2d position;
+};
+
+struct ConfigEditBox{
+	tgui::Layout2d size;
+	unsigned int text_size;
+	std::string text;
 };
 
 struct ConfigButton
@@ -57,6 +62,8 @@ private:
 	tgui::Button::Ptr createButton(const ConfigButton& conf) const;
 
 	tgui::Label::Ptr createLabel(const ConfigLabel& conf) const;
+
+	tgui::EditBox::Ptr createEditBox(const ConfigEditBox& conf) const;
 
 	tgui::Color getCellColorByBacteriumId(int id);
 
