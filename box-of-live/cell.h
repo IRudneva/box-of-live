@@ -30,6 +30,8 @@ public:
 
 	void setCellType(TypeCell type) { type_ = type; }
 
+	bool isReadyToReset() const { return type_ == TypeCell::EMPTY; }
+
 	void setPosition(const Position& pos)
 	{
 		if (pos != position_)

@@ -22,6 +22,7 @@ private:
 	Timer timer_;
 	std::map<int, tgui::Color> color_bacterium_by_type_;
 	std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
+	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
 	

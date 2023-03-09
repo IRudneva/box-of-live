@@ -30,7 +30,7 @@ void Bacterium::update(FieldState& field_state)
 		changeDirection(field_state);
 
 		if(energy_base_ <= 0)
-			field_state.resetCell(getIdCell());
+			field_state.resetTypeCell(getIdCell());
 	}
 }
 
@@ -46,7 +46,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 	{
 		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium)))
 		{
-			field_state.resetCell(id_bacterium);
+			field_state.resetTypeCell(id_bacterium);
 			return;
 		}
 	}
@@ -55,7 +55,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 	if(id_grass!= NO_RESULT)
 	{
 		eatGrass(field_state.getData().at(id_grass));
-		field_state.resetCell(id_grass);
+		field_state.resetTypeCell(id_grass);
 		if (canClone())
 		{
 			const auto new_all_adjacent = field_state.getPositionsAround(position_);

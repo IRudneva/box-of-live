@@ -22,6 +22,8 @@ public:
 
 	void addBacterium(std::shared_ptr<Cell> bacterium);
 
+	void resetTypeCell(int id_cell) const;
+
 	void resetCell(int id_cell);
 
 	const std::map<int, std::shared_ptr<Cell>>& getData() const { return cells_; }

@@ -57,6 +57,12 @@ void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
 		cells_.insert({ bacterium->getIdCell(), bacterium });
 }
 
+void FieldState::resetTypeCell(int id_cell) const
+{
+	if (cells_.find(id_cell) != cells_.end())
+		cells_.at(id_cell)->setCellType(TypeCell::EMPTY);
+}
+
 void FieldState::resetCell(int id_cell)
 {
 	if (cells_.find(id_cell) != cells_.end())
@@ -87,8 +93,11 @@ void FieldState::update()
 	
 	for (const auto&[id, cell] : cells_)
 	{
-		if(cell != nullptr)
+		if (cell != nullptr) {
 			cell->update(*this);
+			if (cell->isReadyToReset())
+				resetCell(id);
+		}
 	}
 
 	for (auto it = cells_.begin(); it != cells_.end(); )

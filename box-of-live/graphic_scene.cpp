@@ -23,17 +23,17 @@ void GraphicScene::init()
 	grid->setAutoSize(true);
 	settings_layout->add(grid);
 
-	conf_helper_.init();
+	conf_helper_.init(*game_config_); 
 
 	conf_helper_.doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
 		auto label = createLabel({ config_name, 14 });
 		grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
 
-		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.defaultValue) });
+		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.default_value) });
 		edit_box->onTextChange([edit_box, &config_record]() {
 			auto text = edit_box->getText();
 			if (!text.empty()) {
-				config_record.setterFunction(text.toInt());
+				config_record.setter_function(text.toInt());
 			}
 		});
 		grid->addWidget(edit_box,
@@ -44,7 +44,7 @@ void GraphicScene::init()
 
 	gui_.add(fields);
 	gui_.add(buttons);
-	field_state_info_->init(conf_helper_.getGameConfig());
+	field_state_info_->init(game_config_);
 
 	timer_.initDouble(0.5);
 }
@@ -165,9 +165,9 @@ tgui::Color GraphicScene::getColorCellByType(TypeCell type, std::optional<Bacter
 
 tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int energy, tgui::Color color) const
 {
-	if (energy < conf_helper_.getGameConfig()->energy_base * 0.25)
+	if (energy < game_config_->energy_base * 0.25)
 		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.4) };
-	if (energy < conf_helper_.getGameConfig()->energy_base * 0.7)
+	if (energy < game_config_->energy_base * 0.7)
 		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };
 	return color;
 }
