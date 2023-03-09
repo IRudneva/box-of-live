@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <optional>
 #include <random>
 
 constexpr static int unsigned HEIGHT_WINDOW = 600;
@@ -34,3 +35,15 @@ static std::chrono::steady_clock::time_point getCurrentTime() {
 	return time;
 }
 
+struct BacteriumInfo
+{
+	int id_type = 0;
+	int energy = 0;
+};
+
+struct CellInfo {
+	TypeCell type = TypeCell::EMPTY;
+	int x = 0;
+	int y = 0;
+	std::optional<BacteriumInfo> bacterium_info;
+};

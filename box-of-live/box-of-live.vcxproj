@@ -158,6 +158,7 @@
   <ItemGroup>
     <ClCompile Include="bacterium.cpp" />
     <ClCompile Include="config_helper.cpp" />
+    <ClCompile Include="gui_field_state.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="cell.cpp" />
     <ClCompile Include="field_state.cpp" />
@@ -175,6 +176,7 @@
     <ClInclude Include="graphic_scene.h" />
     <ClInclude Include="grass.h" />
     <ClInclude Include="gui_config.h" />
+    <ClInclude Include="gui_field_state.h" />
     <ClInclude Include="position.h" />
     <ClInclude Include="timer.h" />
   </ItemGroup>

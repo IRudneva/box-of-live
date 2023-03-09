@@ -1,9 +1,7 @@
 ﻿#pragma once
-#include <TGUI/TGUI.hpp>
 #include <unordered_map>
 #include "cell.h"
 #include "config_helper.h"
-#include "position.h"
 
 using Sec = std::chrono::seconds;
 using Millisec = std::chrono::milliseconds;

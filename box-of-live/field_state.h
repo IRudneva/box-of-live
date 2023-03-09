@@ -34,6 +34,7 @@ private:
 	std::shared_ptr<GameConfig> config_;
 	std::map<int, std::shared_ptr<Cell>> cells_;
 	Timer timer_grass_;
+
 	
 private:
 	Position getRandomEmptyPosition() const;
