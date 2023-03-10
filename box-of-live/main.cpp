@@ -1,4 +1,5 @@
 ﻿#include "graphic_scene.h"
+#include "hv/TcpServer.h"
 
 void mainLoop(sf::RenderWindow& window, GraphicScene& scene)
 {

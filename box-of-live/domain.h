@@ -3,6 +3,7 @@
 #include <optional>
 #include <random>
 
+
 constexpr static int unsigned HEIGHT_WINDOW = 600;
 constexpr static unsigned int WIDTH_WINDOW = 800;
 constexpr static int HEIGHT_PLAYING_FIELD = 400;
