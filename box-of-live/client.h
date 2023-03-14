@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "gui_client_manager.h"
 #include "hv/TcpClient.h"
 
@@ -10,9 +10,9 @@ public:
 		if(initSocket(1234))
 		{
 			client_.onConnection = [&](const hv::SocketChannelPtr& channel) {
+				gui_manager_->startLoop(); // это должно происходить после подключения - сейчас нужно, чтобы смотреть результат
 				std::string peeraddr = channel->peeraddr();
 				if (channel->isConnected()) {
-					gui_manager_->startLoop();
 					printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				}
 				else {

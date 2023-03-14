@@ -10,9 +10,25 @@ public:
 
 	void init();
 
+	void drawGui();
+
 	void update();
 
-	void handleEvent(const sf::Event& event) { gui_.handleEvent(event); }
+	void handleEvent(const sf::Event& event)
+	{
+		gui_.handleEvent(event);
+	}
+
+	bool isPressedStartButton() const{
+		if (start_button->isMouseDown())
+			return true;
+		return false;
+	}
+
+	bool isChangedConfig()
+	{
+		return conf_helper_.isChanged();
+	}
 
 private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
@@ -21,7 +37,7 @@ private:
 	ConfigHelper conf_helper_;
 	Timer timer_;
 	std::map<int, tgui::Color> color_bacterium_by_type_;
-	std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
+	//std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
 	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;

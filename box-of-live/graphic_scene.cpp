@@ -44,41 +44,51 @@ void GraphicScene::init()
 
 	gui_.add(fields);
 	gui_.add(buttons);
-	field_state_info_->init(game_config_);
+	//field_state_info_->init(game_config_);
 
 	timer_.initDouble(0.5);
 }
 
-void GraphicScene::update()
+void GraphicScene::drawGui()
 {
 	gui_.draw();
+	if (auto canvas = canvas_.lock(); canvas != nullptr) {
+		canvas->clear(tgui::Color::White);
+		drawMarkupField(canvas);
+		canvas->display();
+	}
+}
+
+void GraphicScene::update()
+{
+	/*gui_.draw();
 
 	if (auto canvas = canvas_.lock(); canvas != nullptr) {
 		canvas->clear(tgui::Color::White);
+*/
+		//if (start_button->isMouseDown())
+			//field_state_info_->reset();
 
-		if (start_button->isMouseDown())
-			field_state_info_->reset();
-
-		if (timer_.timedOut())
-			field_state_info_->update();
+		//if (timer_.timedOut())
+			//field_state_info_->update();
 		
-		auto field_data = field_state_info_->getCellInfo();
+		//auto field_data = field_state_info_->getCellInfo();
 
-		for (const auto& cell : field_data)
-		{
-			sf::RectangleShape cell_shape;
-			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
-			float pos_x = static_cast<float>(cell.x *CELL_SIZE);
-			float pos_y = static_cast<float>(cell.y * CELL_SIZE);
-			cell_shape.setPosition(pos_x, pos_y); // 
-			cell_shape.setFillColor(getColorCellByType(cell.type, cell.bacterium_info));
-			cell_shape.setOutlineColor(sf::Color::Black);
-			canvas->draw(cell_shape);
-		}
-		drawMarkupField(canvas);
+		//for (const auto& cell : field_data)
+		//{
+		//	sf::RectangleShape cell_shape;
+		//	cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
+		//	float pos_x = static_cast<float>(cell.x *CELL_SIZE);
+		//	float pos_y = static_cast<float>(cell.y * CELL_SIZE);
+		//	cell_shape.setPosition(pos_x, pos_y); // 
+		//	cell_shape.setFillColor(getColorCellByType(cell.type, cell.bacterium_info));
+		//	cell_shape.setOutlineColor(sf::Color::Black);
+		//	canvas->draw(cell_shape);
+		//}
+	//	drawMarkupField(canvas);
 
-		canvas->display();
-	}
+	//	canvas->display();
+	//}
 }
 
 tgui::Panel::Ptr GraphicScene::createLayout(const ConfigLayout& conf) const

@@ -4,8 +4,9 @@ void ConfigHelper::init(GameConfig& config)
 {
 #define ADD_CONFIG_RECORD(option_name, column_id, row_id, def_value)  \
 ConfigRecord record_##option_name((column_id), (row_id)); \
-record_##option_name.setter_function = [&config](int value) { \
+record_##option_name.setter_function = [&config, this](int value) { \
 config.option_name = value; \
+is_change_config_ = true;\
 };  \
 record_##option_name.default_value = (def_value);\
 records[#option_name] = record_##option_name;
