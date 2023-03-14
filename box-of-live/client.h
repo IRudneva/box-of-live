@@ -10,7 +10,7 @@ public:
 		if(initSocket(1234))
 		{
 			client_.onConnection = [&](const hv::SocketChannelPtr& channel) {
-				gui_manager_->startLoop(); // это должно происходить после подключения - сейчас нужно, чтобы смотреть результат
+				
 				std::string peeraddr = channel->peeraddr();
 				if (channel->isConnected()) {
 					printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
@@ -22,7 +22,9 @@ public:
 			client_.onMessage = [](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
 				printf("< %.*s\n", (int)buf->size(), (char*)buf->data());
 			};
+
 			client_.start();
+			gui_manager_->startLoop(); // это должно происходить после подключения - сейчас нужно, чтобы смотреть результат
 		}
 	}
 
