@@ -157,7 +157,9 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bacterium.cpp" />
+    <ClCompile Include="client.cpp" />
     <ClCompile Include="config_helper.cpp" />
+    <ClCompile Include="gui_client_manager.cpp" />
     <ClCompile Include="gui_field_state.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="cell.cpp" />
@@ -170,11 +172,13 @@
   <ItemGroup>
     <ClInclude Include="bacterium.h" />
     <ClInclude Include="cell.h" />
+    <ClInclude Include="client.h" />
     <ClInclude Include="config_helper.h" />
     <ClInclude Include="field_state.h" />
     <ClInclude Include="domain.h" />
     <ClInclude Include="graphic_scene.h" />
     <ClInclude Include="grass.h" />
+    <ClInclude Include="gui_client_manager.h" />
     <ClInclude Include="gui_config.h" />
     <ClInclude Include="gui_field_state.h" />
     <ClInclude Include="position.h" />
