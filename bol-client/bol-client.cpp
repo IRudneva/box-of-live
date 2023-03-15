@@ -5,6 +5,7 @@
 #include "hv/htime.h"
 #include <memory>
 #include "packet_reader.h"
+#include "msgpack.hpp"
 
 class Client
 {
@@ -47,15 +48,15 @@ public:
 			PacketReader reader;
 
 			client_.onMessage = [&reader](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
-				uint8_t* it = (uint8_t*)buf->data();
-				size_t sizeLeft = buf->size();
-				do {
-					sizeLeft = reader.readData(&it, sizeLeft);
-					if (reader.isAllDataComplete()) {
-						// reader->getPacket(); // для дальнейшей обработки
-						reader.reset();
-					}
-				} while (sizeLeft > 0);
+				//uint8_t* it = (uint8_t*)buf->data();
+				//size_t sizeLeft = buf->size();
+				//do {
+				//	sizeLeft = reader.readData(&it, sizeLeft);
+				//	if (reader.isAllDataComplete()) {
+				//		// reader->getPacket(); // для дальнейшей обработки
+				//		reader.reset();
+				//	}
+				//} while (sizeLeft > 0);
 			/*	auto p = msgpack::unpack<Packet>((uint8_t*)buf->data(), buf->size());
 				if (!p.room_list.empty()) {
 					for (const auto&[id, room] : p.room_list)
@@ -81,9 +82,17 @@ public:
 				}
 				else if (str == "get room list")
 				{
-				/*	Msg m;
-					auto data = msgpack::pack(m);
-					client_.send(data.data(), data.size());*/
+					Packet pt_get_rooms = { {PacketType::PT_MSG_GET_ROOM_LIST, 0} };
+					client_.send(&pt_get_rooms, sizeof(PacketHeader));
+					std::vector<int> a(200, 1);
+
+					/*Packet pt_add_new_room = { {PacketType::PT_ROOM_LIST, 3} };
+					for (auto i = a.begin(); i != a.end(); i++)
+					{
+						pt_add_new_room.data.push_back(msgpack::pack((*i)));
+					}
+					pt_add_new_room.data.push_back()
+					client_.send(&pt_add_new_room, pt_add_new_room.header.data_size);*/
 				}
 				else {
 					if (!client_.isConnected()) break;

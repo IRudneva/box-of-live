@@ -2,7 +2,7 @@
 #include "hv/TcpServer.h"
 #include <memory>
 #include <iostream>
-
+#include "packet_reader.h"
 class Server
 {
 public:
@@ -22,8 +22,19 @@ public:
 				}
 			};
 
+			PacketReader reader;
 
-			server_.onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
+			server_.onMessage = [&reader, this](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
+				uint8_t* it = (uint8_t*)buf->data();
+				size_t sizeLeft = buf->size();
+				do {
+					sizeLeft = reader.readData(&it, sizeLeft);
+					if (reader.isAllDataComplete()) {
+						 auto pac = reader.getPacket(); // для дальнейшей обработки
+						 std::cout << (int)pac.header.packet_type << " type packed received." << std::endl;
+						reader.reset();
+					}
+				} while (sizeLeft > 0);
 				/*Msg m = msgpack::unpack<Msg>((uint8_t*)buf->data(), buf->size());
 				srv_manager_->handleMsg(m);
 				Packet p = { PacketType::PT_ROOM_LIST, srv_manager_->getRoomList() };

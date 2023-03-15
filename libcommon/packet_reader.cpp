@@ -39,6 +39,11 @@ size_t PacketReader::readData(uint8_t** data, size_t size)
 	return size;
 }
 
+Packet PacketReader::getPacket()
+{
+	return msgpack::unpack<Packet>(raw_data);
+}
+
 bool PacketReader::isAllDataComplete()
 {
 	if (!header)
