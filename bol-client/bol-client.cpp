@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "client_manager.h"
+﻿#include "cli_manager.h"
 #include "hv/TcpClient.h"
 #include "hv/htime.h"
 #include <memory>
@@ -18,7 +17,7 @@ public:
 				if (channel->isConnected()) {
 					printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 					// send(time) every 3s
-					hv::setInterval(3000, [channel](hv::TimerID timerID) {
+					/*hv::setInterval(3000, [channel](hv::TimerID timerID) {
 						if (channel->isConnected()) {
 							if (channel->isWriteComplete()) {
 								char str[DATETIME_FMT_BUFLEN] = { 0 };
@@ -32,8 +31,8 @@ public:
 							hv::killTimer(timerID);
 						}
 
-					});
-				//	gui_manager_->startLoop();
+					});*/
+					//	gui_manager_->startLoop();
 				}
 				else {
 					printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
@@ -43,11 +42,17 @@ public:
 				}
 			};
 			client_.onMessage = [](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
-				printf("< %.*s\n", (int)buf->size(), (char*)buf->data());
+				auto p = msgpack::unpack<Packet>((uint8_t*)buf->data(), buf->size());
+				if (!p.room_list.empty()) {
+					for (const auto&[id, room] : p.room_list)
+					{
+						std::cout << "room " << id << " state " << room.field_state << std::endl;;
+					}
+				}
 			};
 
 			client_.start();
-		
+
 			std::string str;
 			while (std::getline(std::cin, str)) {
 				if (str == "close") {
@@ -60,17 +65,18 @@ public:
 					client_.stop();
 					break;
 				}
-				else if(str == "get room list")
-				{/*
+				else if (str == "get room list")
+				{
 					Msg m;
-					client_.send();*/
+					auto data = msgpack::pack(m);
+					client_.send(data.data(), data.size());
 				}
 				else {
 					if (!client_.isConnected()) break;
 					client_.send(str);
 				}
 			}
-			
+
 		}
 	}
 

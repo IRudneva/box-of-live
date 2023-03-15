@@ -1,5 +1,4 @@
-﻿#pragma once
-#include "server_manager.h"
+﻿#include "srv_manager.h"
 #include "hv/TcpServer.h"
 #include <memory>
 #include <iostream>
@@ -22,20 +21,22 @@ public:
 					printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				}
 			};
+
+
 			server_.onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
-				printf("< %.*s\n", (int)buf->size(), (char*)buf->data());
-				//Msg m = reinterpret_cast<Msg*>(buf->data()), sizeof(buf->data());
-				//srv_manager_->handleMsg(*m);
-				//channel->write(srv_manager_->getRoomList());
-				/*printf("< %.*s\n", (int)buf->size(), (char*)buf->data());
-				channel->write(buf);*/
+				Msg m = msgpack::unpack<Msg>((uint8_t*)buf->data(), buf->size());
+				srv_manager_->handleMsg(m);
+				Packet p = { PacketType::PT_ROOM_LIST, srv_manager_->getRoomList() };
+				auto data = msgpack::pack(p);
+				channel->write(data.data(), data.size());
+
 			};
 
-			
+
 			server_.setThreadNum(4);
 			server_.start();
 
-			
+
 			std::string str;
 			while (std::getline(std::cin, str)) {
 				if (str == "close") {
