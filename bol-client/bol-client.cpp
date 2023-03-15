@@ -1,8 +1,10 @@
-﻿#include "cli_manager.h"
+﻿#include <iostream>
+//#include "cli_manager.h"
+#include <TGUI/TGUI.hpp>
 #include "hv/TcpClient.h"
 #include "hv/htime.h"
 #include <memory>
-
+#include "packet_reader.h"
 
 class Client
 {
@@ -41,14 +43,26 @@ public:
 					printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
 				}
 			};
-			client_.onMessage = [](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
-				auto p = msgpack::unpack<Packet>((uint8_t*)buf->data(), buf->size());
+
+			PacketReader reader;
+
+			client_.onMessage = [&reader](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
+				uint8_t* it = (uint8_t*)buf->data();
+				size_t sizeLeft = buf->size();
+				do {
+					sizeLeft = reader.readData(&it, sizeLeft);
+					if (reader.isAllDataComplete()) {
+						// reader->getPacket(); // для дальнейшей обработки
+						reader.reset();
+					}
+				} while (sizeLeft > 0);
+			/*	auto p = msgpack::unpack<Packet>((uint8_t*)buf->data(), buf->size());
 				if (!p.room_list.empty()) {
 					for (const auto&[id, room] : p.room_list)
 					{
 						std::cout << "room " << id << " state " << room.field_state << std::endl;;
 					}
-				}
+				}*/
 			};
 
 			client_.start();
@@ -67,9 +81,9 @@ public:
 				}
 				else if (str == "get room list")
 				{
-					Msg m;
+				/*	Msg m;
 					auto data = msgpack::pack(m);
-					client_.send(data.data(), data.size());
+					client_.send(data.data(), data.size());*/
 				}
 				else {
 					if (!client_.isConnected()) break;
@@ -92,7 +106,7 @@ public:
 
 private:
 	hv::TcpClient client_;
-	std::shared_ptr<ClientManager> gui_manager_ = std::make_shared<ClientManager>();
+	//std::shared_ptr<ClientManager> gui_manager_ = std::make_shared<ClientManager>();
 
 };
 

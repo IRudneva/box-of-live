@@ -24,11 +24,11 @@ public:
 
 
 			server_.onMessage = [this](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
-				Msg m = msgpack::unpack<Msg>((uint8_t*)buf->data(), buf->size());
+				/*Msg m = msgpack::unpack<Msg>((uint8_t*)buf->data(), buf->size());
 				srv_manager_->handleMsg(m);
 				Packet p = { PacketType::PT_ROOM_LIST, srv_manager_->getRoomList() };
 				auto data = msgpack::pack(p);
-				channel->write(data.data(), data.size());
+				channel->write(data.data(), data.size());*/
 
 			};
 
@@ -69,7 +69,7 @@ public:
 
 private:
 	hv::TcpServer server_;
-	std::shared_ptr<SrvManager> srv_manager_ = std::make_shared<SrvManager>();
+//	std::shared_ptr<SrvManager> srv_manager_ = std::make_shared<SrvManager>();
 
 };
 
