@@ -25,7 +25,7 @@ size_t PacketReader::readData(uint8_t** data, size_t size)
 			return size;
 
 
-		header = *(PacketHeader*)header_raw_data.data();
+		header = *(reinterpret_cast<PacketHeader*>(header_raw_data.data()));
 	}
 	// Read body
 
@@ -58,4 +58,19 @@ void PacketReader::reset()
 	header.reset();
 	header_raw_data.clear();
 	raw_data.clear();
+}
+
+void PacketWriter::writePacket(std::shared_ptr<Packet> packet)
+{
+	packet_ = packet;
+}
+
+std::vector<uint8_t> PacketWriter::getData()
+{
+	return msgpack::pack(*packet_);
+}
+	
+void PacketWriter::reset()
+{
+	packet_ = nullptr;
 }

@@ -1,5 +1,9 @@
 #pragma once
+#include <mutex>
 #include <TGUI/TGUI.hpp>
+#include "ui_scene.h"
+#include "shared_packet_queue.h"
+#include "hv/TcpClient.h"
 
 //enum class MsgType : uint32_t
 //{
@@ -62,56 +66,108 @@
 //
 //};
 
-
 class ClientManager
 {
 public:
-	void startLoop()
+	void initGameUI(const hv::SocketChannelPtr& channel)
 	{
 		auto window = createWindow();
-		//auto scene = initGuiScene(window);
-		mainLoop(window/*, std::move(scene)*/);
-	}
-
-private:
-
-	sf::RenderWindow createWindow() const { return { {600, 800}, "Box of Live" }; }
-
-	/*std::unique_ptr<GraphicScene> initGuiScene(sf::RenderWindow& window) const
-	{
-		std::unique_ptr<GraphicScene> scene = std::make_unique<GraphicScene>(window);
-		scene->init();
-		return scene;
-	}*/
-
-	void mainLoop(sf::RenderWindow& window/*, std::unique_ptr<GraphicScene> scene*/)
-	{
+		graphic_scene_ = std::make_shared<GraphicScene>(window);
+		graphic_scene_->init();
+		//uiLoop(window);
 		while (window.isOpen())
 		{
-			sf::Event event;
+			sf::Event event{};
 			while (window.pollEvent(event))
-			{
-				//scene->handleEvent(event);
+		{
+				graphic_scene_->handleEvent(event);
 
 				if (event.type == sf::Event::Closed)
 					window.close();
-
-				//if (scene->isPressedStartButton())
-				//{
-				//	std::cout << "start" << std::endl; // формируем запрос на обновление игрового поля и запуск игры
-				//}
-
-				//if (scene->isChangedConfig()) // формируем пакет с новым конфигом
-				//{
-				//	std::cout << "Config changed: " << std::endl;
-				//}
+				if (event.type == sf::Event::MouseButtonPressed)
+				{
+					if (graphic_scene_->isPressedCreateRoomButton()) 
+					{
+						handleUIEvent(UIEventType::PRESSED_BUTTON_CREATE_ROOM, channel);
+					}
+					if(graphic_scene_->isPressedChooseRoomButton())
+					{
+						handleUIEvent(UIEventType::PRESSED_BUTTON_CHOOSE_ROOM, channel);
+					}
+				}
 			}
 
 			window.clear();
-			//scene->drawGui();
+			graphic_scene_->drawGui();
 			window.display();
 		}
 	}
+
+	void handleUIEvent(UIEventType event, const hv::SocketChannelPtr& channel) const
+	{
+		PacketWriter writer;
+		std::shared_ptr<Packet> packet = std::make_shared<Packet>();
+		switch (event)
+		{
+		case UIEventType::PRESSED_BUTTON_CREATE_ROOM:
+		{
+			std::cout << "press BCreateR" << std::endl;
+			packet = std::make_shared<Packet>();
+			packet->header = { PacketType::PT_MSG_CREATE_ROOM, 0 };
+			packet->data = {};
+			packet_queue_->pushPacket(packet);
+			packet_queue_->handlePushedPacket();
+			auto p1 = packet_queue_->popPacket();
+			//	writer.writePacket(packet_queue_->popPacket());
+			channel->write(&p1, sizeof(p1->header)/*writer.getData().data(), writer.getData().size()*/);
+			break;
+		}
+		case UIEventType::PRESSED_BUTTON_CHOOSE_ROOM:
+		{
+			std::cout << "press BChooseR" << std::endl;
+			packet = std::make_shared<Packet>();
+			packet->header = { PacketType::PT_MSG_GET_ROOM_LIST, 0 };
+			packet->data = {};
+			packet_queue_->pushPacket(packet);
+			packet_queue_->handlePushedPacket();
+			auto p2 = packet_queue_->popPacket();
+			channel->write(&p2, sizeof(p2->header));
+			break;
+		}
+		case UIEventType::NO_EVENT: break;
+		default: ;
+		}
+	}
+
+private:
+	std::shared_ptr<GraphicScene> graphic_scene_;
+	std::shared_ptr<SharedPacketQueue> packet_queue_ = std::make_shared<SharedPacketQueue>();;
+	
+
+	sf::RenderWindow createWindow() const { return {  {WIDTH_WINDOW, HEIGHT_WINDOW}, "Box of Live"  }; }
+
+	//void uiLoop(sf::RenderWindow& window) const
+	//{
+	//	while (window.isOpen())
+	//	{
+	//		sf::Event event{};
+	//		while (window.pollEvent(event))
+	//		{
+	//			graphic_scene_->handleEvent(event);
+
+	//			if (event.type == sf::Event::Closed)
+	//				window.close();
+
+	//			if (auto ui_event = graphic_scene_->checkEvents(); ui_event != UIEventType::NO_EVENT)
+	//				handleUIEvent(ui_event);
+
+	//		}
+
+	//		window.clear();
+	//		graphic_scene_->drawGui();
+	//		window.display();
+	//	}
+	//}
 
 };
 

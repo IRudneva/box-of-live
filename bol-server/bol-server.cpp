@@ -29,6 +29,11 @@ public:
 				size_t sizeLeft = buf->size();
 				do {
 					sizeLeft = reader.readData(&it, sizeLeft);
+					//if(sizeLeft == 0)
+					//{
+					//	auto pac = reader.getPacket(); // для дальнейшей обработки
+					//	std::cout << (int)pac.header.packet_type << " type packed received." << std::endl;
+					//}
 					if (reader.isAllDataComplete()) {
 						 auto pac = reader.getPacket(); // для дальнейшей обработки
 						 std::cout << (int)pac.header.packet_type << " type packed received." << std::endl;

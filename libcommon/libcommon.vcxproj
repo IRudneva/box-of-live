@@ -153,6 +153,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="domain.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="packet_reader.h" />
     <ClInclude Include="pch.h" />
