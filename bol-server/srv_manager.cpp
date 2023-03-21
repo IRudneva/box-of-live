@@ -1,4 +1,6 @@
 #include "srv_manager.h"
+#include <iostream>
+#include "packet_writer.h"         //////////////////////////////////////
 
 void SrvManager::handlePacket(std::shared_ptr<DeserializePacket> packet, const hv::SocketChannelPtr& channel)
 {
@@ -6,7 +8,6 @@ void SrvManager::handlePacket(std::shared_ptr<DeserializePacket> packet, const h
 	std::shared_ptr<DeserializePacket> cur_packet = nullptr;
 
 	packet_queue_->pushPacket(packet);
-	packet_queue_->handlePushedPacket();
 	cur_packet = packet_queue_->popPacket();
 
 	switch (cur_packet->type)
@@ -44,7 +45,7 @@ void SrvManager::handlePacket(std::shared_ptr<DeserializePacket> packet, const h
 			writer.writeDeserializePacket(pt_room_list);
 			auto net_pac = writer.getSerializePacket();
 			channel->write((uint8_t*)&net_pac->header, (int)sizeof(net_pac->header));
-			channel->write((uint8_t*)&net_pac->data, (int)net_pac->data.size());
+			channel->write(net_pac->data.data(), (int)net_pac->data.size());
 	
 
 		break;

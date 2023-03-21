@@ -1,8 +1,7 @@
 #pragma once
-
-#include <string>
 #include <TGUI/Color.hpp>
 #include <TGUI/Layout.hpp>
+#include <string>
 
 struct ConfigLabel
 {

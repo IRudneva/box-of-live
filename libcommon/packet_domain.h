@@ -1,4 +1,6 @@
 #pragma once
+#include "deserialize_packet.h"
+#include <string>
 
 struct IdRoom
 {
@@ -29,31 +31,6 @@ private:
 	uint32_t id_room;
 };
 
-enum class PacketType : uint32_t
-{
-	PT_CREATE_ROOM,
-	PT_CLOSE_ROOM,
-	PT_GET_ROOM_LIST,
-	PT_ROOM_LIST
-};
-
-struct PacketHeader
-{
-	PacketType  packet_type;
-	uint32_t data_size = 0;
-};
-
-
-struct DeserializePacket 
-{
-protected:
-	DeserializePacket(PacketType ty) : type(ty){}
-public:
-	PacketType type;
-	virtual ~DeserializePacket() = default;
-};
-
-
 struct PTCreateRoom : public DeserializePacket
 {
 	PTCreateRoom() : DeserializePacket(PacketType::PT_CREATE_ROOM){}
@@ -81,7 +58,7 @@ struct PTGetRoomList : DeserializePacket
 {
 	PTGetRoomList() : DeserializePacket(PacketType::PT_GET_ROOM_LIST){}
 
-	 uint8_t t = 0;
+	uint8_t t = 0;
 	template<class T>
 	void pack(T& packer) {
 		packer(t);
@@ -97,18 +74,6 @@ struct PTRoomList : DeserializePacket
 	template<class T>
 	void pack(T& packer) {
 		packer(room_list);
-	}
-};
-
-
-struct NetworkPacket
-{
-	PacketHeader header;
-	std::vector<uint8_t> data;
-
-	template<class T>
-	void pack(T& packer) {
-		packer(data);
 	}
 };
 

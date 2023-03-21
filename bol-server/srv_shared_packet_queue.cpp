@@ -1,9 +1,12 @@
 #include "srv_shared_packet_queue.h"
+#include <iostream>
+
+#include "deserialize_packet.h"
 
 void SharedPacketQueue::pushPacket(std::shared_ptr<DeserializePacket> packet)
 {
-	std::lock_guard<std::mutex> lock(SHARED_QUEUE_MUTEX);
-	pushed_packet_ = packet;
+	std::lock_guard<std::mutex> lock(m);
+	queue_.push(packet);
 	std::cout << "Thread::" << std::this_thread::get_id() << " packet :" << (int)packet->type << " type, size " << sizeof(packet) << " pushed." << std::endl;
 }
 
@@ -14,17 +17,9 @@ bool SharedPacketQueue::hasPacket() const {
 	return true;
 }
 
-void SharedPacketQueue::handlePushedPacket() {
-	if (pushed_packet_ == nullptr)
-		return;
-
-	queue_.push(pushed_packet_);
-	pushed_packet_ = nullptr;
-}
-
 std::shared_ptr<DeserializePacket> SharedPacketQueue::popPacket()
 {
-	std::lock_guard<std::mutex> lock(SHARED_QUEUE_MUTEX);
+	std::lock_guard<std::mutex> lock(m);
 	auto buff_packet = queue_.front();
 	queue_.pop();
 	std::cout << "Thread::" << std::this_thread::get_id() << " packet :" << (int)buff_packet->type << " type, size " << sizeof(buff_packet) << " pop." << std::endl;

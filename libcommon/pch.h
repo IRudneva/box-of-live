@@ -4,17 +4,10 @@
 // Однако изменение любого из приведенных здесь файлов между операциями сборки приведет к повторной компиляции всех(!) этих файлов.
 // Не добавляйте сюда файлы, которые планируете часто изменять, так как в этом случае выигрыша в производительности не будет.
 
-#ifndef PCH_H
-#define PCH_H
+#ifndef PCHCOMMON_H
+#define PCHCOMMON_H
 
 // Добавьте сюда заголовочные файлы для предварительной компиляции
 #include "framework.h"
 #include <unordered_map>
-//#include <numeric>
-//#include <cstdlib>
-//#include <cmath>
-//#include <map>
-//#include <string>
-#include "msgpack.hpp"
-
 #endif //PCH_H

@@ -1,8 +1,7 @@
 #pragma once
-#include <optional>
-#include "domain.h"
 #include "packet_domain.h"
-#include "pch.h"
+#include <optional>
+#include <memory>
 
 class NetworkPacketReader
 {
@@ -23,23 +22,3 @@ private:
 	void reset();
 };
 
-class DeserializePacketWriter
-{
-public:
-	template <typename T>
-	void writeDeserializePacket(T deserialize_pac)
-	{
-		if (deserialize_pac == nullptr) return;
-
-		des_packet_->header.packet_type = deserialize_pac->type;
-		des_packet_->data = msgpack::pack(*(deserialize_pac));
-		des_packet_->header.data_size = des_packet_->data.size();
-	}
-
-	std::shared_ptr<NetworkPacket> getSerializePacket();
-
-private:
-	std::shared_ptr<NetworkPacket> des_packet_ = nullptr;
-
-	void reset() { des_packet_ = nullptr; }
-};

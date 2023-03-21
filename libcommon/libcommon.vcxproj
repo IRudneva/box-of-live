@@ -166,14 +166,18 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="domain.h" />
+    <ClInclude Include="com_timer.h" />
+    <ClInclude Include="deserialize_packet.h" />
+    <ClInclude Include="game_domain.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="packet_domain.h" />
     <ClInclude Include="packet_reader.h" />
+    <ClInclude Include="packet_writer.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="packet_reader.cpp" />
+    <ClCompile Include="packet_writer.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

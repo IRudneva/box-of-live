@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <map>
+#include <string>
 
 struct GameConfig
 {

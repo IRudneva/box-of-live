@@ -1,14 +1,14 @@
 #pragma once
-#include <queue>
 #include <TGUI/TGUI.hpp>
+#include <SFML/Graphics.hpp>
+#include "ui_event.h"
 #include "gui_config.h"
-#include "config_helper.h"
-#include "packet_reader.h"
+#include <queue>
 
 class GraphicScene final
 {
 public:
-	GraphicScene(sf::RenderWindow & window) : gui_(window) {}
+	GraphicScene(sf::RenderWindow& window) : gui_(window) {}
 
 	void init();
 
@@ -16,40 +16,15 @@ public:
 
 	void update();
 
-	void handleEvent(const sf::Event& event)
-	{
-		gui_.handleEvent(event);
-	}
+	void handleEvent(const sf::Event& event);
 
-	bool isPressedCreateRoomButton() const {
-		if (button_create_room_->isMouseDown())
-			return true;
-		return false;
-	}
+	bool isPressedCreateRoomButton() const;
 
-	bool isPressedChooseRoomButton() const {
-		if (button_choose_room_->isMouseDown())
-			return true;
-		return false;
-	}
+	bool isPressedChooseRoomButton() const;
 
-	UIEventType checkEvents()
-	{
-		if (isPressedCreateRoomButton())
-			events_.push(UIEventType::PRESSED_BUTTON_CREATE_ROOM);
-		if (isPressedChooseRoomButton())
-			events_.push(UIEventType::PRESSED_BUTTON_CHOOSE_ROOM);
-		if (events_.empty())
-			return UIEventType::NO_EVENT;
-		auto top_event = events_.front();
-		events_.pop();
-		return top_event;
-	}
+	UIEventType checkEvents();
 
-	bool isChangedConfig()
-	{
-		return conf_helper_.isChanged();
-	}
+//	bool isChangedConfig() { return conf_helper_.isChanged(); }
 
 private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
@@ -58,11 +33,11 @@ private:
 	tgui::Button::Ptr button_choose_room_;
 	std::queue<UIEventType> events_;
 //	tgui::Button::Ptr start_button;
-	ConfigHelper conf_helper_;
-	Timer timer_;
+//	ConfigHelper conf_helper_;
+//	Timer timer_;
 //	std::map<int, tgui::Color> color_bacterium_by_type_;
 	//std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
-	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
+//	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
 	

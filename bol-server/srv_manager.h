@@ -1,6 +1,13 @@
 #pragma once
+#include <map>
+#include <memory>
 #include <hv/Channel.h>
+
 #include "srv_shared_packet_queue.h"
+
+
+struct Room;
+struct DeserializePacket;
 
 class SrvManager
 {

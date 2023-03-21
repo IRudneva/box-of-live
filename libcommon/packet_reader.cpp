@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "packet_reader.h"
+#include "msgpack.hpp"
 
 size_t NetworkPacketReader::readNetworkPacket(uint8_t** data, size_t size)
 {
@@ -49,7 +50,7 @@ std::shared_ptr<DeserializePacket> NetworkPacketReader::getDeserializePacket() {
 	case PacketType::PT_CREATE_ROOM:
 	{
 		std::shared_ptr<PTCreateRoom> pt_create_room = std::make_shared<PTCreateRoom>();
-		auto packet = msgpack::unpack<PTCreateRoom>(raw_data_);
+		auto packet = msgpack::unpack<PTCreateRoom>(raw_data_); // некорректно распаковывает
 		*pt_create_room = packet;
 		result = std::static_pointer_cast<DeserializePacket>(pt_create_room);
 		reset();
@@ -88,7 +89,6 @@ std::shared_ptr<DeserializePacket> NetworkPacketReader::getDeserializePacket() {
 	}
 }
 
-
 bool NetworkPacketReader::isAllDataComplete() const
 {
 	if (!header_)
@@ -105,9 +105,3 @@ void NetworkPacketReader::reset()
 	raw_data_.clear();
 }
 
-
-std::shared_ptr<NetworkPacket> DeserializePacketWriter::getSerializePacket() {
-	auto buff_pac = des_packet_;
-	reset();
-	return buff_pac;
-}

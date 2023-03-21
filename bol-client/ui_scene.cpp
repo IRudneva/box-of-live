@@ -1,5 +1,6 @@
 ﻿#include "ui_scene.h"
 #include <memory>
+#include <game_domain.h>
 
 void GraphicScene::init()
 {
@@ -58,7 +59,7 @@ void GraphicScene::init()
 	gui_.add(buttons);
 	//field_state_info_->init(game_config_);
 
-	timer_.initDouble(0.5);
+//	timer_.initDouble(0.5);
 }
 
 void GraphicScene::drawGui()
@@ -101,6 +102,36 @@ void GraphicScene::update()
 
 	//	canvas->display();
 	//}
+}
+
+void GraphicScene::handleEvent(const sf::Event& event)
+{
+	gui_.handleEvent(event);
+}
+
+bool GraphicScene::isPressedCreateRoomButton() const {
+	if (button_create_room_->isMouseDown())
+		return true;
+	return false;
+}
+
+bool GraphicScene::isPressedChooseRoomButton() const {
+	if (button_choose_room_->isMouseDown())
+		return true;
+	return false;
+}
+
+UIEventType GraphicScene::checkEvents()
+{
+	if (isPressedCreateRoomButton())
+		events_.push(UIEventType::PRESSED_BUTTON_CREATE_ROOM);
+	if (isPressedChooseRoomButton())
+		events_.push(UIEventType::PRESSED_BUTTON_CHOOSE_ROOM);
+	if (events_.empty())
+		return UIEventType::NO_EVENT;
+	auto top_event = events_.front();
+	events_.pop();
+	return top_event;
 }
 
 tgui::Panel::Ptr GraphicScene::createLayout(const ConfigLayout& conf) const
