@@ -9,11 +9,11 @@ inline std::mutex SHARED_QUEUE_MUTEX;
 class SharedPacketQueue
 {
 public:
-	void pushPacket(std::shared_ptr<Packet> packet)
+	void pushPacket(std::shared_ptr<DeserializePacket> packet)
 	{
 		std::lock_guard<std::mutex> lock(SHARED_QUEUE_MUTEX);
 		pushed_packet_ = packet;
-		std::cerr << "Thread::" << std::this_thread::get_id() << "packet :" << (int)packet->header.packet_type << " type, size " << packet->header.data_size << " pushed." << std::endl;
+		std::cerr << "Thread::" << std::this_thread::get_id() << " packet :" << (int)packet->type << " type, size " << (int)packet->type << " pushed." << std::endl;
 	}
 
 	bool hasPacket() const {
@@ -31,17 +31,17 @@ public:
 		pushed_packet_ = nullptr;
 	}
 
-	std::shared_ptr<Packet> popPacket()
+	std::shared_ptr<DeserializePacket> popPacket()
 	{
 		std::lock_guard<std::mutex> lock(SHARED_QUEUE_MUTEX);
 		auto buff_packet = queue_.front();
 		queue_.pop();
-		std::cerr <<"Thread::" <<std::this_thread::get_id() << "packet :" << (int)buff_packet->header.packet_type << " type, size " << buff_packet->header.data_size << " pop." << std::endl;
+		std::cerr <<"Thread::" <<std::this_thread::get_id() << " packet :" << (int)buff_packet->type << " type, size " << (int)buff_packet->type << " pop." << std::endl;
 		return buff_packet;
 	}
 
 
 private:
-	std::queue<std::shared_ptr<Packet>> queue_;
-	std::shared_ptr<Packet> pushed_packet_;
+	std::queue<std::shared_ptr<DeserializePacket>> queue_;
+	std::shared_ptr<DeserializePacket> pushed_packet_;
 };

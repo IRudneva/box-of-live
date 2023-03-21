@@ -3,7 +3,6 @@
 #include "hv/htime.h"
 #include <memory>
 
-
 class Client
 {
 public:
@@ -28,27 +27,24 @@ public:
 			};
 
 
-			client_.onMessage = [](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
-				//uint8_t* it = (uint8_t*)buf->data();
-				//size_t sizeLeft = buf->size();
-				//do {
-				//	sizeLeft = reader.readData(&it, sizeLeft);
-				//	if (reader.isAllDataComplete()) {
-				//		// reader->getPacket(); // для дальнейшей обработки
-				//		reader.reset();
-				//	}
-				//} while (sizeLeft > 0);
+			NetworkPacketReader reader;
 
+			client_.onMessage = [&reader, this](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
+				uint8_t* it = (uint8_t*)buf->data();
+				size_t sizeLeft = buf->size();
+				do {
+					sizeLeft = reader.readNetworkPacket(&it, sizeLeft);
 
-			/*	auto p = msgpack::unpack<Packet>((uint8_t*)buf->data(), buf->size());
-				if (!p.room_list.empty()) {
-					for (const auto&[id, room] : p.room_list)
-					{
-						std::cout << "room " << id << " state " << room.field_state << std::endl;;
+					if (reader.isAllDataComplete()) {
+						PacketType type_packet = reader.getNetworkPacketHeader().value().packet_type;
+						auto packet = reader.getDeserializePacket(); // для дальнейшей обработки
+					
+						std::cout << (int)packet->type << " type packed received." << std::endl;
+						ui_manager_->handlePacket(packet, channel);
 					}
-				}*/
-			};
+				} while (sizeLeft > 0);
 
+			};
 
 			client_.start();
 
@@ -56,7 +52,6 @@ public:
 				ui_manager_->initGameUI(channel_);
 
 			while (true) {
-
 				if (client_.isConnected()) break;
 				client_.startReconnect();
 			}

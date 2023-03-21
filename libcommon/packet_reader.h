@@ -1,61 +1,45 @@
-
 #pragma once
 #include <optional>
-
 #include "domain.h"
+#include "packet_domain.h"
+#include "pch.h"
 
-enum class PacketType : uint32_t
-{
-	PT_MSG_CREATE_ROOM,
-	PT_MSG_GET_ROOM_LIST,
-	PT_ROOM_LIST
-};
-
-struct PacketHeader
-{
-	PacketType  packet_type;
-	uint32_t data_size;
-};
-
-struct Packet
-{
-	PacketHeader header;
-	std::vector<uint8_t> data;
-
-	template<class T>
-		void pack(T& packer) {
-			packer(data);
-		}
-};
-
-class PacketReader
+class NetworkPacketReader
 {
 public:
-	size_t readData(uint8_t** data, size_t size);
+	size_t readNetworkPacket(uint8_t** data, size_t size);
 
-	Packet getPacket();
+	std::shared_ptr<DeserializePacket> getDeserializePacket();
 
-	bool isAllDataComplete();
+	bool isAllDataComplete() const;
+
+	std::optional<PacketHeader> getNetworkPacketHeader() const { return header_; }
+
+private:
+	std::optional<PacketHeader> header_;
+	std::vector<uint8_t> header_raw_data_;
+	std::vector<uint8_t> raw_data_;
 
 	void reset();
-
-
-	std::optional<PacketHeader> header;
-
-	std::vector<uint8_t> header_raw_data;
-	std::vector<uint8_t> raw_data;
 };
 
-
-class PacketWriter
+class DeserializePacketWriter
 {
 public:
-	void writePacket(std::shared_ptr<Packet> packet);
+	template <typename T>
+	void writeDeserializePacket(T deserialize_pac)
+	{
+		if (deserialize_pac == nullptr) return;
 
-	std::vector<uint8_t> getData();
+		des_packet_->header.packet_type = deserialize_pac->type;
+		des_packet_->data = msgpack::pack(*(deserialize_pac));
+		des_packet_->header.data_size = des_packet_->data.size();
+	}
 
-	void reset();
+	std::shared_ptr<NetworkPacket> getSerializePacket();
 
-	std::shared_ptr<Packet> packet_;
+private:
+	std::shared_ptr<NetworkPacket> des_packet_ = nullptr;
+
+	void reset() { des_packet_ = nullptr; }
 };
-

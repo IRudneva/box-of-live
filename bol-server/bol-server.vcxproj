@@ -96,11 +96,12 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\irina.rudneva\repos\box-of-live\libcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\irina.rudneva\repos\box-of-live\x64\Debug;C:\Users\irina.rudneva\repos\box-of-live\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\irina.rudneva\repos\box-of-live\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -163,8 +164,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bol-server.cpp" />
+    <ClCompile Include="srv_manager.cpp" />
+    <ClCompile Include="srv_shared_packet_queue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="srv_shared_packet_queue.h" />
     <ClInclude Include="srv_manager.h" />
   </ItemGroup>
   <ItemGroup>

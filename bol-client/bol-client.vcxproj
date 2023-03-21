@@ -96,11 +96,12 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>C:\Users\irina.rudneva\repos\box-of-live\libcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>C:\Users\irina.rudneva\repos\box-of-live\x64\Debug;C:\Users\irina.rudneva\repos\box-of-live\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\Users\irina.rudneva\repos\box-of-live\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -164,13 +165,13 @@
   <ItemGroup>
     <ClCompile Include="bol-client.cpp" />
     <ClCompile Include="config_helper.cpp" />
-    <ClCompile Include="shared_packet_queue.cpp" />
+    <ClCompile Include="cli_shared_packet_queue.cpp" />
     <ClCompile Include="ui_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cli_manager.h" />
     <ClInclude Include="config_helper.h" />
-    <ClInclude Include="shared_packet_queue.h" />
+    <ClInclude Include="cli_shared_packet_queue.h" />
     <ClInclude Include="ui_scene.h" />
     <ClInclude Include="gui_config.h" />
   </ItemGroup>

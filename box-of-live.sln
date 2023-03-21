@@ -4,6 +4,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 15.0.28307.2017
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "box-of-live", "box-of-live\box-of-live.vcxproj", "{F96D6FEE-C53D-476B-B7C9-A8AF90E6A5F1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8354ED27-CB92-4E0E-8CBF-68D328DD6A01} = {8354ED27-CB92-4E0E-8CBF-68D328DD6A01}
+		{4B3F4D31-EA20-4047-A428-6B6E660AA652} = {4B3F4D31-EA20-4047-A428-6B6E660AA652}
+		{086651E9-BA91-49CF-8EED-ACDDD973E64A} = {086651E9-BA91-49CF-8EED-ACDDD973E64A}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bol-client", "bol-client\bol-client.vcxproj", "{8354ED27-CB92-4E0E-8CBF-68D328DD6A01}"
 	ProjectSection(ProjectDependencies) = postProject

@@ -10,8 +10,11 @@
 // Добавьте сюда заголовочные файлы для предварительной компиляции
 #include "framework.h"
 #include <unordered_map>
-#include <map>
-#include <string>
+//#include <numeric>
+//#include <cstdlib>
+//#include <cmath>
+//#include <map>
+//#include <string>
 #include "msgpack.hpp"
 
 #endif //PCH_H

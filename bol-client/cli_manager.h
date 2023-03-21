@@ -1,70 +1,8 @@
 #pragma once
-#include <mutex>
 #include <TGUI/TGUI.hpp>
 #include "ui_scene.h"
-#include "shared_packet_queue.h"
+#include "cli_shared_packet_queue.h"
 #include "hv/TcpClient.h"
-
-//enum class MsgType : uint32_t
-//{
-//	MSG_GET_ROOM_LIST
-//};
-//
-//struct Msg
-//{
-//	MsgType type = MsgType::MSG_GET_ROOM_LIST;
-//
-//	template<class T>
-//	void pack(T& packer) {
-//		packer(static_cast<uint32_t>(type));
-//	}
-//
-//};
-//
-//struct IdRoom
-//{
-//	static int generateId() {
-//		++id;
-//		return id;
-//	}
-//	static void reset() { id = 0; }
-//private:
-//	IdRoom() = default;
-//	inline static int id = 0;
-//};
-//
-//struct GameRoom
-//{
-//	GameRoom() { id_room = IdRoom::generateId(); }
-//	int field_state = 1;
-//	int getIdRoom() const { return id_room; }
-//	template<class T>
-//	void pack(T& packer) {
-//		packer(id_room, field_state);
-//	}
-//
-//private:
-//	int id_room = 0;
-//};
-//
-//
-//enum class PacketType : uint32_t
-//{
-//	PT_ROOM_LIST
-//};
-//
-//struct Packet
-//{
-//	PacketType type;
-//	std::map<int, GameRoom> room_list;
-//
-//	template<class T>
-//	void pack(T& packer) {
-//		auto t = static_cast<uint32_t>(type);
-//		packer(t, room_list);
-//	}
-//
-//};
 
 class ClientManager
 {
@@ -84,6 +22,7 @@ public:
 
 				if (event.type == sf::Event::Closed)
 					window.close();
+
 				if (event.type == sf::Event::MouseButtonPressed)
 				{
 					if (graphic_scene_->isPressedCreateRoomButton()) 
@@ -105,37 +44,84 @@ public:
 
 	void handleUIEvent(UIEventType event, const hv::SocketChannelPtr& channel) const
 	{
-		PacketWriter writer;
-		std::shared_ptr<Packet> packet = std::make_shared<Packet>();
+		DeserializePacketWriter writer;
 		switch (event)
 		{
 		case UIEventType::PRESSED_BUTTON_CREATE_ROOM:
 		{
 			std::cout << "press BCreateR" << std::endl;
-			packet = std::make_shared<Packet>();
-			packet->header = { PacketType::PT_MSG_CREATE_ROOM, 0 };
-			packet->data = {};
-			packet_queue_->pushPacket(packet);
-			packet_queue_->handlePushedPacket();
-			auto p1 = packet_queue_->popPacket();
-			//	writer.writePacket(packet_queue_->popPacket());
-			channel->write(&p1, sizeof(p1->header)/*writer.getData().data(), writer.getData().size()*/);
+			std::shared_ptr<PTCreateRoom> pt_create_room = std::make_shared<PTCreateRoom>("room ololo");
+			writer.writeDeserializePacket(pt_create_room);
+			auto net_pac = writer.getSerializePacket();
+			channel->write((uint8_t*)&net_pac->header, (int)sizeof(net_pac->header));
+			channel->write((uint8_t*)&net_pac->data, (int)net_pac->data.size());
 			break;
 		}
 		case UIEventType::PRESSED_BUTTON_CHOOSE_ROOM:
 		{
-			std::cout << "press BChooseR" << std::endl;
-			packet = std::make_shared<Packet>();
-			packet->header = { PacketType::PT_MSG_GET_ROOM_LIST, 0 };
-			packet->data = {};
+			/*std::cout << "press BChooseR" << std::endl;
+				
+			packet->header = { PacketType::PT_MSG_GET_ROOM_LIST, sizeof(packet->data.data()) };
 			packet_queue_->pushPacket(packet);
 			packet_queue_->handlePushedPacket();
-			auto p2 = packet_queue_->popPacket();
-			channel->write(&p2, sizeof(p2->header));
+			auto test = *packet_queue_->popPacket();
+			channel->write((uint8_t*)&test.header, (int)sizeof(test.header));
+			channel->write((uint8_t*)&test.data, (int)sizeof(test.data.data()));*/
 			break;
 		}
 		case UIEventType::NO_EVENT: break;
 		default: ;
+		}
+	}
+
+	void handlePacket(std::shared_ptr<DeserializePacket> packet, const hv::SocketChannelPtr& channel) const
+	{
+		std::shared_ptr<DeserializePacket> cur_packet = nullptr;
+
+		packet_queue_->pushPacket(packet);
+		packet_queue_->handlePushedPacket();
+		cur_packet = packet_queue_->popPacket();
+	
+		switch (cur_packet->type)
+		{
+		case PacketType::PT_CREATE_ROOM:
+		{
+			DeserializePacket& c = *cur_packet;
+			auto p_p = dynamic_cast<PTCreateRoom&>(c);
+			std::cout << "i received PTCreateRoom" << std::endl;
+
+			break;
+		}
+		case PacketType::PT_CLOSE_ROOM:
+		{
+			DeserializePacket& c = *cur_packet;
+			auto p_p = dynamic_cast<PTCloseRoom&>(c);
+			std::cout << "i received PTCloseRoom" << std::endl;
+		
+			break;
+		}
+		case PacketType::PT_GET_ROOM_LIST:
+		{
+			DeserializePacket& c = *cur_packet;
+			auto p_p = dynamic_cast<PTGetRoomList&>(c);
+			std::cout << "i received PTGetRoomList" << std::endl;
+	
+			break;
+		}
+		case PacketType::PT_ROOM_LIST:
+		{
+			DeserializePacket& c = *cur_packet;
+			auto p_p = dynamic_cast<PTRoomList&>(c);
+			std::cout << "i received PTRoomList" << std::endl;
+			for (auto r : p_p.room_list)
+			{
+				std::cout << "Room id: " << r.getId() << " room name: " << r.name << std::endl;
+			}
+			//////////////////////////////////////////////////////
+			break;
+		}
+		default:
+			break;
 		}
 	}
 

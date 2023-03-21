@@ -1,8 +1,6 @@
-﻿#include "srv_manager.h"
-#include "hv/TcpServer.h"
-#include <memory>
-#include <iostream>
-#include "packet_reader.h"
+﻿#include "hv/TcpServer.h"
+#include "srv_manager.h"
+
 class Server
 {
 public:
@@ -22,30 +20,20 @@ public:
 				}
 			};
 
-			PacketReader reader;
+			NetworkPacketReader reader;
 
 			server_.onMessage = [&reader, this](const hv::SocketChannelPtr& channel, hv::Buffer* buf) {
 				uint8_t* it = (uint8_t*)buf->data();
 				size_t sizeLeft = buf->size();
 				do {
-					sizeLeft = reader.readData(&it, sizeLeft);
-					//if(sizeLeft == 0)
-					//{
-					//	auto pac = reader.getPacket(); // для дальнейшей обработки
-					//	std::cout << (int)pac.header.packet_type << " type packed received." << std::endl;
-					//}
+					sizeLeft = reader.readNetworkPacket(&it, sizeLeft);
 					if (reader.isAllDataComplete()) {
-						 auto pac = reader.getPacket(); // для дальнейшей обработки
-						 std::cout << (int)pac.header.packet_type << " type packed received." << std::endl;
-						reader.reset();
+						auto packet = reader.getDeserializePacket(); // для дальнейшей обработки
+						std::cout << (int)packet->type << " type packed received." << std::endl;
+						srv_manager_->handlePacket(packet, channel);
 					}
 				} while (sizeLeft > 0);
-				/*Msg m = msgpack::unpack<Msg>((uint8_t*)buf->data(), buf->size());
-				srv_manager_->handleMsg(m);
-				Packet p = { PacketType::PT_ROOM_LIST, srv_manager_->getRoomList() };
-				auto data = msgpack::pack(p);
-				channel->write(data.data(), data.size());*/
-
+			
 			};
 
 
@@ -69,8 +57,6 @@ public:
 					server_.broadcast(str.data(), str.size());
 				}
 			}
-
-			//gui_manager_->startLoop(); // это должно происходить после подключения - сейчас нужно, чтобы смотреть результат
 		}
 	}
 
@@ -85,7 +71,7 @@ public:
 
 private:
 	hv::TcpServer server_;
-//	std::shared_ptr<SrvManager> srv_manager_ = std::make_shared<SrvManager>();
+	std::unique_ptr<SrvManager> srv_manager_ = std::make_unique<SrvManager>();
 
 };
 

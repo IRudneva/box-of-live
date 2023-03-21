@@ -1,9 +1,5 @@
-﻿//#include "client.h"
-//
-//int main()
-//{
-//	Client client;
-//	client.run();
-//
-//	return 0;
-//}
+﻿
+int main()
+{
+	return 0;
+}
