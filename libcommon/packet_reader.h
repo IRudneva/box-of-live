@@ -8,7 +8,7 @@ class NetworkPacketReader
 public:
 	size_t readNetworkPacket(uint8_t** data, size_t size);
 
-	std::shared_ptr<DeserializePacket> getDeserializePacket();
+	DeserializePacketWithIdChannel getDeserializePacket();
 
 	bool isAllDataComplete() const;
 
@@ -18,7 +18,6 @@ private:
 	std::optional<PacketHeader> header_;
 	std::vector<uint8_t> header_raw_data_;
 	std::vector<uint8_t> raw_data_;
-
 	void reset();
 };
 

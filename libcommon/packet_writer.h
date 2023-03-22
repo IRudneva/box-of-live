@@ -1,4 +1,5 @@
 #pragma once
+#include "msgpack.hpp"
 #include <memory>
 
 #include "packet_domain.h"
@@ -6,67 +7,51 @@
 class DeserializePacketWriter
 {
 public:
-	template <typename T>
-	void writeDeserializePacket(T deserialize_pac);
+//	template <typename PacketType>
+	static SerializedPacketWithIdChannel getSerializePacket(const DeserializePacketWithIdChannel& deserialize_pac)
+	{
+		DeserializePacket& des_p = *deserialize_pac.packet;
+		SerializedPacketWithIdChannel result;
+		result.id_channel = deserialize_pac.id_channel;
+		result.packet->header.packet_type = deserialize_pac.packet->type;
+		switch (deserialize_pac.packet->type)
+		{
+		case PacketType::PT_CREATE_ROOM:
+		{
+			auto cr = dynamic_cast<PTCreateRoom&>(des_p);
+			result.packet->data = msgpack::pack(cr);
+			result.packet->header.data_size = result.packet->data.size();
 
-	std::shared_ptr<NetworkPacket> getSerializePacket();
+			return result;
+		}
+		case PacketType::PT_CLOSE_ROOM:
+		{
+			auto clr = dynamic_cast<PTCloseRoom&>(des_p);
+			result.packet->data = msgpack::pack(clr);
+			result.packet->header.data_size = result.packet->data.size();
 
+			return result;
+		}
+		case PacketType::PT_GET_ROOM_LIST:
+		{
+			auto grl = dynamic_cast<PTGetRoomList&>(des_p);
+			result.packet->data = msgpack::pack(grl);
+			result.packet->header.data_size = result.packet->data.size();
 
-private:
-	std::shared_ptr<NetworkPacket> des_packet_ = std::make_shared<NetworkPacket>();
+			return result;
+		}
+		case PacketType::PT_ROOM_LIST:
+		{
+			auto rl = dynamic_cast<PTRoomList&>(des_p);
+			result.packet->data = msgpack::pack(rl);
+			result.packet->header.data_size = result.packet->data.size();
 
-	void reset() { des_packet_ = nullptr; }
-
-	std::vector<uint8_t> packPacket(PTCloseRoom p) const;
-
-	std::vector<uint8_t> packPacket(PTCreateRoom p) const;
-
-	std::vector<uint8_t> packPacket(PTGetRoomList p) const;
-
-	std::vector<uint8_t> packPacket(PTRoomList p) const;
+			return result;
+		}
+		default:
+		{
+			break;
+		}
+		}
+	}
 };
-
-template <typename T>
-void DeserializePacketWriter::writeDeserializePacket(T deserialize_pac)
-{
-	if (deserialize_pac == nullptr) return;
-
-	des_packet_->header.packet_type = deserialize_pac->type;
-	DeserializePacket& c = *deserialize_pac;
-	switch (des_packet_->header.packet_type)
-	{
-	case PacketType::PT_CREATE_ROOM:
-	{
-		auto p_p = dynamic_cast<PTCreateRoom&>(c);
-		des_packet_->data = packPacket(p_p);
-		des_packet_->header.data_size = des_packet_->data.size();
-		break;
-
-	}
-	case PacketType::PT_CLOSE_ROOM:
-	{
-		auto p_p = dynamic_cast<PTCloseRoom&>(c);
-		des_packet_->data = packPacket(p_p);
-		des_packet_->header.data_size = des_packet_->data.size();
-		break;
-	}
-	case PacketType::PT_GET_ROOM_LIST:
-	{
-		auto p_p = dynamic_cast<PTGetRoomList&>(c);
-		des_packet_->data = packPacket(p_p);
-		des_packet_->header.data_size = des_packet_->data.size();
-		break;
-	}
-	case PacketType::PT_ROOM_LIST:
-	{
-		auto p_p = dynamic_cast<PTRoomList&>(c);
-		des_packet_->data = packPacket(p_p);
-		des_packet_->header.data_size = des_packet_->data.size();
-		break;
-	}
-	default:
-	{
-		break;
-	}
-	}
-}

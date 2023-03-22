@@ -1,17 +1,14 @@
 #pragma once
 #include "packet_reader.h"
 #include "srv_manager.h"
-#include <hv/TcpServer.h>
+#include "srv_shared_packet_queue.h"
 
-class Server
+class LogicServer
 {
 public:
-	void run();
-
-	bool initSocket(int port);
+	void run(std::shared_ptr<SharedPacketQueue<DeserializePacketWithIdChannel>> queue);
 
 private:
-	hv::TcpServer server_;
 	std::unique_ptr<SrvManager> srv_manager_ = std::make_unique<SrvManager>();
 
 };

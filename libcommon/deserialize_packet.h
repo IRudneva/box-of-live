@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <memory>
 
 enum class PacketType : uint32_t
 {
@@ -34,3 +35,16 @@ struct NetworkPacket
 		packer(data);
 	}
 };
+
+struct SerializedPacketWithIdChannel
+{
+	std::shared_ptr<NetworkPacket> packet = nullptr;
+	uint32_t id_channel;
+};
+
+struct DeserializePacketWithIdChannel
+{
+	std::shared_ptr<DeserializePacket> packet = nullptr;
+	uint32_t id_channel;
+};
+
