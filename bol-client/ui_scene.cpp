@@ -1,4 +1,5 @@
-﻿#include "ui_scene.h"
+﻿#include "pch_client.h"
+#include "ui_scene.h"
 #include <memory>
 #include <game_domain.h>
 

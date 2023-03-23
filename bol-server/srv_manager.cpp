@@ -3,12 +3,9 @@
 #include "packet_writer.h"  
 #include "network_server.h"
 
-  
-
 #include <iostream>
-//////////////////////////////////////
 
-void SrvManager::handlePacket(const DeserializePacketWithIdChannel& packet/*, const hv::SocketChannelPtr& channel*/)
+void SrvManager::handlePacket(const DeserializePacketWithIdChannel& packet)
 {
 	DeserializePacketWriter writer;
 	DeserializePacket& pt_ds = *packet.packet;
@@ -17,8 +14,6 @@ void SrvManager::handlePacket(const DeserializePacketWithIdChannel& packet/*, co
 	{
 	case PacketType::PT_CREATE_ROOM:
 	{
-	//	auto s_packet = writer.getSerializePacket(packet);
-
 		auto pt_cr = dynamic_cast<PTCreateRoom&>(pt_ds);
 		std::cout << "i received PTCreateRoom" << std::endl;
 		int id_room = pt_cr.room.getId();
@@ -40,7 +35,7 @@ void SrvManager::handlePacket(const DeserializePacketWithIdChannel& packet/*, co
 		std::cout << "i received PTGetRoomList" << std::endl;
 		std::cout << "i form a room list..." << std::endl;
 
-		std::shared_ptr<PTRoomList> pt_room_list;
+		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
 		
 		for (const auto& [id, room] : room_list_)
 		{
@@ -54,10 +49,6 @@ void SrvManager::handlePacket(const DeserializePacketWithIdChannel& packet/*, co
 		auto s_packet = writer.getSerializePacket(ds_packet);
 
 		NetworkServer::sendPacket(s_packet);
-		/*	channel->write((uint8_t*)&net_pac->header, (int)sizeof(net_pac->header));
-			channel->write(net_pac->data.data(), (int)net_pac->data.size());
-	*/
-
 		break;
 	}
 	case PacketType::PT_ROOM_LIST:

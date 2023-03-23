@@ -1,21 +1,19 @@
 #pragma once
+#include "packet_reader.h"
 #include "cli_manager.h"
-#include "hv/TcpClient.h"
+#include "cli_shared_packet_queue.h"
 
-//#include "cli_manager.h"
-//#include "hv/TcpClient.h"
-//#include "hv/htime.h"
-//#include <memory>
 
-class Client
+class LogicClient
 {
 public:
-	void run();
-
-	bool initSocket(int port);
-
+	explicit LogicClient(uint32_t id_channel) : id_channel_(id_channel) {}
+	void run(std::shared_ptr<SharedPacketQueue<DeserializePacketWithIdChannel>> queue);
+	void runUILoop()
+	{
+		ui_manager_->initGameUI();
+	}
 private:
-	hv::TcpClient client_;
-	hv::SocketChannelPtr channel_ = nullptr;
-	std::unique_ptr<ClientManager> ui_manager_ = std::make_unique<ClientManager>();
+	uint32_t id_channel_;
+	std::unique_ptr<ClientManager> ui_manager_ = std::make_unique<ClientManager>(id_channel_);
 };

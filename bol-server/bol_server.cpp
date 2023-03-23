@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-void LogicServer::run(std::shared_ptr<SharedPacketQueue<DeserializePacketWithIdChannel>>queue)
+void LogicServer::run(std::shared_ptr<SharedPacketQueue<DeserializePacketWithIdChannel>> queue)
 {
-	while(queue->hasPacket())
+	if(queue->hasPacket())
 	{
 		srv_manager_->handlePacket(queue->popPacket());
 	}

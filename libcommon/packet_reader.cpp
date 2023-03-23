@@ -44,8 +44,8 @@ size_t NetworkPacketReader::readNetworkPacket(uint8_t** data, size_t size)
 	return size;
 }
 
-DeserializePacketWithIdChannel NetworkPacketReader::getDeserializePacket() {
-	DeserializePacketWithIdChannel result;
+std::shared_ptr<DeserializePacketWithIdChannel> NetworkPacketReader::getDeserializePacket() {
+	std::shared_ptr<DeserializePacketWithIdChannel> result = std::make_shared<DeserializePacketWithIdChannel>();
 
 	switch (header_.value().packet_type)
 	{
@@ -55,35 +55,35 @@ DeserializePacketWithIdChannel NetworkPacketReader::getDeserializePacket() {
 		auto packet = msgpack::unpack<PTCreateRoom>(raw_data_);
 		*pt_create_room = packet;
 
-		result.packet = std::static_pointer_cast<DeserializePacket>(pt_create_room);
+		result->packet = std::static_pointer_cast<DeserializePacket>(pt_create_room);
 		reset();
 		return result;
 	}
 	case PacketType::PT_CLOSE_ROOM:
 	{
-	/*	std::shared_ptr<PTCloseRoom> pt_close_room = std::make_shared<PTCloseRoom>();
+		std::shared_ptr<PTCloseRoom> pt_close_room = std::make_shared<PTCloseRoom>();
 		auto packet = msgpack::unpack<PTCloseRoom>(raw_data_);
 		*pt_close_room = packet;
-		result = std::static_pointer_cast<DeserializePacket>(pt_close_room);
-		reset();*/
+		result->packet = std::static_pointer_cast<DeserializePacket>(pt_close_room);
+		reset();
 		return result;
 	}
 	case PacketType::PT_GET_ROOM_LIST:
 	{
-		/*std::shared_ptr<PTGetRoomList> pt_get_room = std::make_shared<PTGetRoomList>();
+		std::shared_ptr<PTGetRoomList> pt_get_room = std::make_shared<PTGetRoomList>();
 		auto packet = msgpack::unpack<PTGetRoomList>(raw_data_);
 		*pt_get_room = packet;
-		result = std::static_pointer_cast<DeserializePacket>(pt_get_room);
-		reset();*/
+		result->packet = std::static_pointer_cast<DeserializePacket>(pt_get_room);
+		reset();
 		return result;
 	}
 	case PacketType::PT_ROOM_LIST:
 	{
-		/*std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
+		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
 		auto packet = msgpack::unpack<PTRoomList>(raw_data_);
 		*pt_room_list = packet;
-		result = std::static_pointer_cast<DeserializePacket>(pt_room_list);
-		reset();*/
+		result->packet = std::static_pointer_cast<DeserializePacket>(pt_room_list);
+		reset();
 		return result;
 	}
 	default:

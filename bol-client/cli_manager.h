@@ -1,19 +1,23 @@
 #pragma once
-#include "ui_scene.h"
-#include "cli_shared_packet_queue.h"
-#include "hv/TcpClient.h"
+
+enum class UIEventType :uint32_t;
+class GraphicScene;
+
+struct DeserializePacketWithIdChannel;
 
 class ClientManager
 {
 public:
-	void initGameUI(const hv::SocketChannelPtr& channel);
+	ClientManager(uint32_t id_channel) : id_channel_(id_channel){}
 
-	void handleUIEvent(UIEventType event, const hv::SocketChannelPtr& channel) const;
+	void initGameUI();
 
-	void handlePacket(std::shared_ptr<DeserializePacket> packet, const hv::SocketChannelPtr& channel) const;
+	void handleUIEvent(UIEventType event) const;
+
+	void handlePacket(const DeserializePacketWithIdChannel& packet) const;
 private:
 	std::shared_ptr<GraphicScene> graphic_scene_;
-	std::shared_ptr<SharedPacketQueue> packet_queue_ = std::make_shared<SharedPacketQueue>();;
+	uint32_t id_channel_ = 0;
 	
 	sf::RenderWindow createWindow() const;
 };

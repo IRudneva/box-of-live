@@ -1,3 +1,4 @@
+#include "pch_client.h"
 #include "config_helper.h"
 
 void ConfigHelper::init(GameConfig& config)

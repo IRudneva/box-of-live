@@ -1,21 +1,34 @@
 #pragma once
 #include <mutex>
 #include <queue>
-#include <memory>
-//#include "deserialize_packet.h"
 
-struct DeserializePacket;
-
+template <typename PacketType>
 class SharedPacketQueue
 {
 public:
-	void pushPacket(std::shared_ptr<DeserializePacket> packet);
+	void pushPacket(PacketType packet)
+	{
+		std::lock_guard<std::mutex> lock(m);
+		queue_.push(packet);
+	}
 
-	bool hasPacket() const;
+	bool hasPacket() const
+	{
+		if (queue_.empty())
+			return false;
 
-	std::shared_ptr<DeserializePacket> popPacket();
+		return true;
+	}
+
+	PacketType popPacket()
+	{
+		std::lock_guard<std::mutex> lock(m);
+		auto buff_packet = queue_.front();
+		queue_.pop();
+		return buff_packet;
+	}
 
 private:
 	std::mutex m;
-	std::queue<std::shared_ptr<DeserializePacket>> queue_;
+	std::queue<PacketType> queue_;
 };

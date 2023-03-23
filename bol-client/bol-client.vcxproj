@@ -87,8 +87,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
@@ -97,6 +96,7 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\libcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
+      <PrecompiledHeaderFile>pch_client.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -141,8 +141,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>
-      </PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -152,6 +151,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)\..\libcommon;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PrecompiledHeaderFile>pch_client.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -168,13 +168,21 @@
     <ClCompile Include="config_helper.cpp" />
     <ClCompile Include="cli_shared_packet_queue.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="network_client.cpp" />
+    <ClCompile Include="pch_client.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="ui_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bol-client.h" />
+    <ClInclude Include="bol_socket_channel.h" />
     <ClInclude Include="cli_manager.h" />
     <ClInclude Include="config_helper.h" />
     <ClInclude Include="cli_shared_packet_queue.h" />
+    <ClInclude Include="network_client.h" />
+    <ClInclude Include="pch_client.h" />
     <ClInclude Include="ui_event.h" />
     <ClInclude Include="ui_scene.h" />
     <ClInclude Include="gui_config.h" />

@@ -1,15 +1,17 @@
+#include "pch_client.h"
 #include "cli_manager.h"
-#include <TGUI/TGUI.hpp>
-#include "packet_writer.h"
 #include "game_domain.h"
-#include <iostream>
+#include "network_client.h"
+#include "packet_writer.h"
+#include "ui_scene.h"
 
-void ClientManager::initGameUI(const hv::SocketChannelPtr& channel)
+
+void ClientManager::initGameUI()
 {
 	auto window = createWindow();
 	graphic_scene_ = std::make_shared<GraphicScene>(window);
 	graphic_scene_->init();
-	//uiLoop(window);
+
 	while (window.isOpen())
 	{
 		sf::Event event{};
@@ -24,11 +26,11 @@ void ClientManager::initGameUI(const hv::SocketChannelPtr& channel)
 			{
 				if (graphic_scene_->isPressedCreateRoomButton())
 				{
-					handleUIEvent(UIEventType::PRESSED_BUTTON_CREATE_ROOM, channel);
+					handleUIEvent(UIEventType::PRESSED_BUTTON_CREATE_ROOM);
 				}
 				if (graphic_scene_->isPressedChooseRoomButton())
 				{
-					handleUIEvent(UIEventType::PRESSED_BUTTON_CHOOSE_ROOM, channel);
+					handleUIEvent(UIEventType::PRESSED_BUTTON_CHOOSE_ROOM);
 				}
 			}
 		}
@@ -39,7 +41,7 @@ void ClientManager::initGameUI(const hv::SocketChannelPtr& channel)
 	}
 }
 
-void ClientManager::handleUIEvent(UIEventType event, const hv::SocketChannelPtr& channel) const
+void ClientManager::handleUIEvent(UIEventType event) const
 {
 	DeserializePacketWriter writer;
 	switch (event)
@@ -47,47 +49,53 @@ void ClientManager::handleUIEvent(UIEventType event, const hv::SocketChannelPtr&
 	case UIEventType::PRESSED_BUTTON_CREATE_ROOM:
 	{
 		std::cout << "press BCreateR" << std::endl;
+		DeserializePacketWithIdChannel ds_packet;
 		std::shared_ptr<PTCreateRoom> pt_create_room = std::make_shared<PTCreateRoom>("room ololo");
-		{/*
-			std::string test;
+		ds_packet.packet = std::static_pointer_cast<DeserializePacket>(pt_create_room);
+		ds_packet.id_channel = id_channel_;
+
+		auto s_packet = writer.getSerializePacket(ds_packet);
+
+		NetworkClient::sendPacket(s_packet);
+		{
+			/*std::string test;
 			char t = '*';
 			for (auto i = 0; i < 1000000; i++)
 			{
 				test.push_back(t);
 			}
 			std::shared_ptr<PTCreateRoom> pt_create_room = std::make_shared<PTCreateRoom>(test);
-			writer.writeDeserializePacket(pt_create_room);
-			auto net_pac = writer.getSerializePacket();
-			channel->write((uint8_t*)&net_pac->header, (int)sizeof(net_pac->header));
-			channel->write(net_pac->data.data(), (int)net_pac->data.size());*/
+			ds_packet.packet = std::static_pointer_cast<DeserializePacket>(pt_create_room);
+			ds_packet.id_channel = id_channel_;
+
+			auto s_packet = writer.getSerializePacket(ds_packet);
+
+			NetworkClient::sendPacket(s_packet);*/
 		}
-		writer.writeDeserializePacket(pt_create_room);
-		auto net_pac = writer.getSerializePacket();
-		channel->write((uint8_t*)&net_pac->header, (int)sizeof(net_pac->header));
-		channel->write(net_pac->data.data(), (int)net_pac->data.size());
+	
 		break;
 	}
 	case UIEventType::PRESSED_BUTTON_CHOOSE_ROOM:
 	{
 		std::cout << "press BChooseR" << std::endl;
+		DeserializePacketWithIdChannel ds_packet;
 		std::shared_ptr<PTGetRoomList> pt_ger_room_list = std::make_shared<PTGetRoomList>();
-		writer.writeDeserializePacket(pt_ger_room_list);
-		auto net_pac = writer.getSerializePacket();
-		channel->write((uint8_t*)&net_pac->header, (int)sizeof(net_pac->header));
-		channel->write(net_pac->data.data(), (int)net_pac->data.size());
+		ds_packet.packet = std::static_pointer_cast<DeserializePacket>(pt_ger_room_list);
+		ds_packet.id_channel = id_channel_;
+		auto s_packet = writer.getSerializePacket(ds_packet);
+		NetworkClient::sendPacket(s_packet);
 		break;
 	}
-	case UIEventType::NO_EVENT: break;
-	default:;
+	case UIEventType::NO_EVENT: 
+		break;
+	default:
+		break;
 	}
 }
 
-void ClientManager::handlePacket(std::shared_ptr<DeserializePacket> packet, const hv::SocketChannelPtr& channel) const
+void ClientManager::handlePacket(const DeserializePacketWithIdChannel& packet) const
 {
-	std::shared_ptr<DeserializePacket> cur_packet = nullptr;
-
-	packet_queue_->pushPacket(packet);
-	cur_packet = packet_queue_->popPacket();
+	std::shared_ptr<DeserializePacket> cur_packet = packet.packet;
 
 	switch (cur_packet->type)
 	{

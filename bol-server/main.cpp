@@ -2,30 +2,32 @@
 #include "bol_server.h"
 #include "srv_shared_packet_queue.h"
 #include "network_server.h"
+#include <future>
 
+//void NetworkLoop(NetworkServer& n_server)
+//{
+//	std::cout << "NetworkLoop thread:: " << std::this_thread::get_id() << std::endl;
+//	n_server.run();
+//}
+
+void LogicLoop(const NetworkServer& n_server, LogicServer& l_server, std::shared_ptr<SharedPacketQueue<DeserializePacketWithIdChannel>> queue)
+{
+	std::cout << "LogicLoop thread:: " << std::this_thread::get_id() << std::endl;
+	while(true)
+	{
+		l_server.run(queue);
+	}
+}
 
 int main()
 {
 	std::shared_ptr<SharedPacketQueue<DeserializePacketWithIdChannel>> shared_packet_queue = std::make_shared<SharedPacketQueue<DeserializePacketWithIdChannel>>();
-	NetworkServer networck_server(shared_packet_queue);
+	NetworkServer network_server(shared_packet_queue);
+	network_server.run();
+	//std::future<void> f1 = std::async(std::launch::async, [&network_server] {return NetworkLoop(network_server); });
 	LogicServer server;
-	server.run(shared_packet_queue);
-		/*std::string str;
-		while (std::getline(std::cin, str)) {
-			if (str == "close") {
-				server_.closesocket();
-			}
-			else if (str == "start") {
-				server_.start();
-			}
-			else if (str == "stop") {
-				server_.stop();
-				break;
-			}
-			else {
-				server_.broadcast(str.data(), str.size());
-			}
-		}*/
-	
+	std::future<void> f2 = std::async(std::launch::async, [&network_server, &server, &shared_packet_queue] {return LogicLoop(network_server, server, shared_packet_queue); });
+	//f1.get();
+	f2.get();
 	return 0;
 }
