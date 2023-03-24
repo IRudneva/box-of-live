@@ -24,9 +24,6 @@
     <ClCompile Include="ui_scene.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
-    <ClCompile Include="cli_shared_packet_queue.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="cli_manager.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -51,9 +48,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="ui_scene.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="cli_shared_packet_queue.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="bol-client.h">

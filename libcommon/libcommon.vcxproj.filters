@@ -13,42 +13,69 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="protocol">
+      <UniqueIdentifier>{a08ad3e6-1dca-434f-a317-daf18ceb3d7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="packet reader">
+      <UniqueIdentifier>{5dca3041-86fe-4b1b-91f5-c9053c4d8404}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="packet writer">
+      <UniqueIdentifier>{f22522f9-7822-4e4d-a7a5-befa30fbbb64}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{92076a02-e49b-4fbe-a2e6-5592f4da3f38}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="network_packet.h">
+      <Filter>protocol</Filter>
     </ClInclude>
-    <ClInclude Include="pch.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="packet.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="client_packet.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_type.h">
+      <Filter>protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="server_packet.h">
+      <Filter>protocol</Filter>
     </ClInclude>
     <ClInclude Include="packet_reader.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="packet_domain.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="deserialize_packet.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>packet reader</Filter>
     </ClInclude>
     <ClInclude Include="packet_writer.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>packet writer</Filter>
     </ClInclude>
-    <ClInclude Include="com_timer.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="pch.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="shared_packet_queue.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="packet_domain.h">
+      <Filter>protocol</Filter>
     </ClInclude>
     <ClInclude Include="game_domain.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="bol_timer.h">
+      <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="pch.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="packet_reader.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>packet reader</Filter>
     </ClCompile>
     <ClCompile Include="packet_writer.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>packet writer</Filter>
+    </ClCompile>
+    <ClCompile Include="pch.cpp">
+      <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

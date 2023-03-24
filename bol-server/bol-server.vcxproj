@@ -172,14 +172,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="srv_manager.cpp" />
-    <ClCompile Include="srv_shared_packet_queue.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bol_server.h" />
     <ClInclude Include="bol-socket-channel.h" />
     <ClInclude Include="network_server.h" />
     <ClInclude Include="pch_server.h" />
-    <ClInclude Include="srv_shared_packet_queue.h" />
     <ClInclude Include="srv_manager.h" />
   </ItemGroup>
   <ItemGroup>

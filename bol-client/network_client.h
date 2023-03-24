@@ -1,7 +1,7 @@
 #pragma once
 #include "bol_socket_channel.h"
 #include "deserialize_packet.h"
-#include "cli_shared_packet_queue.h"
+#include "shared_packet_queue.h"
 
 using BOLTcpClient = hv::TcpClientTmpl<BOLSocketChannel>;
 

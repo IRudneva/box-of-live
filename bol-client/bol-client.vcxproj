@@ -166,7 +166,6 @@
     <ClCompile Include="bol-client.cpp" />
     <ClCompile Include="cli_manager.cpp" />
     <ClCompile Include="config_helper.cpp" />
-    <ClCompile Include="cli_shared_packet_queue.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="network_client.cpp" />
     <ClCompile Include="pch_client.cpp">
@@ -180,7 +179,6 @@
     <ClInclude Include="bol_socket_channel.h" />
     <ClInclude Include="cli_manager.h" />
     <ClInclude Include="config_helper.h" />
-    <ClInclude Include="cli_shared_packet_queue.h" />
     <ClInclude Include="network_client.h" />
     <ClInclude Include="pch_client.h" />
     <ClInclude Include="ui_event.h" />

@@ -3,7 +3,7 @@
 
 #include "packet_reader.h"
 #include "srv_manager.h"
-#include "srv_shared_packet_queue.h"
+#include "shared_packet_queue.h"
 
 class LogicServer
 {

@@ -166,14 +166,19 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="com_timer.h" />
-    <ClInclude Include="deserialize_packet.h" />
+    <ClInclude Include="client_packet.h" />
+    <ClInclude Include="bol_timer.h" />
+    <ClInclude Include="network_packet.h" />
+    <ClInclude Include="packet.h" />
     <ClInclude Include="game_domain.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="packet_domain.h" />
     <ClInclude Include="packet_reader.h" />
+    <ClInclude Include="packet_type.h" />
     <ClInclude Include="packet_writer.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="server_packet.h" />
+    <ClInclude Include="shared_packet_queue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="packet_reader.cpp" />

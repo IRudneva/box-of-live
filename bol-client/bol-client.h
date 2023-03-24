@@ -1,7 +1,7 @@
 #pragma once
 #include "packet_reader.h"
 #include "cli_manager.h"
-#include "cli_shared_packet_queue.h"
+#include "shared_packet_queue.h"
 
 
 class LogicClient
