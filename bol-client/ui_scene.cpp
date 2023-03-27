@@ -5,6 +5,7 @@
 
 void GraphicScene::init()
 {
+
 	auto fields = tgui::Group::create();
 	auto welcome_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(fields), tgui::bindTop(fields) }, HEIGHT_WINDOW });
 	fields->add(welcome_layout);
