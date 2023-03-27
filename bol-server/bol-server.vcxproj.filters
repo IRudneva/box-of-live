@@ -13,39 +13,45 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{00420d7f-a88d-42b8-834f-2884c76c8cbe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logic">
+      <UniqueIdentifier>{7ed090a7-1642-4bf5-aa80-f351ee9cfeb2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="srv_manager.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="network_server.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="bol_server.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="pch_server.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
+    <ClCompile Include="network_server.cpp">
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="logic_server.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
+    <ClCompile Include="srv_manager.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="srv_manager.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="bol-socket-channel.h">
+    <ClInclude Include="pch_server.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="network_server.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="bol_server.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="bol-socket-channel.h">
+      <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="pch_server.h">
-      <Filter>Файлы заголовков</Filter>
+    <ClInclude Include="srv_manager.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="logic_server.h">
+      <Filter>logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

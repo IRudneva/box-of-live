@@ -163,7 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="bol-client.cpp" />
+    <ClCompile Include="logic_client.cpp" />
     <ClCompile Include="cli_manager.cpp" />
     <ClCompile Include="config_helper.cpp" />
     <ClCompile Include="main.cpp" />
@@ -175,7 +175,7 @@
     <ClCompile Include="ui_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bol-client.h" />
+    <ClInclude Include="ligic_client.h" />
     <ClInclude Include="bol_socket_channel.h" />
     <ClInclude Include="cli_manager.h" />
     <ClInclude Include="config_helper.h" />

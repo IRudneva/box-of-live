@@ -2,14 +2,14 @@
 #include <map>
 
 struct Room;
-struct DeserializePacketWithIdChannel;
+struct PacketWithIdChannel;
 
 class SrvManager
 {
 public:
 	const std::map<int, Room>& getRoomList() const { return room_list_; }
 
-	void handlePacket(const DeserializePacketWithIdChannel& packet);
+	void handlePacket(const PacketWithIdChannel& packet);
 private:
 	std::map<int, Room> room_list_;
 };

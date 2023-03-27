@@ -22,9 +22,6 @@
     <Filter Include="helpers">
       <UniqueIdentifier>{fbb4fe58-4567-41aa-b47a-d7911e65e913}</UniqueIdentifier>
     </Filter>
-    <Filter Include="client">
-      <UniqueIdentifier>{8c2290c1-eed3-4c8f-b0b8-5cd609f66039}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="bacterium.cpp">
@@ -56,12 +53,6 @@
     </ClCompile>
     <ClCompile Include="gui_field_state.cpp">
       <Filter>gui</Filter>
-    </ClCompile>
-    <ClCompile Include="client.cpp">
-      <Filter>client</Filter>
-    </ClCompile>
-    <ClCompile Include="gui_client_manager.cpp">
-      <Filter>client</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -97,12 +88,6 @@
     </ClInclude>
     <ClInclude Include="gui_field_state.h">
       <Filter>gui</Filter>
-    </ClInclude>
-    <ClInclude Include="client.h">
-      <Filter>client</Filter>
-    </ClInclude>
-    <ClInclude Include="gui_client_manager.h">
-      <Filter>client</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

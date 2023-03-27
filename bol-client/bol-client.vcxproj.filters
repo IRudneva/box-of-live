@@ -13,20 +13,17 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="network">
+      <UniqueIdentifier>{37a3f93c-ef5a-4900-a865-1d18f7c7ed61}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="logic">
+      <UniqueIdentifier>{dab4d657-f6cf-4c18-92d0-650913fd80ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="UI scene">
+      <UniqueIdentifier>{73e851b8-cb8a-438a-996c-644384cddbf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="bol-client.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="config_helper.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="ui_scene.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
-    <ClCompile Include="cli_manager.cpp">
-      <Filter>Исходные файлы</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>Исходные файлы</Filter>
     </ClCompile>
@@ -34,36 +31,48 @@
       <Filter>Исходные файлы</Filter>
     </ClCompile>
     <ClCompile Include="network_client.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>network</Filter>
+    </ClCompile>
+    <ClCompile Include="logic_client.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
+    <ClCompile Include="cli_manager.cpp">
+      <Filter>logic</Filter>
+    </ClCompile>
+    <ClCompile Include="ui_scene.cpp">
+      <Filter>UI scene</Filter>
+    </ClCompile>
+    <ClCompile Include="config_helper.cpp">
+      <Filter>UI scene</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cli_manager.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="config_helper.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="gui_config.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_scene.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="bol-client.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_event.h">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="pch_client.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="network_client.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>network</Filter>
     </ClInclude>
     <ClInclude Include="bol_socket_channel.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="ligic_client.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_event.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="cli_manager.h">
+      <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="ui_scene.h">
+      <Filter>UI scene</Filter>
+    </ClInclude>
+    <ClInclude Include="gui_config.h">
+      <Filter>UI scene</Filter>
+    </ClInclude>
+    <ClInclude Include="config_helper.h">
+      <Filter>UI scene</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

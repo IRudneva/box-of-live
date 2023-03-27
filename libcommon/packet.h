@@ -15,9 +15,4 @@ public:
 	virtual void pack(msgpack::Unpacker& unpacker) = 0;
 };
 
-struct PacketWithIdChannel
-{
-	std::shared_ptr<Packet> packet = nullptr;
-	uint32_t id_channel;
-};
 

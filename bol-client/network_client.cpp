@@ -12,11 +12,11 @@ void NetworkClient::run()
 			std::string peeraddr = channel->peeraddr();
 			if (channel->isConnected()) {
 				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
-				channel_ = channel;
+				linkChannel(channel);
 			}
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
-				channel_ = nullptr;
+				unlinkChannel();
 			}
 			if (client_.isReconnect()) {
 				printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
@@ -29,7 +29,10 @@ void NetworkClient::run()
 			do {
 				size_left = channel->reader_.readNetworkPacket(&it, size_left);
 				if (channel->reader_.isAllDataComplete()) {
-					auto packet = pack(channel);
+					auto packet = ServerPacketBuilder::getPacket(
+						channel->reader_.getPacketType(),
+						channel->reader_.getData());
+
 					std::cout << "thread:: " << std::this_thread::get_id() << std::endl;
 					queue_->pushPacket(*packet);
 				}
@@ -51,10 +54,10 @@ bool NetworkClient::initSocket(int port)
 	return true;
 }
 
-std::shared_ptr<DeserializePacketWithIdChannel> NetworkClient::pack(const BOLTcpClient::TSocketChannelPtr& channel) const
-{
-	auto packet = channel->reader_.getDeserializePacket(); // для дальнейшей обработки
-	packet->id_channel = channel->id();
-	std::cout << (int)packet->packet->type << " type packed received." << "channel id " << (int)packet->id_channel << std::endl;
-	return packet;
-}
+//std::shared_ptr<DeserializePacketWithIdChannel> NetworkClient::pack(const BOLTcpClient::TSocketChannelPtr& channel) const
+//{
+//	auto packet = channel->reader_.getDeserializePacket(); // для дальнейшей обработки
+//	packet->id_channel = channel->id();
+//	std::cout << (int)packet->packet->type << " type packed received." << "channel id " << (int)packet->id_channel << std::endl;
+//	return packet;
+//}

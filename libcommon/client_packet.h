@@ -47,3 +47,9 @@ struct PTGetRoomList : ClientPacket
 	void pack(msgpack::Packer& packer) override { packer(t); }
 	void pack(msgpack::Unpacker& unpacker) override { unpacker(t); }
 };
+
+struct PacketWithIdChannel
+{
+	std::shared_ptr<ClientPacket> packet = nullptr;
+	uint32_t id_channel;
+};

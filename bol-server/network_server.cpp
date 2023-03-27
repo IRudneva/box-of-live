@@ -13,10 +13,7 @@ void NetworkServer::run()
 			std::string peeraddr = channel->peeraddr();
 			if (channel->isConnected()) {
 				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
-
-				std::weak_ptr<BOLSocketChannel> wp(channel);
-				////
-				channel_map_[channel->id()] = wp;
+				addChannel(channel);
 			}
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
@@ -29,10 +26,15 @@ void NetworkServer::run()
 			do {
 				size_left = channel->reader_.readNetworkPacket(&it, size_left);
 				if (channel->reader_.isAllDataComplete()) {
-					auto packet = pack(channel);
+					auto packet = ClientPacketBuilder::getPacket(
+						channel->reader_.getPacketType(),
+						channel->reader_.getData());
+					PacketWithIdChannel packet_with_id { packet, channel->id() };
+
+				/*	auto packet = pack(channel);
 					std::cout << (int)packet->packet->type << " type packed received." << std::endl;
-					std::cout << "thread:: " << std::this_thread::get_id() << std::endl;
-					queue_->pushPacket(*packet);
+					std::cout << "thread:: " << std::this_thread::get_id() << std::endl;*/
+					queue_->pushPacket(packet_with_id);
 				}
 			} while (size_left > 0);
 
@@ -53,10 +55,10 @@ bool NetworkServer::initSocket(int port)
 	return true;
 }
 
-std::shared_ptr<DeserializePacketWithIdChannel> NetworkServer::pack(const BOLTcpServer::TSocketChannelPtr& channel) const
-{
-	auto packet = channel->reader_.getDeserializePacket(); // для дальнейшей обработки
-	packet->id_channel = channel->id();
-	std::cout << (int)packet->packet->type << " type packed received." << "channel id "<< (int)packet->id_channel << std::endl;
-	return packet;
-}
+//std::shared_ptr<DeserializePacketWithIdChannel> NetworkServer::pack(const BOLTcpServer::TSocketChannelPtr& channel) const
+//{
+//	auto packet = channel->reader_.getDeserializePacket(); // для дальнейшей обработки
+//	packet->id_channel = channel->id();
+//	std::cout << (int)packet->packet->type << " type packed received." << "channel id "<< (int)packet->id_channel << std::endl;
+//	return packet;
+//}

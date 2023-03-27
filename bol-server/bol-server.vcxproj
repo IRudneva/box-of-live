@@ -164,7 +164,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="bol_server.cpp" />
+    <ClCompile Include="logic_server.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="network_server.cpp" />
     <ClCompile Include="pch_server.cpp">
@@ -174,7 +174,7 @@
     <ClCompile Include="srv_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bol_server.h" />
+    <ClInclude Include="logic_server.h" />
     <ClInclude Include="bol-socket-channel.h" />
     <ClInclude Include="network_server.h" />
     <ClInclude Include="pch_server.h" />

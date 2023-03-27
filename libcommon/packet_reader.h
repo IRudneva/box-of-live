@@ -1,4 +1,6 @@
 #pragma once
+#include "client_packet.h"
+#include "server_packet.h"
 #include "network_packet.h"
 #include <optional>
 #include <memory>

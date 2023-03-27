@@ -9,13 +9,8 @@ struct ServerPacket : Packet
 protected:
 	ServerPacket(PacketType ty) : Packet(ty) {}
 public:
-	void pack(msgpack::Packer& packer) override
-	{
-	}
-	void pack(msgpack::Unpacker& unpacker) override
-	{
-		
-	}
+	void pack(msgpack::Packer& packer) override {}
+	void pack(msgpack::Unpacker& unpacker) override {}
 };
 
 struct PTRoomList : ServerPacket
