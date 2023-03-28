@@ -3,45 +3,38 @@
 #include <memory>
 #include <game_domain.h>
 
+#include "client_packet.h"
+#include "network_client.h"
+
 void GraphicScene::init()
 {
-
 	auto fields = tgui::Group::create();
-	auto welcome_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(fields), tgui::bindTop(fields) }, HEIGHT_WINDOW , WIDTH_WINDOW});
-	fields->add(welcome_layout);
-	//auto settings_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(fields), tgui::bindTop(fields) }, "200" });
-	//auto game_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(settings_layout), tgui::bindBottom(settings_layout) }, "400" });
-	//auto canvas = tgui::CanvasSFML::create();
-	//game_layout->add(canvas, "game_canvas");
-	//canvas_ = canvas;
-	//fields->add(settings_layout);
-	//fields->add(game_layout);
 
-	auto buttons = tgui::Group::create();
-
-	button_create_room_ = createButton({ tgui::Color::Green, tgui::Color::Green, tgui::Color::Magenta,
-		{ 350, 150 }, { 150, 70 }, "CREATE ROOM" });
+	room_list_ = tgui::ListBox::create();
+	room_list_->setSize((int)WIDTH_WINDOW * 0.25, HEIGHT_WINDOW);
+	room_list_->setItemHeight(26);
+	room_list_->getRenderer()->setBackgroundColor(tgui::Color(210, 210, 210));
+	room_list_->setTextAlignment(tgui::ListBox::TextAlignment::Center);
+	room_list_->getSharedRenderer()->setBorderColor(tgui::Color::White);
+//	room_list_->onItemSelect([] {}); ДОПИСАТЬ ЛОГИКУ
+	fields->add(room_list_, "room_list");
 	
-
-	button_choose_room_ = createButton({ tgui::Color::Yellow, tgui::Color::Yellow, tgui::Color::Magenta,
-	{ 350, 250 }, { 150, 70 }, "CHOOSE A ROOM" });
-
-	buttons->add(button_create_room_);
-	buttons->add(button_choose_room_);
-	/*start_button = createButton({ tgui::Color::Green, tgui::Color::Red, tgui::Color::Magenta,
-		{ 500, 55 }, { 150, 70 }, "START" });
-
-	buttons->add(start_button);
+	auto settings_layout = createLayout({ tgui::Color::White,
+		{ tgui::bindRight(room_list_), tgui::bindTop(room_list_) },
+		(int)HEIGHT_WINDOW * 0.25, WIDTH_WINDOW - room_list_->getSize().x }
+	);
 
 	auto grid = tgui::Grid::create();
 
 	grid->setAutoSize(true);
+	grid->setPosition(tgui::bindLeft(room_list_), tgui::bindTop(room_list_));
 	settings_layout->add(grid);
 
-	conf_helper_.init(*game_config_); 
+	conf_helper_->init(*game_config_);
 
-	conf_helper_.doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
+	conf_helper_->doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
 		auto label = createLabel({ config_name, 14 });
+
 		grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
 
 		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.default_value) });
@@ -55,13 +48,71 @@ void GraphicScene::init()
 			config_record.row_id,
 			config_record.column_id * 2 + 1,
 			tgui::Grid::Alignment::Left);
+	});
+
+	fields->add(settings_layout);
+
+	auto game_layout = createLayout({ tgui::Color::White,
+		{ tgui::bindLeft(settings_layout), tgui::bindBottom(settings_layout) },
+		HEIGHT_WINDOW - settings_layout->getSize().y, WIDTH_WINDOW - room_list_->getSize().x}
+	);
+	fields->add(game_layout);
+	
+	auto canvas = tgui::CanvasSFML::create();
+	game_layout->add(canvas, "game_canvas");
+	canvas_ = canvas;
+
+	auto buttons = tgui::Group::create();
+
+	auto size_room_list = room_list_->getSize();
+
+	auto button_create_room = createButton({ tgui::Color::Red,
+		tgui::Color::Red,
+		tgui::Color::Magenta,
+		{ tgui::bindLeft(fields),size_room_list.y * 0.9 },
+		{ size_room_list.x, size_room_list.y * 0.1 },
+		"CREATE ROOM" });
+	button_create_room->getRenderer()->setTextColor(tgui::Color::White);
+
+	button_create_room->onPress([] {
+		std::cout << "press BCreateR" << std::endl;
+		PTCreateRoom packet("room ololo");
+		NetworkClient::getInstance().sendPacket(packet);
+	});
+
+	auto size_settings_layout = settings_layout->getSize();
+
+	auto button_start = createButton({ tgui::Color::Green,
+		tgui::Color::Green,
+		tgui::Color::Magenta,
+		{size_settings_layout.x,size_settings_layout.y * 0.25 },
+		{ size_settings_layout.x *0.25, size_settings_layout.y *0.4 },
+		"START" });
+
+	/*button_start->onPress([] {
+		std::cout << "press START" << std::endl;
+		PTStartGame packet();
+		NetworkClient::getInstance().sendPacket(packet);
 	});*/
 
-	gui_.add(fields);
-	gui_.add(buttons);
+
+	buttons->add(button_create_room);
+	buttons->add(button_start);
+
+
+	gui_.add(fields, "fields");
+	gui_.add(buttons, "buttons");
+	
+
 	//field_state_info_->init(game_config_);
 
-//	timer_.initDouble(0.5);
+	//	timer_.initDouble(0.5);
+}
+
+void GraphicScene::backToMenu()
+{
+	init();
+	drawGui();
 }
 
 void GraphicScene::drawGui()
@@ -111,19 +162,13 @@ void GraphicScene::handleEvent(const sf::Event& event)
 	gui_.handleEvent(event);
 }
 
-bool GraphicScene::isPressedCreateRoomButton() const {
-	if (button_create_room_->isMouseDown())
-		return true;
-	return false;
+
+void GraphicScene::createRoom(int id_room, const std::string& room_name)
+{
+	room_list_->addItem(std::to_string(id_room) +" "+room_name, std::to_string(id_room));
 }
 
-bool GraphicScene::isPressedChooseRoomButton() const {
-	if (button_choose_room_->isMouseDown())
-		return true;
-	return false;
-}
-
-void GraphicScene::createRoomList(std::vector<std::string> name_room)
+void GraphicScene::createRoomList(const std::vector<std::string>& name_room)
 {
 	auto layout = createLayout({ tgui::Color::Green, { 230,140}, 300, 350 });
 	auto grid = tgui::Grid::create();
@@ -135,19 +180,6 @@ void GraphicScene::createRoomList(std::vector<std::string> name_room)
 	}
 	gui_.add(layout);
 	gui_.add(grid);
-}
-
-UIEventType GraphicScene::checkEvents()
-{
-	if (isPressedCreateRoomButton())
-		events_.push(UIEventType::PRESSED_BUTTON_CREATE_ROOM);
-	if (isPressedChooseRoomButton())
-		events_.push(UIEventType::PRESSED_BUTTON_CHOOSE_ROOM);
-	if (events_.empty())
-		return UIEventType::NO_EVENT;
-	auto top_event = events_.front();
-	events_.pop();
-	return top_event;
 }
 
 tgui::Panel::Ptr GraphicScene::createLayout(const ConfigLayout& conf) const
@@ -182,20 +214,23 @@ tgui::Label::Ptr GraphicScene::createLabel(const ConfigLabel& conf) const
 
 void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const
 {
+	auto x_field_size = canvas->getSize().x;
+	auto y_field_size = canvas->getSize().y;
+
 	sf::Vertex line[] = {
 			sf::Vertex(sf::Vector2f(0, 0), sf::Color::Black),
-			sf::Vertex(sf::Vector2f(WIDTH_PLAYING_FIELD, 0), sf::Color::Black)
+			sf::Vertex(sf::Vector2f(x_field_size, 0), sf::Color::Black)
 	};
 
-	for (auto i = 0; i < HEIGHT_PLAYING_FIELD / CELL_SIZE; i++)
+	for (auto i = 0; i < (int)(y_field_size / CELL_SIZE); i++)
 	{
 		canvas->draw(line, 2, sf::Lines);
 		line[0].position.y += CELL_SIZE;
 		line[1].position.y += CELL_SIZE;
 	}
 	line[0].position = sf::Vector2f(0, 0);
-	line[1].position = sf::Vector2f(0, HEIGHT_PLAYING_FIELD);
-	for (auto i = 0; i < WIDTH_PLAYING_FIELD / CELL_SIZE; i++)
+	line[1].position = sf::Vector2f(0, y_field_size);
+	for (auto i = 0; i < (int)(x_field_size / CELL_SIZE); i++)
 	{
 		canvas->draw(line, 2, sf::Lines);
 		line[0].position.x += CELL_SIZE;

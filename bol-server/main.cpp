@@ -15,8 +15,8 @@ int main()
 
 	if (getchar() == '\n')
 	{
-		server.stopLogicLoop();
 		network_server.stop();
+		server.stopLogicLoop();
 	}
 	return 0;
 }

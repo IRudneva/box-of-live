@@ -19,36 +19,6 @@ NetworkServer& NetworkServer::getInstance() {
 	return *p_instance;
 }
 
-void NetworkServer::sendPacket(uint32_t id_channel, std::shared_ptr<ServerPacket>& packet)
-{
-	//проверить, подключен ли клиент
-	if (findChannel(id_channel))
-	{
-		if (auto client = channel_map_[id_channel].lock())
-		{
-			PacketWriter<std::shared_ptr<ServerPacket>> writer;
-			auto s_packet = writer.serialize(packet);
-			client->write(s_packet.data(), (int)s_packet.size());
-		}
-	}
-}
-
-void NetworkServer::addChannel(const BOLTcpServer::TSocketChannelPtr& channel)
-{
-	std::lock_guard<std::mutex> lock(m_);
-	std::weak_ptr<BOLSocketChannel> wp(channel);
-	channel_map_[channel->id()] = wp;
-}
-
-bool NetworkServer::findChannel(uint32_t id_channel)
-{
-	std::lock_guard<std::mutex> lock(m_);
-	auto client_it = channel_map_.find(id_channel);
-	if (client_it != channel_map_.end())
-		return true;
-	return false;
-}
-
 void NetworkServer::run()
 {
 	std::cout << "NS::run thread " << std::this_thread::get_id() << std::endl;
@@ -76,7 +46,7 @@ void NetworkServer::run()
 					auto type = channel->reader_.getPacketType();
 					auto data = channel->reader_.getData();
 					auto packet = ClientPacketBuilder::getPacket(type, data);
-					PacketWithIdChannel packet_with_id { packet, channel->id() };
+					PacketWithIdChannel packet_with_id{ packet, channel->id() };
 					queue_->pushPacket(packet_with_id);
 				}
 			} while (size_left > 0);
@@ -86,6 +56,36 @@ void NetworkServer::run()
 		server_.setThreadNum(4);
 		server_.start();
 	}
+}
+
+void NetworkServer::sendPacket(uint32_t id_channel, const ServerPacket& packet)
+{
+	//проверить, подключен ли клиент
+	if (findChannel(id_channel))
+	{
+		if (auto client = channel_map_[id_channel].lock())
+		{
+			PacketWriter writer;
+			auto s_packet = writer.serialize(packet);
+			client->write(s_packet.data(), (int)s_packet.size());
+		}
+	}
+}
+
+void NetworkServer::addChannel(const BOLTcpServer::TSocketChannelPtr& channel)
+{
+	std::lock_guard<std::mutex> lock(m_);
+	std::weak_ptr<BOLSocketChannel> wp(channel);
+	channel_map_[channel->id()] = wp;
+}
+
+bool NetworkServer::findChannel(uint32_t id_channel)
+{
+	std::lock_guard<std::mutex> lock(m_);
+	auto client_it = channel_map_.find(id_channel);
+	if (client_it != channel_map_.end())
+		return true;
+	return false;
 }
 
 bool NetworkServer::initSocket(int port)

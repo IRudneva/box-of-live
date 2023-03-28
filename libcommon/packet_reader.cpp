@@ -44,6 +44,14 @@ std::shared_ptr<ServerPacket> ServerPacketBuilder::getPacket(PacketType type, co
 {
 	switch (type)
 	{
+	case PacketType::PT_CREATE_ROOM:
+	{
+		std::shared_ptr<PTNewRoom> pt_new_room = std::make_shared<PTNewRoom>();
+		auto packet = msgpack::unpack<PTNewRoom>(data);
+		*pt_new_room = packet;
+		auto result = std::static_pointer_cast<ServerPacket>(pt_new_room);
+		return result;
+	}
 	case PacketType::PT_ROOM_LIST:
 	{
 		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();

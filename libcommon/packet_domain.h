@@ -1,22 +1,32 @@
 #pragma once
 #include <string>
 
+#include <mutex>
+
 struct IdRoom
 {
-	static uint32_t generateId() {
+	static IdRoom* instance() {
+		static IdRoom inst;
+		return &inst;
+	}
+
+	uint32_t generateId() {
+		std::lock_guard<std::mutex> lock(m);
 		++id;
 		return id;
 	}
-	static void reset() { id = 0; }
+
+	void reset() { id = 0; }
 private:
 	IdRoom() = default;
+	std::mutex m;
 	inline static uint32_t id = 0;
 };
 
 struct Room
 {
-	Room() : id_room(IdRoom::generateId()){}
-	Room(const std::string& n) : id_room(IdRoom::generateId()), name(n) {}
+	Room() : id_room(IdRoom::instance()->generateId()){}
+	Room(const std::string& n) : id_room(IdRoom::instance()->generateId()), name(n) {}
 
 	uint32_t getId() const { return id_room; }
 

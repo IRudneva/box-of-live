@@ -8,7 +8,7 @@ struct  ClientPacket : Packet
 protected:
 	ClientPacket(PacketType ty) : Packet(ty){}
 public:
-	void pack(msgpack::Packer& packer) override
+	void pack(msgpack::Packer& packer) const override
 	{
 	}
 	void pack(msgpack::Unpacker& unpacker) override
@@ -24,7 +24,7 @@ struct PTCreateRoom : ClientPacket
 
 	Room room;
 
-	void pack(msgpack::Packer& packer) override { packer(room); }
+	void pack(msgpack::Packer& packer) const override { packer(room); }
 	void pack(msgpack::Unpacker& unpacker) override { unpacker(room); }
 };
 
@@ -34,7 +34,7 @@ struct PTCloseRoom : ClientPacket
 	PTCloseRoom(uint32_t id) : ClientPacket(PacketType::PT_CLOSE_ROOM), id_room(id) {}
 	uint32_t id_room = 0;
 
-	void pack(msgpack::Packer& packer) override { packer(id_room); }
+	void pack(msgpack::Packer& packer) const override { packer(id_room); }
 	void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 };
 
@@ -44,7 +44,7 @@ struct PTGetRoomList : ClientPacket
 
 	uint8_t t = 0;
 
-	void pack(msgpack::Packer& packer) override { packer(t); }
+	void pack(msgpack::Packer& packer) const override { packer(t); }
 	void pack(msgpack::Unpacker& unpacker) override { unpacker(t); }
 };
 

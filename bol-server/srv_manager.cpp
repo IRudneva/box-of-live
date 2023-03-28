@@ -17,9 +17,12 @@ void SrvManager::handlePacket(const PacketWithIdChannel& packet)
 		auto pt_cr = std::static_pointer_cast<PTCreateRoom>(packet.packet);
 		std::cout << "i received PTCreateRoom" << std::endl;
 		int id_room = pt_cr->room.getId();
-		Room room = pt_cr->room;
-		room_list_.insert({ id_room, room });
+		Room room = std::move(pt_cr->room);
+		auto new_room = room_list_.insert({ id_room, std::move(room) });
 		std::cout << "room " << id_room << " name " << room.name << " created." << std::endl;
+		PTNewRoom pt_new_room;
+		pt_new_room.room = new_room.first->second;
+		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_new_room);
 		break;
 	}
 	case PacketType::PT_CLOSE_ROOM:
@@ -34,15 +37,14 @@ void SrvManager::handlePacket(const PacketWithIdChannel& packet)
 		std::cout << "i received PTGetRoomList" << std::endl;
 		std::cout << "i form a room list..." << std::endl;
 
-		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
+		PTRoomList pt_room_list;
 		
 		for (const auto& [id, room] : room_list_)
 		{
-			pt_room_list->room_list.push_back(room);
+			pt_room_list.room_list.push_back(room);
 		}
 
-		auto server_pac = std::static_pointer_cast<ServerPacket>(pt_room_list);
-		NetworkServer::getInstance().sendPacket(packet.id_channel, server_pac);
+		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_list);
 		break;
 	}
 	case PacketType::PT_ROOM_LIST:

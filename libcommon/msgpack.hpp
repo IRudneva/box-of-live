@@ -1013,7 +1013,7 @@ void Unpacker::unpack_type(std::vector<uint8_t> &value) {
 }
 
 template<class PackableObject>
-std::vector<uint8_t> pack(PackableObject &obj) {
+std::vector<uint8_t> pack(const PackableObject &obj) {
   auto packer = Packer{};
   obj.pack(packer);
   return packer.vector();

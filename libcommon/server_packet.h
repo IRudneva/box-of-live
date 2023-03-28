@@ -9,7 +9,7 @@ struct ServerPacket : Packet
 protected:
 	ServerPacket(PacketType ty) : Packet(ty) {}
 public:
-	void pack(msgpack::Packer& packer) override {}
+	void pack(msgpack::Packer& packer) const  override {}
 	void pack(msgpack::Unpacker& unpacker) override {}
 };
 
@@ -19,6 +19,14 @@ struct PTRoomList : ServerPacket
 	
 	std::vector<Room> room_list;
 	
-	void pack(msgpack::Packer& packer) override { packer(room_list); }
+	void pack(msgpack::Packer& packer) const  override { packer(room_list); }
 	void pack(msgpack::Unpacker& unpacker) override { unpacker(room_list); }
+};
+
+struct PTNewRoom : ServerPacket
+{
+	PTNewRoom() :ServerPacket(PacketType::PT_CREATE_ROOM) {}
+	Room room;
+	void pack(msgpack::Packer& packer) const  override { packer(room); }
+	void pack(msgpack::Unpacker& unpacker) override { unpacker(room); }
 };

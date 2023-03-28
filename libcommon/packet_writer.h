@@ -5,15 +5,14 @@
 
 #include "packet_domain.h"
 
-template <typename TPacketType>
 class PacketWriter
 {
 public:
-	static std::vector<uint8_t> serialize(TPacketType packet)
+	static std::vector<uint8_t> serialize(const Packet& packet)
 	{
 		std::vector<uint8_t> packet_data;
-		std::vector<uint8_t> data = msgpack::pack(*packet);
-		PacketHeader header{ packet->type, data.size() };
+		std::vector<uint8_t> data = msgpack::pack(packet);
+		PacketHeader header{ packet.type, (uint32_t)data.size() };
 
 		uint8_t* header_data = (uint8_t*)&header;
 

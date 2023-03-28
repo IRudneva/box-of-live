@@ -37,6 +37,7 @@ void NetworkClient::run()
 			}
 			if (client_.isReconnect()) {
 				printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
+				linkChannel(channel);
 			}
 		};
 
@@ -56,9 +57,22 @@ void NetworkClient::run()
 
 		};
 
+		setReconnect();
 		client_.start();
 	}
 }
+
+void NetworkClient::setReconnect()
+{
+	// reconnect: 1,2,4,8,10,10,10...
+	reconn_setting_t reconn;
+	reconn_setting_init(&reconn);
+	reconn.min_delay = 1000;
+	reconn.max_delay = 10000;
+	reconn.delay_policy = 2;
+	client_.setReconnect(&reconn);
+}
+
 
 bool NetworkClient::initSocket(int port)
 {
@@ -70,11 +84,11 @@ bool NetworkClient::initSocket(int port)
 	return true;
 }
 
-void NetworkClient::sendPacket(std::shared_ptr<ClientPacket> packet)
+void NetworkClient::sendPacket(const ClientPacket& packet)
 {
 	if (!checkChannelIsValid())
 		return;
-	PacketWriter<std::shared_ptr<ClientPacket>> writer;
+	PacketWriter writer;
 	std::vector<uint8_t> s_packet = writer.serialize(packet);
 	channel_->write(s_packet.data(), (int)s_packet.size());
 	std::cout << "send packet!" << std::endl;

@@ -1,9 +1,8 @@
 #pragma once
-//#include <TGUI/TGUI.hpp>
-//#include <SFML/Graphics.hpp>
-#include "ui_event.h"
 #include "gui_config.h"
 #include <queue>
+
+#include "config_helper.h"
 
 class GraphicScene final
 {
@@ -12,34 +11,29 @@ public:
 
 	void init();
 
+	void backToMenu();
+
 	void drawGui();
 
 	void update();
 
 	void handleEvent(const sf::Event& event);
 
-	bool isPressedCreateRoomButton() const;
+	void createRoom(int id_room, const std::string& room_name);
 
-	bool isPressedChooseRoomButton() const;
-
-	UIEventType checkEvents();
-
-	void createRoomList(std::vector<std::string> name_room);
+	void createRoomList(const std::vector<std::string>& name_room);
 
 //	bool isChangedConfig() { return conf_helper_.isChanged(); }
 
 private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
 	tgui::GuiSFML gui_;
-	tgui::Button::Ptr button_create_room_;
-	tgui::Button::Ptr button_choose_room_;
-	std::queue<UIEventType> events_;
-//	tgui::Button::Ptr start_button;
-//	ConfigHelper conf_helper_;
+	tgui::ListBox::Ptr room_list_;
+	std::unique_ptr<ConfigHelper> conf_helper_ = std::make_unique<ConfigHelper>();
 //	Timer timer_;
 //	std::map<int, tgui::Color> color_bacterium_by_type_;
 	//std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
-//	std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
+	std::unique_ptr<GameConfig> game_config_ = std::make_unique<GameConfig>();
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
 	
@@ -56,5 +50,4 @@ private:
 	//tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
 
 	//tgui::Color getCellColorByBacteriumId(int id);
-
 };

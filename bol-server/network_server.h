@@ -27,7 +27,7 @@ public:
 
 	void run();
 
-	void sendPacket(uint32_t id_channel, std::shared_ptr<ServerPacket>& packet);
+	void sendPacket(uint32_t id_channel, const ServerPacket& packet);
 
 	void stop();
 

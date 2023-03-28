@@ -5,6 +5,8 @@
 
 struct GameConfig
 {
+	GameConfig() = default;
+
 	int energy_base = 0;
 	int energy_action_cost = 0;
 	int energy_to_clone = 0;

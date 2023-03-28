@@ -66,6 +66,9 @@
     <ClInclude Include="bol_timer.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="msgpack.hpp">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="packet_reader.cpp">

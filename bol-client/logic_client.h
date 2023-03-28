@@ -1,29 +1,22 @@
 #pragma once
-#include <atomic>
-#include <thread>
-
 #include "packet_reader.h"
-#include "cli_manager.h"
 #include "shared_packet_queue.h"
+#include "ui_scene.h"
+#include "game_domain.h"
 
 class LogicClient
 {
 public:
 	explicit LogicClient(std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue) : queue_(queue) {}
 
-	void runLoop();
+	void initGraphicScene();
 
-	void stopLoop();
+	void updateGameScene();
 
 private:
-	std::atomic_bool ui_is_run_ = false;
-	std::atomic_bool logic_is_run_ = false;
-	std::thread ui_thread_;
-	std::thread logic_thread_;
-	std::unique_ptr<ClientManager> ui_manager_ = std::make_unique<ClientManager>();
 	std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue_;
+	std::unique_ptr<GraphicScene> graphic_scene_;
+	sf::RenderWindow window_{ {WIDTH_WINDOW, HEIGHT_WINDOW}, "Box of Live" };
 
-	void handleQueue() const;
-
-	void updateUI();
+	void handlePacket(std::shared_ptr<ServerPacket> packet) const;
 };

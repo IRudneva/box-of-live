@@ -36,9 +36,6 @@
     <ClCompile Include="logic_client.cpp">
       <Filter>logic</Filter>
     </ClCompile>
-    <ClCompile Include="cli_manager.cpp">
-      <Filter>logic</Filter>
-    </ClCompile>
     <ClCompile Include="ui_scene.cpp">
       <Filter>UI scene</Filter>
     </ClCompile>
@@ -55,12 +52,6 @@
     </ClInclude>
     <ClInclude Include="bol_socket_channel.h">
       <Filter>network</Filter>
-    </ClInclude>
-    <ClInclude Include="ui_event.h">
-      <Filter>logic</Filter>
-    </ClInclude>
-    <ClInclude Include="cli_manager.h">
-      <Filter>logic</Filter>
     </ClInclude>
     <ClInclude Include="ui_scene.h">
       <Filter>UI scene</Filter>

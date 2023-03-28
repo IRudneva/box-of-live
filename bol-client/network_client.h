@@ -25,9 +25,11 @@ public:
 
 	void run();
 
-	void sendPacket(std::shared_ptr<ClientPacket> packet);
+	void sendPacket(const ClientPacket& packet);
 
 	void stop() { client_.stop(); }
+
+	bool checkChannelIsValid();
 
 private:
 	static NetworkClient* p_instance;
@@ -38,16 +40,17 @@ private:
 	std::mutex m_;
 
 	NetworkClient() = default;
+	~NetworkClient() = default;
 	NetworkClient(const NetworkClient&) = delete;
 	NetworkClient& operator=(NetworkClient&) = delete;
-	~NetworkClient() = default;
+
 	friend class NetworkClientDestroyer;
+
+	void setReconnect();
 
 	void linkChannel(const BOLTcpClient::TSocketChannelPtr& channel);
 
 	void unlinkChannel();
-
-	bool checkChannelIsValid();
 
 	bool initSocket(int port);
 };

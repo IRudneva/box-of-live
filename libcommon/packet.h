@@ -11,7 +11,7 @@ public:
 	virtual ~Packet() = default;
 
 	PacketType type = PacketType::NO_TYPE;
-	virtual void pack(msgpack::Packer& packer) = 0;
+	virtual void pack(msgpack::Packer& packer) const = 0;
 	virtual void pack(msgpack::Unpacker& unpacker) = 0;
 };
 
