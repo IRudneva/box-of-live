@@ -2,16 +2,22 @@
 
 #include <future>
 
-#include "ligic_client.h"
+#include "logic_client.h"
 #include "network_client.h"
 
 int main()
 {
-	std::shared_ptr<SharedPacketQueue<ServerPacket>> shared_packet_queue = std::make_shared<SharedPacketQueue<ServerPacket>>();
+	std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> shared_packet_queue = std::make_shared<SharedPacketQueue<std::shared_ptr<ServerPacket>>>();
 	LogicClient client(shared_packet_queue);
 	client.runLoop();
-	NetworkClient network_client(shared_packet_queue);
+
+	NetworkClient& network_client = NetworkClient::getInstance();
+	NetworkClient::getInstance().initQueue(shared_packet_queue);
 	network_client.run();
-	client.stopLoop();
+	if (getchar() == '\n')
+	{
+		client.stopLoop();
+		network_client.stop();
+	}
 	return 0;
 }

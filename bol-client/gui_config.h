@@ -30,5 +30,6 @@ struct ConfigLayout
 	tgui::Color color;
 	tgui::Layout2d position;
 	tgui::Layout height;
+	tgui::Layout width;
 };
 

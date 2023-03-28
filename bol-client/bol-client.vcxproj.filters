@@ -56,9 +56,6 @@
     <ClInclude Include="bol_socket_channel.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="ligic_client.h">
-      <Filter>logic</Filter>
-    </ClInclude>
     <ClInclude Include="ui_event.h">
       <Filter>logic</Filter>
     </ClInclude>
@@ -73,6 +70,9 @@
     </ClInclude>
     <ClInclude Include="config_helper.h">
       <Filter>UI scene</Filter>
+    </ClInclude>
+    <ClInclude Include="logic_client.h">
+      <Filter>logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

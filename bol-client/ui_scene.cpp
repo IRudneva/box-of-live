@@ -7,7 +7,7 @@ void GraphicScene::init()
 {
 
 	auto fields = tgui::Group::create();
-	auto welcome_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(fields), tgui::bindTop(fields) }, HEIGHT_WINDOW });
+	auto welcome_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(fields), tgui::bindTop(fields) }, HEIGHT_WINDOW , WIDTH_WINDOW});
 	fields->add(welcome_layout);
 	//auto settings_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(fields), tgui::bindTop(fields) }, "200" });
 	//auto game_layout = createLayout({ tgui::Color::White, { tgui::bindLeft(settings_layout), tgui::bindBottom(settings_layout) }, "400" });
@@ -123,6 +123,20 @@ bool GraphicScene::isPressedChooseRoomButton() const {
 	return false;
 }
 
+void GraphicScene::createRoomList(std::vector<std::string> name_room)
+{
+	auto layout = createLayout({ tgui::Color::Green, { 230,140}, 300, 350 });
+	auto grid = tgui::Grid::create();
+	grid->setPosition(layout->getPosition());
+	grid->setSize(layout->getSize());
+	for (auto i = 0; i < name_room.size(); i++) {
+		auto label = createLabel({ name_room[i], 16 });
+		grid->addWidget(label, i, 0, tgui::Grid::Alignment::Left);
+	}
+	gui_.add(layout);
+	gui_.add(grid);
+}
+
 UIEventType GraphicScene::checkEvents()
 {
 	if (isPressedCreateRoomButton())
@@ -142,6 +156,7 @@ tgui::Panel::Ptr GraphicScene::createLayout(const ConfigLayout& conf) const
 	layout->getRenderer()->setBackgroundColor(conf.color);
 	layout->setPosition(conf.position);
 	layout->setHeight(conf.height);
+	layout->setWidth(conf.width);
 	return layout;
 }
 

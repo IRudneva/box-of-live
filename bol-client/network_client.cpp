@@ -3,6 +3,23 @@
 
 #include <iostream>
 
+NetworkClient*  NetworkClient::p_instance = 0;
+NetworkClientDestroyer  NetworkClient::destroyer;
+
+NetworkClientDestroyer::~NetworkClientDestroyer() {
+	delete p_instance;
+}
+void  NetworkClientDestroyer::initialize (NetworkClient* p) {
+	p_instance = p;
+}
+NetworkClient&  NetworkClient::getInstance() {
+	if (!p_instance) {
+		p_instance = new  NetworkClient();
+		destroyer.initialize(p_instance);
+	}
+	return *p_instance;
+}
+
 void NetworkClient::run()
 {
 	if (initSocket(1234))
@@ -29,12 +46,11 @@ void NetworkClient::run()
 			do {
 				size_left = channel->reader_.readNetworkPacket(&it, size_left);
 				if (channel->reader_.isAllDataComplete()) {
-					auto packet = ServerPacketBuilder::getPacket(
-						channel->reader_.getPacketType(),
-						channel->reader_.getData());
-
+					auto type = channel->reader_.getPacketType();
+					auto data = channel->reader_.getData();
+					auto packet = ServerPacketBuilder::getPacket(type, data);
 					std::cout << "thread:: " << std::this_thread::get_id() << std::endl;
-					queue_->pushPacket(*packet);
+					queue_->pushPacket(packet);
 				}
 			} while (size_left > 0);
 
@@ -54,10 +70,32 @@ bool NetworkClient::initSocket(int port)
 	return true;
 }
 
-//std::shared_ptr<DeserializePacketWithIdChannel> NetworkClient::pack(const BOLTcpClient::TSocketChannelPtr& channel) const
-//{
-//	auto packet = channel->reader_.getDeserializePacket(); // для дальнейшей обработки
-//	packet->id_channel = channel->id();
-//	std::cout << (int)packet->packet->type << " type packed received." << "channel id " << (int)packet->id_channel << std::endl;
-//	return packet;
-//}
+void NetworkClient::sendPacket(std::shared_ptr<ClientPacket> packet)
+{
+	if (!checkChannelIsValid())
+		return;
+	PacketWriter<std::shared_ptr<ClientPacket>> writer;
+	std::vector<uint8_t> s_packet = writer.serialize(packet);
+	channel_->write(s_packet.data(), (int)s_packet.size());
+	std::cout << "send packet!" << std::endl;
+}
+
+void NetworkClient::linkChannel(const BOLTcpClient::TSocketChannelPtr& channel)
+{
+	std::lock_guard<std::mutex> lock(m_);
+	channel_ = channel;
+}
+
+void NetworkClient::unlinkChannel()
+{
+	std::lock_guard<std::mutex> lock(m_);
+	channel_ = nullptr;
+}
+
+bool NetworkClient::checkChannelIsValid()
+{
+	std::lock_guard<std::mutex> lock(m_);
+	if (channel_ == nullptr)
+		return false;
+	return true;
+}

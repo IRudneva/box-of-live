@@ -8,8 +8,15 @@ int main()
 	std::shared_ptr<SharedPacketQueue<PacketWithIdChannel>> shared_packet_queue = std::make_shared<SharedPacketQueue<PacketWithIdChannel>>();
 	LogicServer server(shared_packet_queue);
 	server.runLogicLoop();
-	NetworkServer network_server(shared_packet_queue);
+	
+	NetworkServer& network_server = NetworkServer::getInstance();
+	NetworkServer::getInstance().initQueue(shared_packet_queue);
 	network_server.run();
-	server.stopLogicLoop();
+
+	if (getchar() == '\n')
+	{
+		server.stopLogicLoop();
+		network_server.stop();
+	}
 	return 0;
 }

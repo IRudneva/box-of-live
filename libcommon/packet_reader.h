@@ -20,7 +20,12 @@ class NetworkPacketReader
 public:
 	size_t readNetworkPacket(uint8_t** data, size_t size);
 
-	PacketType getPacketType() const { if (header_.has_value()) return header_.value().packet_type; }
+	PacketType getPacketType() const
+	{
+		if (header_.has_value()) 
+			return header_.value().packet_type;
+		return PacketType::NO_TYPE;
+	}
 
 	std::vector<uint8_t> getData()
 	{
@@ -29,11 +34,7 @@ public:
 		return buffer;
 	}
 
-	//std::shared_ptr<Packet> getPacket();
-
 	bool isAllDataComplete() const;
-
-	//std::optional<PacketHeader> getNetworkPacketHeader() const { return header_; }
 
 private:
 	std::optional<PacketHeader> header_;

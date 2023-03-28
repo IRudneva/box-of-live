@@ -34,14 +34,15 @@ void SrvManager::handlePacket(const PacketWithIdChannel& packet)
 		std::cout << "i received PTGetRoomList" << std::endl;
 		std::cout << "i form a room list..." << std::endl;
 
-		PTRoomList pt_room_list;
+		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
 		
 		for (const auto& [id, room] : room_list_)
 		{
-			pt_room_list.room_list.push_back(room);
+			pt_room_list->room_list.push_back(room);
 		}
-	
-		NetworkServer::sendPacket(packet.id_channel, pt_room_list);
+
+		auto server_pac = std::static_pointer_cast<ServerPacket>(pt_room_list);
+		NetworkServer::getInstance().sendPacket(packet.id_channel, server_pac);
 		break;
 	}
 	case PacketType::PT_ROOM_LIST:

@@ -5,7 +5,7 @@
 #include "packet_writer.h"
 #include "ui_scene.h"
 
-void ClientManager::initGameUI()
+void ClientManager::updateGameScene()
 {
 	auto window = createWindow();
 	auto gr_scene = std::make_shared<GraphicScene>(window);
@@ -48,9 +48,10 @@ void ClientManager::handleUIEvent(UIEventType event) const
 	case UIEventType::PRESSED_BUTTON_CREATE_ROOM:
 	{
 		std::cout << "press BCreateR" << std::endl;
-		PTCreateRoom packet("room ololo");
-		NetworkClient::sendPacket(packet);
-		{
+		std::shared_ptr<PTCreateRoom> packet = std::make_shared<PTCreateRoom>("room ololo");
+		
+		NetworkClient::getInstance().sendPacket(packet);
+		{ // TEST
 			/*std::string test;
 			char t = '*';
 			for (auto i = 0; i < 1000000; i++)
@@ -71,8 +72,8 @@ void ClientManager::handleUIEvent(UIEventType event) const
 	case UIEventType::PRESSED_BUTTON_CHOOSE_ROOM:
 	{
 		std::cout << "press BChooseR" << std::endl;
-		PTGetRoomList pt_ger_room_list;
-		NetworkClient::sendPacket(pt_ger_room_list);
+		std::shared_ptr<PTGetRoomList> pt_ger_room_list = std::make_shared<PTGetRoomList>();
+		NetworkClient::getInstance().sendPacket(pt_ger_room_list);
 		break;
 	}
 	case UIEventType::NO_EVENT: 
@@ -82,19 +83,21 @@ void ClientManager::handleUIEvent(UIEventType event) const
 	}
 }
 
-void ClientManager::handlePacket(ServerPacket& packet) const
+void ClientManager::handlePacket(std::shared_ptr<ServerPacket> packet) const
 {
-	switch (packet.type)
+	switch (packet->type)
 	{
 	case PacketType::PT_ROOM_LIST:
 	{
-		ServerPacket& ppacket = packet;
-		auto pt_room_list = dynamic_cast<PTRoomList&>(ppacket);
+		std::vector<std::string> rl;
+		auto pt_room_list = std::static_pointer_cast<PTRoomList>(packet);
 		std::cout << "i received PTRoomList" << std::endl;
-		for (auto r : pt_room_list.room_list)
+		for (auto r : pt_room_list->room_list)
 		{
 			std::cout << "Room id: " << r.getId() << " room name: " << r.name << std::endl;
+			rl.push_back(std::to_string(r.getId()) + " " + r.name);
 		}
+		graphic_scene_->createRoomList(rl);
 		break;
 	}
 	default:

@@ -9,19 +9,22 @@ template <typename TPacketType>
 class PacketWriter
 {
 public:
-	static std::vector<uint8_t> serialize(/*const */TPacketType packet)
+	static std::vector<uint8_t> serialize(TPacketType packet)
 	{
 		std::vector<uint8_t> packet_data;
-		PacketHeader header;
-		header.packet_type = packet.type;
-		std::vector<uint8_t> data = msgpack::pack(packet);
-		header.data_size = data.size();
-		uint8_t* pheader = (uint8_t*)&header;
-		for (auto i = 0; i < sizeof(PacketHeader); i++)
+		std::vector<uint8_t> data = msgpack::pack(*packet);
+		PacketHeader header{ packet->type, data.size() };
+
+		uint8_t* header_data = (uint8_t*)&header;
+
+		for (auto i = 0; i < (int)sizeof(header);)
 		{
-			packet_data.push_back(pheader[i]);
+			packet_data.push_back(header_data[i++]);
 		}
-		packet_data.insert(packet_data.end(), data.begin(), data.end());
+		for(auto i = 0; i < data.size();)
+		{
+			packet_data.push_back(data[i++]);
+		}
 		return packet_data;
 	}
 };

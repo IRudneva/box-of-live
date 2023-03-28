@@ -1,6 +1,53 @@
-#include "pch_server.h"
+ï»¿#include "pch_server.h"
 #include "network_server.h"
 #include <iostream>
+
+NetworkServer* NetworkServer::p_instance = 0;
+NetworkServerDestroyer NetworkServer::destroyer;
+
+NetworkServerDestroyer::~NetworkServerDestroyer() {
+	delete p_instance;
+}
+void NetworkServerDestroyer::initialize(NetworkServer* p) {
+	p_instance = p;
+}
+NetworkServer& NetworkServer::getInstance() {
+	if (!p_instance) {
+		p_instance = new NetworkServer();
+		destroyer.initialize(p_instance);
+	}
+	return *p_instance;
+}
+
+void NetworkServer::sendPacket(uint32_t id_channel, std::shared_ptr<ServerPacket>& packet)
+{
+	//Ð¿Ñ€Ð¾Ð²ÐµÑ€Ð¸Ñ‚ÑŒ, Ð¿Ð¾Ð´ÐºÐ»ÑŽÑ‡ÐµÐ½ Ð»Ð¸ ÐºÐ»Ð¸ÐµÐ½Ñ‚
+	if (findChannel(id_channel))
+	{
+		if (auto client = channel_map_[id_channel].lock())
+		{
+			PacketWriter<std::shared_ptr<ServerPacket>> writer;
+			auto s_packet = writer.serialize(packet);
+			client->write(s_packet.data(), (int)s_packet.size());
+		}
+	}
+}
+
+void NetworkServer::addChannel(const BOLTcpServer::TSocketChannelPtr& channel)
+{
+	std::lock_guard<std::mutex> lock(m_);
+	std::weak_ptr<BOLSocketChannel> wp(channel);
+	channel_map_[channel->id()] = wp;
+}
+
+bool NetworkServer::findChannel(uint32_t id_channel)
+{
+	std::lock_guard<std::mutex> lock(m_);
+	auto client_it = channel_map_.find(id_channel);
+	if (client_it != channel_map_.end())
+		return true;
+	return false;
+}
 
 void NetworkServer::run()
 {
@@ -26,14 +73,10 @@ void NetworkServer::run()
 			do {
 				size_left = channel->reader_.readNetworkPacket(&it, size_left);
 				if (channel->reader_.isAllDataComplete()) {
-					auto packet = ClientPacketBuilder::getPacket(
-						channel->reader_.getPacketType(),
-						channel->reader_.getData());
+					auto type = channel->reader_.getPacketType();
+					auto data = channel->reader_.getData();
+					auto packet = ClientPacketBuilder::getPacket(type, data);
 					PacketWithIdChannel packet_with_id { packet, channel->id() };
-
-				/*	auto packet = pack(channel);
-					std::cout << (int)packet->packet->type << " type packed received." << std::endl;
-					std::cout << "thread:: " << std::this_thread::get_id() << std::endl;*/
 					queue_->pushPacket(packet_with_id);
 				}
 			} while (size_left > 0);
@@ -45,7 +88,6 @@ void NetworkServer::run()
 	}
 }
 
-
 bool NetworkServer::initSocket(int port)
 {
 	int listenfd = server_.createsocket(port);
@@ -55,10 +97,7 @@ bool NetworkServer::initSocket(int port)
 	return true;
 }
 
-//std::shared_ptr<DeserializePacketWithIdChannel> NetworkServer::pack(const BOLTcpServer::TSocketChannelPtr& channel) const
-//{
-//	auto packet = channel->reader_.getDeserializePacket(); // äëÿ äàëüíåéøåé îáðàáîòêè
-//	packet->id_channel = channel->id();
-//	std::cout << (int)packet->packet->type << " type packed received." << "channel id "<< (int)packet->id_channel << std::endl;
-//	return packet;
-//}
+void NetworkServer::stop()
+{
+	server_.stop();
+}

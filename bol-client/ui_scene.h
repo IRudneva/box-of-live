@@ -24,6 +24,8 @@ public:
 
 	UIEventType checkEvents();
 
+	void createRoomList(std::vector<std::string> name_room);
+
 //	bool isChangedConfig() { return conf_helper_.isChanged(); }
 
 private:

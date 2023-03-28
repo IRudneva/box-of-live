@@ -44,14 +44,14 @@
     <ClInclude Include="network_server.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="bol-socket-channel.h">
-      <Filter>network</Filter>
-    </ClInclude>
     <ClInclude Include="srv_manager.h">
       <Filter>logic</Filter>
     </ClInclude>
     <ClInclude Include="logic_server.h">
       <Filter>logic</Filter>
+    </ClInclude>
+    <ClInclude Include="bol_socket_channel.h">
+      <Filter>network</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

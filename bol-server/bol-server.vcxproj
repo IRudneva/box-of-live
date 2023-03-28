@@ -175,7 +175,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="logic_server.h" />
-    <ClInclude Include="bol-socket-channel.h" />
+    <ClInclude Include="bol_socket_channel.h" />
     <ClInclude Include="network_server.h" />
     <ClInclude Include="pch_server.h" />
     <ClInclude Include="srv_manager.h" />

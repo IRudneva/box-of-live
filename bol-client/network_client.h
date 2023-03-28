@@ -5,60 +5,50 @@
 
 using BOLTcpClient = hv::TcpClientTmpl<BOLSocketChannel>;
 
+class NetworkClient;
+
+class NetworkClientDestroyer
+{
+private:
+	NetworkClient* p_instance;
+public:
+	~NetworkClientDestroyer();
+	void initialize(NetworkClient* p);
+};
+
 class NetworkClient
 {
 public:
-	NetworkClient(std::shared_ptr<SharedPacketQueue<ServerPacket>> queue) : queue_(queue) {}
+	static NetworkClient& getInstance();
+
+	void initQueue(std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue) { queue_ = queue; }
 
 	void run();
 
-	static void sendPacket(const ClientPacket& packet)
-	{
-		if (!checkChannelIsValid())
-			return;
-		PacketWriter<ClientPacket> writer;
-		auto s_packet = writer.serialize(packet);
-		channel_->write((uint8_t*)&s_packet, (int)s_packet.size());
-		std::cout << "send packet!" << std::endl;
-	}
+	void sendPacket(std::shared_ptr<ClientPacket> packet);
 
-	uint32_t getIdChannel() const
-	{
-		if (channel_ != nullptr)
-			return channel_->id();
-	}
+	void stop() { client_.stop(); }
 
 private:
+	static NetworkClient* p_instance;
+	static NetworkClientDestroyer destroyer;
 	BOLTcpClient client_;
-	std::shared_ptr<SharedPacketQueue<ServerPacket>> queue_;
-	static inline BOLTcpClient::TSocketChannelPtr channel_ = nullptr;
-	static inline std::mutex m_;
+	std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue_;
+	BOLTcpClient::TSocketChannelPtr channel_ = nullptr;
+	std::mutex m_;
 
-	static void linkChannel(const BOLTcpClient::TSocketChannelPtr& channel)
-	{
-		std::lock_guard<std::mutex> lock(m_);
-		channel_ = channel;
-	}
+	NetworkClient() = default;
+	NetworkClient(const NetworkClient&) = delete;
+	NetworkClient& operator=(NetworkClient&) = delete;
+	~NetworkClient() = default;
+	friend class NetworkClientDestroyer;
 
-	static void unlinkChannel()
-	{
-		std::lock_guard<std::mutex> lock(m_);
-		channel_ = nullptr;
-	}
+	void linkChannel(const BOLTcpClient::TSocketChannelPtr& channel);
 
-	static bool checkChannelIsValid(/*uint32_t id_channel*/)
-	{
-		std::lock_guard<std::mutex> lock(m_);
-		if (channel_ == nullptr)
-			return false;
-		/*if (channel_->id() != id_channel)
-			return false;*/
-		return true;
-	}
+	void unlinkChannel();
+
+	bool checkChannelIsValid();
 
 	bool initSocket(int port);
-
-
-	//std::shared_ptr<DeserializePacketWithIdChannel> pack(const BOLTcpClient::TSocketChannelPtr& channel) const;
 };
 

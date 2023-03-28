@@ -1,8 +1,6 @@
 ﻿#include "pch_server.h"
 #include "logic_server.h"
 
-#include <iostream>
-
 void LogicServer::runLogicLoop()
 {
 	is_run_ = true;
@@ -15,4 +13,14 @@ void LogicServer::stopLogicLoop()
 	thread_.join();
 }
 
+void LogicServer::handleQueue() const
+{
+	while (is_run_)
+	{
+		if (queue_->hasPacket())
+		{
+			srv_manager_->handlePacket(queue_->popPacket());
+		}
+	}
+}
 
