@@ -5,34 +5,33 @@
 #include "server_packet.h"
 #include "packet_reader.h"
 
-
-std::shared_ptr<ClientPacket> ClientPacketBuilder::getPacket(PacketType type, const std::vector<uint8_t>& data)
+std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(PacketType type, const std::vector<uint8_t>& data)
 {
 	switch (type)
 	{
-	case PacketType::PT_CREATE_ROOM:
+	case PacketType::CLI_CREATE_ROOM:
 	{
-		std::shared_ptr<PTCreateRoom> pt_create_room = std::make_shared<PTCreateRoom>();
-		auto packet = msgpack::unpack<PTCreateRoom>(data);
+		std::shared_ptr<client_packet::PTCreateRoom> pt_create_room = std::make_shared<client_packet::PTCreateRoom>();
+		auto packet = msgpack::unpack<client_packet::PTCreateRoom>(data);
 		*pt_create_room = packet;
 
-		auto result = std::static_pointer_cast<ClientPacket>(pt_create_room);
+		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_create_room);
 		return result;
 	}
-	case PacketType::PT_CLOSE_ROOM:
+	case PacketType::CLI_CLOSE_ROOM:
 	{
-		std::shared_ptr<PTCloseRoom> pt_close_room = std::make_shared<PTCloseRoom>();
-		auto packet = msgpack::unpack<PTCloseRoom>(data);
+		std::shared_ptr<client_packet::PTCloseRoom> pt_close_room = std::make_shared<client_packet::PTCloseRoom>();
+		auto packet = msgpack::unpack<client_packet::PTCloseRoom>(data);
 		*pt_close_room = packet;
-		auto result = std::static_pointer_cast<ClientPacket>(pt_close_room);
+		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_close_room);
 		return result;
 	}
-	case PacketType::PT_GET_ROOM_LIST:
+	case PacketType::CLI_GET_ROOM_LIST:
 	{
-		std::shared_ptr<PTGetRoomList> pt_get_room = std::make_shared<PTGetRoomList>();
-		auto packet = msgpack::unpack<PTGetRoomList>(data);
+		std::shared_ptr<client_packet::PTGetRoomList> pt_get_room = std::make_shared<client_packet::PTGetRoomList>();
+		auto packet = msgpack::unpack<client_packet::PTGetRoomList>(data);
 		*pt_get_room = packet;
-		auto result = std::static_pointer_cast<ClientPacket>(pt_get_room);
+		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_get_room);
 		return result;
 	}
 	default:
@@ -40,29 +39,36 @@ std::shared_ptr<ClientPacket> ClientPacketBuilder::getPacket(PacketType type, co
 	}
 }
 
-std::shared_ptr<ServerPacket> ServerPacketBuilder::getPacket(PacketType type, const std::vector<uint8_t>& data)
+std::shared_ptr<server_packet::ServerPacket> ServerPacketBuilder::getPacket(PacketType type, const std::vector<uint8_t>& data)
 {
 	switch (type)
 	{
-	case PacketType::PT_CREATE_ROOM:
+	case PacketType::SRV_NEW_ROOM:
 	{
-		std::shared_ptr<PTNewRoom> pt_new_room = std::make_shared<PTNewRoom>();
-		auto packet = msgpack::unpack<PTNewRoom>(data);
+		std::shared_ptr<server_packet::PTNewRoom> pt_new_room = std::make_shared<server_packet::PTNewRoom>();
+		auto packet = msgpack::unpack<server_packet::PTNewRoom>(data);
 		*pt_new_room = packet;
-		auto result = std::static_pointer_cast<ServerPacket>(pt_new_room);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_new_room);
 		return result;
 	}
-	case PacketType::PT_ROOM_LIST:
+	case PacketType::SRV_ROOM_LIST:
 	{
-		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
-		auto packet = msgpack::unpack<PTRoomList>(data);
+		std::shared_ptr<server_packet::PTRoomList> pt_room_list = std::make_shared<server_packet::PTRoomList>();
+		auto packet = msgpack::unpack<server_packet::PTRoomList>(data);
 		*pt_room_list = packet;
-		auto result = std::static_pointer_cast<ServerPacket>(pt_room_list);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_room_list);
 		return result;
 	}
 	default:
 		return nullptr;
 	}
+}
+
+std::vector<uint8_t> NetworkPacketReader::getData()
+{
+	auto buffer = raw_data_;
+	reset();
+	return buffer;
 }
 
 
@@ -96,7 +102,7 @@ size_t NetworkPacketReader::readNetworkPacket(uint8_t** data, size_t size)
 
 	}
 	// Read body
-
+	packet_type_ = header_.value().packet_type;
 	size_t sizeLeft = header_->data_size - raw_data_.size();
 	size_t sizeToRead = std::min(size, sizeLeft);
 
@@ -106,52 +112,6 @@ size_t NetworkPacketReader::readNetworkPacket(uint8_t** data, size_t size)
 
 	return size;
 }
-
-//std::shared_ptr<Packet> NetworkPacketReader::getPacket() {
-//	switch (header_.value().packet_type)
-//	{
-//	case PacketType::PT_CREATE_ROOM:
-//	{
-//		std::shared_ptr<PTCreateRoom> pt_create_room = std::make_shared<PTCreateRoom>();
-//		auto packet = msgpack::unpack<PTCreateRoom>(raw_data_);
-//		*pt_create_room = packet;
-//
-//		auto result = std::static_pointer_cast<Packet>(pt_create_room);
-//		reset();
-//		return result;
-//	}
-//	case PacketType::PT_CLOSE_ROOM:
-//	{
-//		std::shared_ptr<PTCloseRoom> pt_close_room = std::make_shared<PTCloseRoom>();
-//		auto packet = msgpack::unpack<PTCloseRoom>(raw_data_);
-//		*pt_close_room = packet;
-//		auto result = std::static_pointer_cast<Packet>(pt_close_room);
-//		reset();
-//		return result;
-//	}
-//	case PacketType::PT_GET_ROOM_LIST:
-//	{
-//		std::shared_ptr<PTGetRoomList> pt_get_room = std::make_shared<PTGetRoomList>();
-//		auto packet = msgpack::unpack<PTGetRoomList>(raw_data_);
-//		*pt_get_room = packet;
-//		auto result = std::static_pointer_cast<Packet>(pt_get_room);
-//		reset();
-//		return result;
-//	}
-//	case PacketType::PT_ROOM_LIST:
-//	{
-//		std::shared_ptr<PTRoomList> pt_room_list = std::make_shared<PTRoomList>();
-//		auto packet = msgpack::unpack<PTRoomList>(raw_data_);
-//		*pt_room_list = packet;
-//		auto result = std::static_pointer_cast<Packet>(pt_room_list);
-//		reset();
-//		return result;
-//	}
-//	default:
-//		reset();
-//		return nullptr;
-//	}
-//}
 
 bool NetworkPacketReader::isAllDataComplete() const
 {

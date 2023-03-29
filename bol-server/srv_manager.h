@@ -9,7 +9,7 @@ class SrvManager
 public:
 	const std::map<int, Room>& getRoomList() const { return room_list_; }
 
-	void handlePacket(const PacketWithIdChannel& packet);
+	void handlePacket(const client_packet::PacketWithIdChannel& packet);
 private:
 	std::map<int, Room> room_list_;
 };

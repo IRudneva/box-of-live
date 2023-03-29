@@ -11,6 +11,8 @@ public:
 
 	void init();
 
+	void initConnectionFlag(bool status);
+
 	void backToMenu();
 
 	void drawGui();
@@ -29,6 +31,7 @@ private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
 	tgui::GuiSFML gui_;
 	tgui::ListBox::Ptr room_list_;
+	tgui::Panel::Ptr connection_flag_;
 	std::unique_ptr<ConfigHelper> conf_helper_ = std::make_unique<ConfigHelper>();
 //	Timer timer_;
 //	std::map<int, tgui::Color> color_bacterium_by_type_;

@@ -8,7 +8,7 @@
 class LogicServer
 {
 public:
-	explicit LogicServer(std::shared_ptr<SharedPacketQueue<PacketWithIdChannel>> queue) : queue_(queue){}
+	explicit LogicServer(std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue) : queue_(queue){}
 
 	void runLogicLoop();
 
@@ -16,7 +16,7 @@ public:
 
 private:
 	std::unique_ptr<SrvManager> srv_manager_ = std::make_unique<SrvManager>();
-	std::shared_ptr<SharedPacketQueue<PacketWithIdChannel>> queue_;
+	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
 	std::atomic_bool is_run_ = false;
 	std::thread thread_;
 

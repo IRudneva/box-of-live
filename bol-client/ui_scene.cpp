@@ -50,6 +50,14 @@ void GraphicScene::init()
 			tgui::Grid::Alignment::Left);
 	});
 
+	/////////////////////////////////////////////////////////////////////////////////
+	connection_flag_ = createLayout({ tgui::Color::Red,
+		{ settings_layout->getSize().x - (int)settings_layout->getSize().y * 0.1 , settings_layout->getPosition().y },
+		(int)settings_layout->getSize().y * 0.1, (int)settings_layout->getSize().y * 0.1 });
+	/////////////////////////////////////////////////////////////////////////////////////
+
+	settings_layout->add(connection_flag_);
+
 	fields->add(settings_layout);
 
 	auto game_layout = createLayout({ tgui::Color::White,
@@ -76,7 +84,7 @@ void GraphicScene::init()
 
 	button_create_room->onPress([] {
 		std::cout << "press BCreateR" << std::endl;
-		PTCreateRoom packet("room ololo");
+		client_packet::PTCreateRoom packet("room ololo");
 		NetworkClient::getInstance().sendPacket(packet);
 	});
 
@@ -162,6 +170,10 @@ void GraphicScene::handleEvent(const sf::Event& event)
 	gui_.handleEvent(event);
 }
 
+void  GraphicScene::initConnectionFlag(bool status)
+{
+	connection_flag_->getRenderer()->setBackgroundColor((status) ? tgui::Color::Green : tgui::Color::Red);
+}
 
 void GraphicScene::createRoom(int id_room, const std::string& room_name)
 {
@@ -170,16 +182,9 @@ void GraphicScene::createRoom(int id_room, const std::string& room_name)
 
 void GraphicScene::createRoomList(const std::vector<std::string>& name_room)
 {
-	auto layout = createLayout({ tgui::Color::Green, { 230,140}, 300, 350 });
-	auto grid = tgui::Grid::create();
-	grid->setPosition(layout->getPosition());
-	grid->setSize(layout->getSize());
-	for (auto i = 0; i < name_room.size(); i++) {
-		auto label = createLabel({ name_room[i], 16 });
-		grid->addWidget(label, i, 0, tgui::Grid::Alignment::Left);
+	for (const auto& room: name_room) {
+		room_list_->addItem(room);
 	}
-	gui_.add(layout);
-	gui_.add(grid);
 }
 
 tgui::Panel::Ptr GraphicScene::createLayout(const ConfigLayout& conf) const

@@ -13,8 +13,14 @@ void LogicClient::updateGameScene()
 {
 	while (window_.isOpen())
 	{
-		if(!NetworkClient::getInstance().checkChannelIsValid())
+		if (!NetworkClient::getInstance().checkChannelIsValid()) {
+			graphic_scene_->initConnectionFlag(false);
 			graphic_scene_->backToMenu();
+		}
+		else
+		{
+			graphic_scene_->initConnectionFlag(true);
+		}
 
 		if (queue_->hasPacket())
 		{
@@ -41,21 +47,21 @@ void LogicClient::updateGameScene()
 	}
 }
 
-void LogicClient::handlePacket(std::shared_ptr<ServerPacket> packet) const
+void LogicClient::handlePacket(std::shared_ptr<server_packet::ServerPacket> packet) const
 {
 	switch (packet->type)
 	{
-	case PacketType::PT_CREATE_ROOM: 
+	case PacketType::SRV_NEW_ROOM: 
 	{
-		auto pt_new_room = std::static_pointer_cast<PTNewRoom>(packet);
+		auto pt_new_room = std::static_pointer_cast<server_packet::PTNewRoom>(packet);
 		std::cout << "i received PTCreateRoom" << std::endl;
 		graphic_scene_->createRoom(pt_new_room->room.getId(), pt_new_room->room.name);
 		break;
 	}
-	case PacketType::PT_ROOM_LIST:
+	case PacketType::SRV_ROOM_LIST:
 	{
 		std::vector<std::string> rl;
-		auto pt_room_list = std::static_pointer_cast<PTRoomList>(packet);
+		auto pt_room_list = std::static_pointer_cast<server_packet::PTRoomList>(packet);
 		std::cout << "i received PTRoomList" << std::endl;
 		for (auto r : pt_room_list->room_list)
 		{
@@ -65,6 +71,8 @@ void LogicClient::handlePacket(std::shared_ptr<ServerPacket> packet) const
 		graphic_scene_->createRoomList(rl);
 		break;
 	}
+	case PacketType::SRV_CLOSE_ROOM:
+		break;
 	default:
 		break;
 	}

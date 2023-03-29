@@ -7,16 +7,16 @@
 class LogicClient
 {
 public:
-	explicit LogicClient(std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue) : queue_(queue) {}
+	explicit LogicClient(std::shared_ptr<SharedPacketQueue<std::shared_ptr<server_packet::ServerPacket>>> queue) : queue_(queue) {}
 
 	void initGraphicScene();
 
 	void updateGameScene();
 
 private:
-	std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue_;
+	std::shared_ptr<SharedPacketQueue<std::shared_ptr<server_packet::ServerPacket>>> queue_;
 	std::unique_ptr<GraphicScene> graphic_scene_;
 	sf::RenderWindow window_{ {WIDTH_WINDOW, HEIGHT_WINDOW}, "Box of Live" };
 
-	void handlePacket(std::shared_ptr<ServerPacket> packet) const;
+	void handlePacket(std::shared_ptr<server_packet::ServerPacket> packet) const;
 };

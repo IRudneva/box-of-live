@@ -23,13 +23,15 @@ class NetworkServer
 public:
 	static NetworkServer& getInstance();
 
-	void initQueue(std::shared_ptr<SharedPacketQueue<PacketWithIdChannel>> queue) { queue_ = queue; }
+	void init();
 
-	void run();
+	void initQueue(std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue) { queue_ = queue; }
 
-	void sendPacket(uint32_t id_channel, const ServerPacket& packet);
+	void sendPacket(uint32_t id_channel, const server_packet::ServerPacket& packet);
 
 	void stop();
+
+	void start();
 
 private:
 	static NetworkServer* p_instance;
@@ -37,7 +39,7 @@ private:
 	std::map<uint32_t, std::weak_ptr<BOLSocketChannel>> channel_map_;
 	std::mutex m_;
 	BOLTcpServer server_;
-	std::shared_ptr<SharedPacketQueue<PacketWithIdChannel>> queue_;
+	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
 
 	NetworkServer(const NetworkServer&) = delete;
 	NetworkServer& operator=(NetworkServer&) =delete;
@@ -48,6 +50,8 @@ private:
 	bool initSocket(int port);
 
 	void addChannel(const BOLTcpServer::TSocketChannelPtr& channel);
+
+	void deleteChannel(const BOLTcpServer::TSocketChannelPtr& channel);
 
 	bool findChannel(uint32_t id_channel);
 };

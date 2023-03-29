@@ -7,12 +7,12 @@
 
 struct ClientPacketBuilder
 {
-	static std::shared_ptr<ClientPacket> getPacket(PacketType type, const std::vector<uint8_t>& data);
+	static std::shared_ptr<client_packet::ClientPacket> getPacket(PacketType type, const std::vector<uint8_t>& data);
 };
 
 struct ServerPacketBuilder
 {
-	static std::shared_ptr<ServerPacket> getPacket(PacketType type, const std::vector<uint8_t>& data);
+	static std::shared_ptr<server_packet::ServerPacket> getPacket(PacketType type, const std::vector<uint8_t>& data);
 };
 
 class NetworkPacketReader
@@ -20,26 +20,18 @@ class NetworkPacketReader
 public:
 	size_t readNetworkPacket(uint8_t** data, size_t size);
 
-	PacketType getPacketType() const
-	{
-		if (header_.has_value()) 
-			return header_.value().packet_type;
-		return PacketType::NO_TYPE;
-	}
+	PacketType getPacketType() const { return packet_type_; }
 
-	std::vector<uint8_t> getData()
-	{
-		auto buffer = raw_data_;
-		reset();
-		return buffer;
-	}
+	std::vector<uint8_t> getData();
 
 	bool isAllDataComplete() const;
 
 private:
 	std::optional<PacketHeader> header_;
+	PacketType packet_type_;
 	std::vector<uint8_t> header_raw_data_;
 	std::vector<uint8_t> raw_data_;
+
 	void reset();
 };
 

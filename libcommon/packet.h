@@ -10,7 +10,7 @@ protected:
 public:
 	virtual ~Packet() = default;
 
-	PacketType type = PacketType::NO_TYPE;
+	PacketType type;
 	virtual void pack(msgpack::Packer& packer) const = 0;
 	virtual void pack(msgpack::Unpacker& unpacker) = 0;
 };

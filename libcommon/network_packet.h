@@ -1,9 +1,11 @@
 #pragma once
+#include <optional>
+
 #include "packet.h"
 
 struct PacketHeader
 {
-	PacketType  packet_type = PacketType::NO_TYPE;
+	PacketType  packet_type;
 	uint32_t data_size = 0;
 };
 

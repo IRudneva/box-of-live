@@ -21,11 +21,11 @@ class NetworkClient
 public:
 	static NetworkClient& getInstance();
 
-	void initQueue(std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue) { queue_ = queue; }
+	void initQueue(std::shared_ptr<SharedPacketQueue<std::shared_ptr<server_packet::ServerPacket>>> queue) { queue_ = queue; }
 
 	void run();
 
-	void sendPacket(const ClientPacket& packet);
+	void sendPacket(const client_packet::ClientPacket& packet);
 
 	void stop() { client_.stop(); }
 
@@ -35,7 +35,7 @@ private:
 	static NetworkClient* p_instance;
 	static NetworkClientDestroyer destroyer;
 	BOLTcpClient client_;
-	std::shared_ptr<SharedPacketQueue<std::shared_ptr<ServerPacket>>> queue_;
+	std::shared_ptr<SharedPacketQueue<std::shared_ptr<server_packet::ServerPacket>>> queue_;
 	BOLTcpClient::TSocketChannelPtr channel_ = nullptr;
 	std::mutex m_;
 

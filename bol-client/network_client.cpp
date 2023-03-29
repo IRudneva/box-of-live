@@ -37,7 +37,6 @@ void NetworkClient::run()
 			}
 			if (client_.isReconnect()) {
 				printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
-				linkChannel(channel);
 			}
 		};
 
@@ -84,7 +83,7 @@ bool NetworkClient::initSocket(int port)
 	return true;
 }
 
-void NetworkClient::sendPacket(const ClientPacket& packet)
+void NetworkClient::sendPacket(const client_packet::ClientPacket& packet)
 {
 	if (!checkChannelIsValid())
 		return;
