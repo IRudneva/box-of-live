@@ -169,7 +169,6 @@
     <ClInclude Include="client_packet.h" />
     <ClInclude Include="bol_timer.h" />
     <ClInclude Include="msgpack.hpp" />
-    <ClInclude Include="network_packet.h" />
     <ClInclude Include="packet.h" />
     <ClInclude Include="game_domain.h" />
     <ClInclude Include="framework.h" />

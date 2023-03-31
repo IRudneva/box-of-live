@@ -16,20 +16,17 @@ namespace client_packet {
 	struct PTCreateRoom : ClientPacket
 	{
 		PTCreateRoom() : ClientPacket(PacketType::CLI_CREATE_ROOM) {}
-		PTCreateRoom(const std::string& name_room) : ClientPacket(PacketType::CLI_CREATE_ROOM), room(name_room) {}
 
-		Room room;
-
-		void pack(msgpack::Packer& packer) const override { packer(room); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(room); }
+		void pack(msgpack::Packer& packer) const override { }
+		void pack(msgpack::Unpacker& unpacker) override { }
 	};
 
 	struct PTCloseRoom : ClientPacket
 	{
 		PTCloseRoom() : ClientPacket(PacketType::CLI_CLOSE_ROOM) {}
 		PTCloseRoom(uint32_t id) : ClientPacket(PacketType::CLI_CLOSE_ROOM), id_room(id) {}
-		uint32_t id_room = 0;
 
+		uint32_t id_room = 0;
 		void pack(msgpack::Packer& packer) const override { packer(id_room); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 	};
@@ -38,10 +35,19 @@ namespace client_packet {
 	{
 		PTGetRoomList() : ClientPacket(PacketType::CLI_GET_ROOM_LIST) {}
 
-		uint8_t t = 0;
+		void pack(msgpack::Packer& packer) const override { }
+		void pack(msgpack::Unpacker& unpacker) override { }
+	};
 
-		void pack(msgpack::Packer& packer) const override { packer(t); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(t); }
+	struct PTGetRoomState : ClientPacket
+	{
+		PTGetRoomState() : ClientPacket(PacketType::CLI_GET_ROOM_STATE) {}
+		PTGetRoomState(uint32_t id) : ClientPacket(PacketType::CLI_GET_ROOM_STATE), id_room(id) {}
+
+		uint32_t id_room = 0;
+
+		void pack(msgpack::Packer& packer) const override { packer(id_room); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 	};
 
 	struct PacketWithIdChannel

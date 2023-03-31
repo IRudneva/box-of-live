@@ -1,6 +1,5 @@
 #pragma once
 #include "msgpack.hpp"
-#include "network_packet.h"
 #include <memory>
 
 #include "packet_domain.h"

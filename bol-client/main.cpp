@@ -4,7 +4,7 @@
 
 int main()
 {
-	std::shared_ptr<SharedPacketQueue<std::shared_ptr<server_packet::ServerPacket>>> shared_packet_queue = std::make_shared<SharedPacketQueue<std::shared_ptr<server_packet::ServerPacket>>>();
+	std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> shared_packet_queue = std::make_shared<SharedPacketQueue<std::shared_ptr<Packet>>>();
 	LogicClient logic_client(shared_packet_queue);
 	logic_client.initGraphicScene();
 

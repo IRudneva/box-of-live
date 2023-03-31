@@ -27,7 +27,7 @@ public:
 
 	void initQueue(std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue) { queue_ = queue; }
 
-	void sendPacket(uint32_t id_channel, const server_packet::ServerPacket& packet);
+	void sendPacket(uint32_t id_channel, const Packet& packet);
 
 	void stop();
 

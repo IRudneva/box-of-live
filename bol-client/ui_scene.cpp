@@ -16,7 +16,15 @@ void GraphicScene::init()
 	room_list_->getRenderer()->setBackgroundColor(tgui::Color(210, 210, 210));
 	room_list_->setTextAlignment(tgui::ListBox::TextAlignment::Center);
 	room_list_->getSharedRenderer()->setBorderColor(tgui::Color::White);
-//	room_list_->onItemSelect([] {}); ДОПИСАТЬ ЛОГИКУ
+
+	room_list_->onItemSelect([](const tgui::String& item_name, const tgui::String& id)
+	{
+		std::cout <<"press item: " << item_name << std::endl;
+		uint32_t id_room = static_cast<uint32_t>(std::stoi(id.toStdString()));
+		client_packet::PTGetRoomState packet(id_room);
+		NetworkClient::getInstance().sendPacket(packet);
+	});
+
 	fields->add(room_list_, "room_list");
 	
 	auto settings_layout = createLayout({ tgui::Color::White,
@@ -50,11 +58,10 @@ void GraphicScene::init()
 			tgui::Grid::Alignment::Left);
 	});
 
-	/////////////////////////////////////////////////////////////////////////////////
 	connection_flag_ = createLayout({ tgui::Color::Red,
 		{ settings_layout->getSize().x - (int)settings_layout->getSize().y * 0.1 , settings_layout->getPosition().y },
 		(int)settings_layout->getSize().y * 0.1, (int)settings_layout->getSize().y * 0.1 });
-	/////////////////////////////////////////////////////////////////////////////////////
+
 
 	settings_layout->add(connection_flag_);
 
@@ -84,7 +91,7 @@ void GraphicScene::init()
 
 	button_create_room->onPress([] {
 		std::cout << "press BCreateR" << std::endl;
-		client_packet::PTCreateRoom packet("room ololo");
+		client_packet::PTCreateRoom packet;
 		NetworkClient::getInstance().sendPacket(packet);
 	});
 
@@ -119,8 +126,8 @@ void GraphicScene::init()
 
 void GraphicScene::backToMenu()
 {
-	init();
-	drawGui();
+	//init();
+	//drawGui();
 }
 
 void GraphicScene::drawGui()
@@ -173,6 +180,11 @@ void GraphicScene::handleEvent(const sf::Event& event)
 void  GraphicScene::initConnectionFlag(bool status)
 {
 	connection_flag_->getRenderer()->setBackgroundColor((status) ? tgui::Color::Green : tgui::Color::Red);
+	if(connection_flag_)
+	{
+		client_packet::PTGetRoomList get_room_list;
+		NetworkClient::getInstance().sendPacket(get_room_list);
+	}
 }
 
 void GraphicScene::createRoom(int id_room, const std::string& room_name)
@@ -180,10 +192,10 @@ void GraphicScene::createRoom(int id_room, const std::string& room_name)
 	room_list_->addItem(std::to_string(id_room) +" "+room_name, std::to_string(id_room));
 }
 
-void GraphicScene::createRoomList(const std::vector<std::string>& name_room)
+void GraphicScene::createRoomList(const std::vector<Room>& room_list)
 {
-	for (const auto& room: name_room) {
-		room_list_->addItem(room);
+	for (const auto& [id, name]: room_list) {
+		createRoom(id, name);
 	}
 }
 

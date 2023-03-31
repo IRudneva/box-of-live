@@ -27,9 +27,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="network_packet.h">
-      <Filter>protocol</Filter>
-    </ClInclude>
     <ClInclude Include="packet.h">
       <Filter>protocol</Filter>
     </ClInclude>

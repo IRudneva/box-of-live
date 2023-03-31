@@ -1,4 +1,5 @@
 #pragma once
+#include "packet_domain.h"
 #include "gui_config.h"
 #include <queue>
 
@@ -21,9 +22,9 @@ public:
 
 	void handleEvent(const sf::Event& event);
 
-	void createRoom(int id_room, const std::string& room_name);
+	void createRoom(int id_room, const std::string& room_list);
 
-	void createRoomList(const std::vector<std::string>& name_room);
+	void createRoomList(const std::vector<Room>& name_room);
 
 //	bool isChangedConfig() { return conf_helper_.isChanged(); }
 

@@ -34,6 +34,8 @@ void NetworkClient::run()
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				unlinkChannel();
+				auto message = std::make_shared<ConnectionMessage>(PacketType::MSG_DISABLE);
+				queue_->pushPacket(message);
 			}
 			if (client_.isReconnect()) {
 				printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
@@ -49,8 +51,8 @@ void NetworkClient::run()
 					auto type = channel->reader_.getPacketType();
 					auto data = channel->reader_.getData();
 					auto packet = ServerPacketBuilder::getPacket(type, data);
-					std::cout << "thread:: " << std::this_thread::get_id() << std::endl;
 					queue_->pushPacket(packet);
+				
 				}
 			} while (size_left > 0);
 

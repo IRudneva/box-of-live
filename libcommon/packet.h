@@ -15,4 +15,17 @@ public:
 	virtual void pack(msgpack::Unpacker& unpacker) = 0;
 };
 
+struct ConnectionMessage : Packet
+{
+	ConnectionMessage(PacketType ty) :Packet(ty) {}
+
+	void pack(msgpack::Packer& packer) const  override {}
+	void pack(msgpack::Unpacker& unpacker) override {}
+};
+
+struct PacketHeader
+{
+	PacketType  packet_type;
+	uint32_t data_size = 0;
+};
 

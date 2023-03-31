@@ -1,7 +1,5 @@
 #pragma once
 #include "client_packet.h"
-#include "server_packet.h"
-#include "network_packet.h"
 #include <optional>
 #include <memory>
 
@@ -12,7 +10,7 @@ struct ClientPacketBuilder
 
 struct ServerPacketBuilder
 {
-	static std::shared_ptr<server_packet::ServerPacket> getPacket(PacketType type, const std::vector<uint8_t>& data);
+	static std::shared_ptr<Packet> getPacket(PacketType type, const std::vector<uint8_t>& data);
 };
 
 class NetworkPacketReader

@@ -14,15 +14,14 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 	case PacketType::CLI_CREATE_ROOM:
 	{
-		auto pt_cr = std::static_pointer_cast<client_packet::PTCreateRoom>(packet.packet);
 		std::cout << "i received PTCreateRoom" << std::endl;
-		int id_room = pt_cr->room.getId();
-		Room room = std::move(pt_cr->room);
-		auto new_room = room_list_.insert({ id_room, std::move(room) });
-		std::cout << "room " << id_room << " name " << room.name << " created." << std::endl;
-		server_packet::PTNewRoom pt_new_room;
-		pt_new_room.room = new_room.first->second;
+
+		auto new_room = room_list_.insert({ last_id_room_, Room((uint32_t)last_id_room_, "room") });
+		std::cout << "room " << new_room.first->first << " created." << std::endl;
+
+		server_packet::PTNewRoom pt_new_room(new_room.first->second);
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_new_room);
+		++last_id_room_;
 		break;
 	}
 	case PacketType::CLI_CLOSE_ROOM:
@@ -45,6 +44,14 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		}
 
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_list);
+		break;
+	}
+	case PacketType::CLI_GET_ROOM_STATE:
+	{
+		std::cout << "i received PTGetRoomSTATE" << std::endl;
+		auto pt_rst = std::static_pointer_cast<client_packet::PTGetRoomState>(packet.packet);
+		const server_packet::PTRoomState pt_room_state(pt_rst->id_room);
+		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_state);
 		break;
 	}
 	default:

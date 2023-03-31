@@ -1,7 +1,5 @@
 #include "pch_server.h"
 
-#include <iostream>
-
 #include "logic_server.h"
 #include "shared_packet_queue.h"
 #include "network_server.h"

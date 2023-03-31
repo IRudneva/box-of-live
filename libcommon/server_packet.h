@@ -17,7 +17,7 @@ namespace server_packet {
 	struct PTRoomList : ServerPacket
 	{
 		PTRoomList() :ServerPacket(PacketType::SRV_ROOM_LIST) {}
-
+		PTRoomList(const std::vector<Room>& oth_list) :ServerPacket(PacketType::SRV_ROOM_LIST), room_list(oth_list) {}
 		std::vector<Room> room_list;
 
 		void pack(msgpack::Packer& packer) const  override { packer(room_list); }
@@ -26,7 +26,9 @@ namespace server_packet {
 
 	struct PTNewRoom : ServerPacket
 	{
-		PTNewRoom() :ServerPacket(PacketType::SRV_NEW_ROOM) {}
+		PTNewRoom() : ServerPacket(PacketType::SRV_NEW_ROOM){}
+		PTNewRoom(const Room& other) : ServerPacket(PacketType::SRV_NEW_ROOM), room(other) {}
+		PTNewRoom(uint32_t id_room, const std::string& name) :ServerPacket(PacketType::SRV_NEW_ROOM), room(id_room,name) {}
 		Room room;
 		void pack(msgpack::Packer& packer) const  override { packer(room); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(room); }
@@ -37,6 +39,18 @@ namespace server_packet {
 		PTCloseRoom() :ServerPacket(PacketType::SRV_CLOSE_ROOM) {}
 		uint32_t id_room = 0;
 		void pack(msgpack::Packer& packer) const  override { packer(id_room); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
+	};
+
+	struct PTRoomState : ServerPacket
+	{
+		PTRoomState() : ServerPacket(PacketType::SRV_ROOM_STATE) {}
+		PTRoomState(uint32_t id) : ServerPacket(PacketType::SRV_ROOM_STATE), id_room(id) {}
+
+		uint32_t id_room = 0;
+		// ƒŒ¡¿¬»“‹ »Õ‘ œŒ —Œ—“ŒﬂÕ»ﬁ  ŒÃÕ¿“€
+
+		void pack(msgpack::Packer& packer) const override { packer(id_room); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 	};
 } // namespace server_packet

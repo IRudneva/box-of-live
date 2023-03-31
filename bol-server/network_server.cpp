@@ -26,15 +26,16 @@ void NetworkServer::init()
 	{
 		printf("server listen on port %d ... \n", 1234);
 		server_.onConnection = [this](const BOLTcpServer::TSocketChannelPtr& channel) {
-
 			std::string peeraddr = channel->peeraddr();
 			if (channel->isConnected()) {
 				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				addChannel(channel);
+				ConnectionMessage message{ PacketType::MSG_CONNECTED };
+				sendPacket(channel->id(), message);
+				std::cout << "send message CONNECTED" << std::endl;
 			}
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
-				//deleteChannel(channel);
 			}
 		};
 
@@ -59,14 +60,14 @@ void NetworkServer::init()
 	}
 }
 
-void NetworkServer::sendPacket(uint32_t id_channel, const server_packet::ServerPacket& packet)
+void NetworkServer::sendPacket(uint32_t id_channel, const Packet& packet)
 {
+	PacketWriter writer;
 	//проверить, подключен ли клиент
 	if (findChannel(id_channel))
 	{
-		if (auto client = channel_map_[id_channel].lock())
+		if (auto client = channel_map_[id_channel].lock(); client->isConnected())
 		{
-			PacketWriter writer;
 			auto s_packet = writer.serialize(packet);
 			client->write(s_packet.data(), (int)s_packet.size());
 		}
