@@ -75,6 +75,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 		std::cout << "i received PTStartGame" << std::endl;
 		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).reset();
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).update();
 		const server_packet::PTRoomState pt_room_state(pt_st->id_room, rooms_state_.at(static_cast<int>(pt_st->id_room)).getCellInfo());
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_state);

@@ -12,7 +12,7 @@ constexpr static int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
 constexpr static int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
 constexpr static int NO_RESULT = -1;
 
-enum class TypeCell
+enum class TypeCell : uint32_t
 {
 	BACTERIUM,
 	GRASS,
@@ -49,9 +49,19 @@ struct CellInfo {
 	int y = 0;
 	std::shared_ptr<BacteriumInfo> bacterium_info = nullptr;
 
-	template<class T>
-	void pack(T& packer) {
-		packer(x, y, *bacterium_info);
+	void pack(msgpack::Packer& packer) const
+	{
+		if (bacterium_info != nullptr)
+			packer(x, y, *bacterium_info);
+		else
+			packer(x, y);
+	}
+	void pack(msgpack::Unpacker& unpacker)
+	{
+		if (bacterium_info != nullptr)
+			unpacker(x, y, *bacterium_info);
+		else
+			unpacker(x, y);
 	}
 };
 

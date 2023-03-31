@@ -33,7 +33,7 @@ void LogicClient::updateGameScene()
 		}
 
 		window_.clear();
-		graphic_scene_->drawGui();
+		graphic_scene_->update();
 		window_.display();
 	}
 }
@@ -74,6 +74,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 		auto pt_room_state = std::static_pointer_cast<server_packet::PTRoomState>(packet);
 		graphic_scene_->initButtonStart(true);
 		graphic_scene_->initConfigGrid(pt_room_state->id_room, true);
+		graphic_scene_->drawGui(pt_room_state->id_room, pt_room_state->info);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:

@@ -20,7 +20,7 @@ public:
 
 	void backToMenu();
 
-	void drawGui();
+	void drawGui(uint32_t id_room, const std::vector<CellInfo>& info);
 
 	void update();
 
@@ -40,7 +40,7 @@ private:
 	//tgui::Grid::Ptr config_grid_;
 	std::unique_ptr<ConfigHelper> conf_helper_ = std::make_unique<ConfigHelper>();
 //	Timer timer_;
-//	std::map<int, tgui::Color> color_bacterium_by_type_;
+	std::map<int, tgui::Color> color_bacterium_by_type_;
 	//std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
 	//std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 
@@ -54,9 +54,9 @@ private:
 
 	tgui::EditBox::Ptr createEditBox(const ConfigEditBox& conf) const;
 
-	//tgui::Color getColorCellByType(TypeCell type, std::optional<BacteriumInfo> inf_bacterium);
+	tgui::Color getColorCellByType(TypeCell type, std::shared_ptr<BacteriumInfo> inf_bacterium);
 
-	//tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
+	tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
 
-	//tgui::Color getCellColorByBacteriumId(int id);
+	tgui::Color getCellColorByBacteriumId(int id);
 };
