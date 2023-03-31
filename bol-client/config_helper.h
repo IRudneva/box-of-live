@@ -1,19 +1,9 @@
 #pragma once
+#include "game_domain.h"
 #include <functional>
 #include <map>
 #include <string>
 
-struct GameConfig
-{
-	GameConfig() = default;
-
-	int energy_base = 0;
-	int energy_action_cost = 0;
-	int energy_to_clone = 0;
-	int update_time = 0;
-	int grass_update_time = 0;
-	int energy_from_grass = 0;
-};
 
 class ConfigHelper
 {

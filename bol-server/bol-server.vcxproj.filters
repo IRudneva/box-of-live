@@ -19,6 +19,9 @@
     <Filter Include="logic">
       <UniqueIdentifier>{7ed090a7-1642-4bf5-aa80-f351ee9cfeb2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game_state">
+      <UniqueIdentifier>{b93fcc91-3feb-4ca0-ab94-eabc31437d15}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -36,6 +39,24 @@
     <ClCompile Include="srv_manager.cpp">
       <Filter>logic</Filter>
     </ClCompile>
+    <ClCompile Include="field_state.cpp">
+      <Filter>game_state</Filter>
+    </ClCompile>
+    <ClCompile Include="cell.cpp">
+      <Filter>game_state</Filter>
+    </ClCompile>
+    <ClCompile Include="bacterium.cpp">
+      <Filter>game_state</Filter>
+    </ClCompile>
+    <ClCompile Include="grass.cpp">
+      <Filter>game_state</Filter>
+    </ClCompile>
+    <ClCompile Include="position.cpp">
+      <Filter>game_state</Filter>
+    </ClCompile>
+    <ClCompile Include="field_state_info.cpp">
+      <Filter>game_state</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch_server.h">
@@ -52,6 +73,24 @@
     </ClInclude>
     <ClInclude Include="bol_socket_channel.h">
       <Filter>network</Filter>
+    </ClInclude>
+    <ClInclude Include="field_state.h">
+      <Filter>game_state</Filter>
+    </ClInclude>
+    <ClInclude Include="cell.h">
+      <Filter>game_state</Filter>
+    </ClInclude>
+    <ClInclude Include="bacterium.h">
+      <Filter>game_state</Filter>
+    </ClInclude>
+    <ClInclude Include="grass.h">
+      <Filter>game_state</Filter>
+    </ClInclude>
+    <ClInclude Include="position.h">
+      <Filter>game_state</Filter>
+    </ClInclude>
+    <ClInclude Include="field_state_info.h">
+      <Filter>game_state</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,6 +1,7 @@
 #pragma once
 #include "packet.h"
 #include "packet_domain.h"
+#include "game_domain.h"
 #include "msgpack.hpp"
 #include <vector>
 
@@ -45,12 +46,22 @@ namespace server_packet {
 	struct PTRoomState : ServerPacket
 	{
 		PTRoomState() : ServerPacket(PacketType::SRV_ROOM_STATE) {}
-		PTRoomState(uint32_t id) : ServerPacket(PacketType::SRV_ROOM_STATE), id_room(id) {}
+		PTRoomState(uint32_t id, const std::vector<CellInfo>& cell_info) : ServerPacket(PacketType::SRV_ROOM_STATE), id_room(id), info(cell_info) {}
 
 		uint32_t id_room = 0;
-		// ƒŒ¡¿¬»“‹ »Õ‘ œŒ —Œ—“ŒﬂÕ»ﬁ  ŒÃÕ¿“€
+		std::vector<CellInfo> info = {};
 
-		void pack(msgpack::Packer& packer) const override { packer(id_room); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
+		void pack(msgpack::Packer& packer) const override { packer(id_room, info); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, info); }
+	};
+
+	struct PTNewConfig : ServerPacket
+	{
+		PTNewConfig() : ServerPacket(PacketType::SRV_NEW_CONFIG) {}
+		PTNewConfig(uint32_t id, std::shared_ptr<GameConfig> conf) : ServerPacket(PacketType::SRV_NEW_CONFIG), id_room(id), game_config(conf) {}
+		uint32_t id_room;
+		std::shared_ptr<GameConfig> game_config;
+		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,*game_config); }
 	};
 } // namespace server_packet

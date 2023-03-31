@@ -31,14 +31,41 @@ static int getRandomInt(int from, int to)
 
 struct BacteriumInfo
 {
+	BacteriumInfo() = default;
+	BacteriumInfo(int id, int en):id_type(id),energy(en) {}
 	int id_type = 0;
 	int energy = 0;
+	template<class T>
+	void pack(T& packer) {
+		packer(id_type, energy);
+	}
 };
 
 struct CellInfo {
+	CellInfo() = default;
+	CellInfo(TypeCell t, int ox, int oy, std::shared_ptr<BacteriumInfo> inf) : type(t),x(ox), y(oy), bacterium_info(inf) {}
 	TypeCell type = TypeCell::EMPTY;
 	int x = 0;
 	int y = 0;
-	std::optional<BacteriumInfo> bacterium_info;
+	std::shared_ptr<BacteriumInfo> bacterium_info = nullptr;
+
+	template<class T>
+	void pack(T& packer) {
+		packer(x, y, *bacterium_info);
+	}
 };
 
+struct GameConfig
+{
+	int energy_base = 0;
+	int energy_action_cost = 0;
+	int energy_to_clone = 0;
+	int update_time = 0;
+	int grass_update_time = 0;
+	int energy_from_grass = 0;
+
+	template<class T>
+	void pack(T& packer) {
+		packer(energy_base, energy_action_cost, energy_to_clone, update_time, grass_update_time, energy_from_grass);
+	}
+};

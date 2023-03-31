@@ -14,6 +14,10 @@ public:
 
 	void initConnectionFlag(bool status);
 
+	void initConfigGrid(uint32_t id_room, bool status);
+
+	void initButtonStart(bool status) const { gui_.get("button_start")->setEnabled(status); };
+
 	void backToMenu();
 
 	void drawGui();
@@ -22,22 +26,23 @@ public:
 
 	void handleEvent(const sf::Event& event);
 
-	void createRoom(int id_room, const std::string& room_list);
+	void createRoom(int id_room, const std::string& room);
 
-	void createRoomList(const std::vector<Room>& name_room);
-
-//	bool isChangedConfig() { return conf_helper_.isChanged(); }
+	void createRoomList(const std::vector<Room>& room_list);
 
 private:
 	std::weak_ptr<tgui::CanvasSFML> canvas_;
 	tgui::GuiSFML gui_;
 	tgui::ListBox::Ptr room_list_;
 	tgui::Panel::Ptr connection_flag_;
+	std::map<int, tgui::Grid::Ptr> config_grid_for_room_;
+	int id_selected_room_ = 0;
+	//tgui::Grid::Ptr config_grid_;
 	std::unique_ptr<ConfigHelper> conf_helper_ = std::make_unique<ConfigHelper>();
 //	Timer timer_;
 //	std::map<int, tgui::Color> color_bacterium_by_type_;
 	//std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
-	std::unique_ptr<GameConfig> game_config_ = std::make_unique<GameConfig>();
+	//std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
 	

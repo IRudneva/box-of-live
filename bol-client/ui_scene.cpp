@@ -17,12 +17,13 @@ void GraphicScene::init()
 	room_list_->setTextAlignment(tgui::ListBox::TextAlignment::Center);
 	room_list_->getSharedRenderer()->setBorderColor(tgui::Color::White);
 
-	room_list_->onItemSelect([](const tgui::String& item_name, const tgui::String& id)
+	room_list_->onItemSelect([this](const tgui::String& item_name, const tgui::String& id)
 	{
 		std::cout <<"press item: " << item_name << std::endl;
 		uint32_t id_room = static_cast<uint32_t>(std::stoi(id.toStdString()));
 		client_packet::PTGetRoomState packet(id_room);
 		NetworkClient::getInstance().sendPacket(packet);
+		id_selected_room_ = static_cast<int>(id_room);
 	});
 
 	fields->add(room_list_, "room_list");
@@ -32,32 +33,7 @@ void GraphicScene::init()
 		(int)HEIGHT_WINDOW * 0.25, WIDTH_WINDOW - room_list_->getSize().x }
 	);
 
-	auto grid = tgui::Grid::create();
-
-	grid->setAutoSize(true);
-	grid->setPosition(tgui::bindLeft(room_list_), tgui::bindTop(room_list_));
-	settings_layout->add(grid);
-
-	conf_helper_->init(*game_config_);
-
-	conf_helper_->doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
-		auto label = createLabel({ config_name, 14 });
-
-		grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
-
-		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.default_value) });
-		edit_box->onTextChange([edit_box, &config_record]() {
-			auto text = edit_box->getText();
-			if (!text.empty()) {
-				config_record.setter_function(text.toInt());
-			}
-		});
-		grid->addWidget(edit_box,
-			config_record.row_id,
-			config_record.column_id * 2 + 1,
-			tgui::Grid::Alignment::Left);
-	});
-
+	
 	connection_flag_ = createLayout({ tgui::Color::Red,
 		{ settings_layout->getSize().x - (int)settings_layout->getSize().y * 0.1 , settings_layout->getPosition().y },
 		(int)settings_layout->getSize().y * 0.1, (int)settings_layout->getSize().y * 0.1 });
@@ -65,7 +41,7 @@ void GraphicScene::init()
 
 	settings_layout->add(connection_flag_);
 
-	fields->add(settings_layout);
+	fields->add(settings_layout, "settings_layout");
 
 	auto game_layout = createLayout({ tgui::Color::White,
 		{ tgui::bindLeft(settings_layout), tgui::bindBottom(settings_layout) },
@@ -104,15 +80,17 @@ void GraphicScene::init()
 		{ size_settings_layout.x *0.25, size_settings_layout.y *0.4 },
 		"START" });
 
-	/*button_start->onPress([] {
+	button_start->setEnabled(false);
+
+	button_start->onPress([this] {
 		std::cout << "press START" << std::endl;
-		PTStartGame packet();
+		client_packet::PTStartGame packet(static_cast<uint32_t>(id_selected_room_));
 		NetworkClient::getInstance().sendPacket(packet);
-	});*/
+	});
 
 
 	buttons->add(button_create_room);
-	buttons->add(button_start);
+	buttons->add(button_start, "button_start");
 
 
 	gui_.add(fields, "fields");
@@ -177,6 +155,20 @@ void GraphicScene::handleEvent(const sf::Event& event)
 	gui_.handleEvent(event);
 }
 
+void GraphicScene::initConfigGrid(uint32_t id_room, bool status)
+{
+	std::for_each(config_grid_for_room_.begin(), config_grid_for_room_.end(),
+		[](auto config_grid)
+	{
+		config_grid.second->setVisible(false);
+		config_grid.second->setEnabled(false);
+	}
+	);
+	config_grid_for_room_.at(static_cast<int>(id_room))->setVisible(status);
+	config_grid_for_room_.at(static_cast<int>(id_room))->setEnabled(status);
+	std::cout << "set visible config room " << id_room << std::endl;
+}
+
 void  GraphicScene::initConnectionFlag(bool status)
 {
 	connection_flag_->getRenderer()->setBackgroundColor((status) ? tgui::Color::Green : tgui::Color::Red);
@@ -187,15 +179,58 @@ void  GraphicScene::initConnectionFlag(bool status)
 	}
 }
 
-void GraphicScene::createRoom(int id_room, const std::string& room_name)
+void GraphicScene::createRoom(int id_room, const std::string& room)
 {
-	room_list_->addItem(std::to_string(id_room) +" "+room_name, std::to_string(id_room));
+	auto id_item = room_list_->addItem(std::to_string(id_room) +" "+room, std::to_string(id_room));
+
+	std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
+	conf_helper_->init(*game_config);
+	client_packet::PTChangeConfig pt_def_config({ static_cast<uint32_t>(id_room), game_config });
+	NetworkClient::getInstance().sendPacket(pt_def_config);
+
+	auto grid = tgui::Grid::create();
+	grid->setAutoSize(true);
+	grid->setPosition(tgui::bindRight(room_list_), tgui::bindTop(room_list_));
+	//
+	conf_helper_->doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
+		auto label = createLabel({ config_name, 14 });
+
+		grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
+
+		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.default_value) });
+
+		edit_box->onTextChange([this, edit_box, &config_record]() {
+			auto text = edit_box->getText();
+			if (!text.empty())
+			{
+				config_record.setter_function(text.toInt());
+				/*
+				std::shared_ptr<GameConfig> gc = std::make_shared<GameConfig>();
+				for(const auto& [name, conf] : conf_helper_->getRecords())
+				{
+					
+				}
+				client_packet::PTChangeConfig pt_change_config({ static_cast<uint32_t>(id_selected_room_), gc});
+				NetworkClient::getInstance().sendPacket(pt_change_config);*/
+			}
+		});
+
+		grid->addWidget(edit_box,
+			config_record.row_id,
+			config_record.column_id * 2 + 1,
+			tgui::Grid::Alignment::Left);
+	});
+	grid->setVisible(false);
+	grid->setEnabled(false);
+	gui_.add(grid, "grid_"+std::to_string(id_room));
+	config_grid_for_room_.insert({id_room, grid});
+	
 }
 
 void GraphicScene::createRoomList(const std::vector<Room>& room_list)
 {
-	for (const auto& [id, name]: room_list) {
-		createRoom(id, name);
+	for (const auto& room: room_list) {
+		createRoom(static_cast<int>(room.id), room.name);
 	}
 }
 

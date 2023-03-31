@@ -164,6 +164,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bacterium.cpp" />
+    <ClCompile Include="cell.cpp" />
+    <ClCompile Include="field_state.cpp" />
+    <ClCompile Include="field_state_info.cpp" />
+    <ClCompile Include="grass.cpp" />
     <ClCompile Include="logic_server.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="network_server.cpp" />
@@ -171,13 +176,20 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="position.cpp" />
     <ClCompile Include="srv_manager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="bacterium.h" />
+    <ClInclude Include="cell.h" />
+    <ClInclude Include="field_state.h" />
+    <ClInclude Include="field_state_info.h" />
+    <ClInclude Include="grass.h" />
     <ClInclude Include="logic_server.h" />
     <ClInclude Include="bol_socket_channel.h" />
     <ClInclude Include="network_server.h" />
     <ClInclude Include="pch_server.h" />
+    <ClInclude Include="position.h" />
     <ClInclude Include="srv_manager.h" />
   </ItemGroup>
   <ItemGroup>

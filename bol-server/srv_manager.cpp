@@ -18,7 +18,10 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		auto new_room = room_list_.insert({ last_id_room_, Room((uint32_t)last_id_room_, "room") });
 		std::cout << "room " << new_room.first->first << " created." << std::endl;
-
+		////////////////////////////////////////////
+		FieldStateInfo game_field_state;
+		rooms_state_.insert({ last_id_room_, game_field_state });
+			////////////////////////////////
 		server_packet::PTNewRoom pt_new_room(new_room.first->second);
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_new_room);
 		++last_id_room_;
@@ -50,7 +53,30 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 		std::cout << "i received PTGetRoomSTATE" << std::endl;
 		auto pt_rst = std::static_pointer_cast<client_packet::PTGetRoomState>(packet.packet);
-		const server_packet::PTRoomState pt_room_state(pt_rst->id_room);
+		const server_packet::PTRoomState pt_room_state(pt_rst->id_room, rooms_state_.at(static_cast<int>(pt_rst->id_room)).getCellInfo());
+		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_state);
+		break;
+	}
+	case PacketType::CLI_CHANGE_CONFIG:
+	{
+		std::cout << "i received ChangeConfig" << std::endl;
+		auto pt_change_config = std::static_pointer_cast<client_packet::PTChangeConfig>(packet.packet);
+		rooms_state_.at(static_cast<int>(pt_change_config->id_room)).init(pt_change_config->game_config);
+		std::cout << "new config for room: " << pt_change_config->id_room<< std::endl;
+		std::cout << "eb " << pt_change_config->game_config->energy_base << std::endl;
+		std::cout << "eac " << pt_change_config->game_config->energy_action_cost << std::endl;
+		std::cout << "efg " << pt_change_config->game_config->energy_from_grass << std::endl;
+		std::cout << "etc " << pt_change_config->game_config->energy_to_clone << std::endl;
+		std::cout << "ut " << pt_change_config->game_config->update_time << std::endl;
+		std::cout << "gut " << pt_change_config->game_config->grass_update_time << std::endl;
+		break;
+	}
+	case PacketType::CLI_START_GAME:
+	{
+		std::cout << "i received PTStartGame" << std::endl;
+		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).update();
+		const server_packet::PTRoomState pt_room_state(pt_st->id_room, rooms_state_.at(static_cast<int>(pt_st->id_room)).getCellInfo());
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_state);
 		break;
 	}

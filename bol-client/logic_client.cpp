@@ -71,6 +71,9 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	case PacketType::SRV_ROOM_STATE:
 	{
 		std::cout << "i received SRVROOM_STATE" << std::endl;
+		auto pt_room_state = std::static_pointer_cast<server_packet::PTRoomState>(packet);
+		graphic_scene_->initButtonStart(true);
+		graphic_scene_->initConfigGrid(pt_room_state->id_room, true);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:
