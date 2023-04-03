@@ -46,13 +46,18 @@ namespace server_packet {
 	struct PTRoomState : ServerPacket
 	{
 		PTRoomState() : ServerPacket(PacketType::SRV_ROOM_STATE) {}
-		PTRoomState(uint32_t id, const std::vector<CellInfo>& cell_info) : ServerPacket(PacketType::SRV_ROOM_STATE), id_room(id), info(cell_info) {}
+		PTRoomState(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info)
+		: ServerPacket(PacketType::SRV_ROOM_STATE),
+		id_room(id),
+		grass_info(g_info),
+		bacterium_info(bact_info) {}
 
 		uint32_t id_room = 0;
-		std::vector<CellInfo> info = {};
+		std::vector<GrassInfo> grass_info = {};
+		std::vector<BacteriumInfo> bacterium_info = {};
 
-		void pack(msgpack::Packer& packer) const override { packer(id_room, info); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, info); }
+		void pack(msgpack::Packer& packer) const override { packer(id_room, grass_info, bacterium_info); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, grass_info, bacterium_info); }
 	};
 
 	struct PTNewConfig : ServerPacket

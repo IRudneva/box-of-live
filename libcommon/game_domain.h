@@ -29,40 +29,28 @@ static int getRandomInt(int from, int to)
 	return gen(rng);
 }
 
-struct BacteriumInfo
-{
-	BacteriumInfo() = default;
-	BacteriumInfo(int id, int en):id_type(id),energy(en) {}
-	int id_type = 0;
-	int energy = 0;
-	template<class T>
-	void pack(T& packer) {
-		packer(id_type, energy);
-	}
-};
-
-struct CellInfo {
-	CellInfo() = default;
-	CellInfo(TypeCell t, int ox, int oy, std::shared_ptr<BacteriumInfo> inf) : type(t),x(ox), y(oy), bacterium_info(inf) {}
-	TypeCell type = TypeCell::EMPTY;
+struct GrassInfo {
+	GrassInfo() = default;
+	GrassInfo(int ox, int oy) : x(ox), y(oy) {}
 	int x = 0;
 	int y = 0;
-	std::shared_ptr<BacteriumInfo> bacterium_info = nullptr;
+	virtual ~GrassInfo() = default;
 
-	void pack(msgpack::Packer& packer) const
-	{
-		if (bacterium_info != nullptr)
-			packer(x, y, *bacterium_info);
-		else
-			packer(x, y);
-	}
-	void pack(msgpack::Unpacker& unpacker)
-	{
-		if (bacterium_info != nullptr)
-			unpacker(x, y, *bacterium_info);
-		else
-			unpacker(x, y);
-	}
+	virtual void pack(msgpack::Packer& packer) const { packer(x, y); }
+	virtual void pack(msgpack::Unpacker& unpacker) { unpacker(x, y); }
+}; 
+
+struct BacteriumInfo 
+{
+	BacteriumInfo() = default;
+	BacteriumInfo(int ox, int oy, int id, int en) : x(ox), y(oy), id_type(id), energy(en) {}
+	int x = 0;
+	int y = 0;
+	int id_type = 0;
+	int energy = 0;
+
+	void pack(msgpack::Packer& packer) const { packer(x, y, id_type, energy); }
+	void pack(msgpack::Unpacker& unpacker) { unpacker(x, y,id_type, energy); }
 };
 
 struct GameConfig

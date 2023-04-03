@@ -19,8 +19,14 @@
     <Filter Include="logic">
       <UniqueIdentifier>{7ed090a7-1642-4bf5-aa80-f351ee9cfeb2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="game_state">
+    <Filter Include="game state">
       <UniqueIdentifier>{b93fcc91-3feb-4ca0-ab94-eabc31437d15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game state\game logic">
+      <UniqueIdentifier>{f7923df3-27c5-44c5-b71d-ebd4faf0d844}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game state\game object">
+      <UniqueIdentifier>{215ee474-b376-4893-b485-bf045697b77c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -39,23 +45,23 @@
     <ClCompile Include="srv_manager.cpp">
       <Filter>logic</Filter>
     </ClCompile>
-    <ClCompile Include="field_state.cpp">
-      <Filter>game_state</Filter>
+    <ClCompile Include="bacterium.cpp">
+      <Filter>game state\game object</Filter>
     </ClCompile>
     <ClCompile Include="cell.cpp">
-      <Filter>game_state</Filter>
+      <Filter>game state\game object</Filter>
     </ClCompile>
-    <ClCompile Include="bacterium.cpp">
-      <Filter>game_state</Filter>
-    </ClCompile>
-    <ClCompile Include="grass.cpp">
-      <Filter>game_state</Filter>
-    </ClCompile>
-    <ClCompile Include="position.cpp">
-      <Filter>game_state</Filter>
+    <ClCompile Include="field_state.cpp">
+      <Filter>game state\game logic</Filter>
     </ClCompile>
     <ClCompile Include="field_state_info.cpp">
-      <Filter>game_state</Filter>
+      <Filter>game state\game logic</Filter>
+    </ClCompile>
+    <ClCompile Include="grass.cpp">
+      <Filter>game state\game object</Filter>
+    </ClCompile>
+    <ClCompile Include="position.cpp">
+      <Filter>game state\game logic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -74,23 +80,23 @@
     <ClInclude Include="bol_socket_channel.h">
       <Filter>network</Filter>
     </ClInclude>
-    <ClInclude Include="field_state.h">
-      <Filter>game_state</Filter>
+    <ClInclude Include="bacterium.h">
+      <Filter>game state\game object</Filter>
     </ClInclude>
     <ClInclude Include="cell.h">
-      <Filter>game_state</Filter>
+      <Filter>game state\game object</Filter>
     </ClInclude>
-    <ClInclude Include="bacterium.h">
-      <Filter>game_state</Filter>
-    </ClInclude>
-    <ClInclude Include="grass.h">
-      <Filter>game_state</Filter>
-    </ClInclude>
-    <ClInclude Include="position.h">
-      <Filter>game_state</Filter>
+    <ClInclude Include="field_state.h">
+      <Filter>game state\game logic</Filter>
     </ClInclude>
     <ClInclude Include="field_state_info.h">
-      <Filter>game_state</Filter>
+      <Filter>game state\game logic</Filter>
+    </ClInclude>
+    <ClInclude Include="grass.h">
+      <Filter>game state\game object</Filter>
+    </ClInclude>
+    <ClInclude Include="position.h">
+      <Filter>game state\game logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

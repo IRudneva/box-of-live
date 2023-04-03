@@ -20,7 +20,7 @@ public:
 
 	void backToMenu();
 
-	void drawGui(uint32_t id_room, const std::vector<CellInfo>& info);
+	void drawGui(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
 
 	void update();
 
@@ -53,8 +53,6 @@ private:
 	tgui::Label::Ptr createLabel(const ConfigLabel& conf) const;
 
 	tgui::EditBox::Ptr createEditBox(const ConfigEditBox& conf) const;
-
-	tgui::Color getColorCellByType(TypeCell type, std::shared_ptr<BacteriumInfo> inf_bacterium);
 
 	tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
 

@@ -65,6 +65,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	case PacketType::MSG_DISABLE:
 	{
 		graphic_scene_->initConnectionFlag(false);
+		graphic_scene_->initButtonStart(false);
 		graphic_scene_->backToMenu();
 		break;
 	}
@@ -74,7 +75,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 		auto pt_room_state = std::static_pointer_cast<server_packet::PTRoomState>(packet);
 		graphic_scene_->initButtonStart(true);
 		graphic_scene_->initConfigGrid(pt_room_state->id_room, true);
-		graphic_scene_->drawGui(pt_room_state->id_room, pt_room_state->info);
+		graphic_scene_->drawGui(pt_room_state->id_room, pt_room_state->grass_info, pt_room_state->bacterium_info);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:

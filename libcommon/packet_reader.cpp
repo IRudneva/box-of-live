@@ -81,7 +81,7 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	case PacketType::SRV_ROOM_STATE:
 	{
 		auto packet = msgpack::unpack<server_packet::PTRoomState>(data);
-		auto pt_room_state = std::make_shared<server_packet::PTRoomState>(packet.id_room, packet.info);///////////////////
+		auto pt_room_state = std::make_shared<server_packet::PTRoomState>(packet.id_room, packet.grass_info, packet.bacterium_info);///////////////////
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_room_state);
 		return result;
 	}
@@ -152,7 +152,6 @@ bool NetworkPacketReader::isAllDataComplete() const
 
 	return header_->data_size == raw_data_.size();
 }
-
 
 void NetworkPacketReader::reset()
 {

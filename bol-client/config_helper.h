@@ -4,7 +4,6 @@
 #include <map>
 #include <string>
 
-
 class ConfigHelper
 {
 public:

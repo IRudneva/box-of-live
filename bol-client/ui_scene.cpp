@@ -104,23 +104,34 @@ void GraphicScene::init()
 
 void GraphicScene::backToMenu()
 {
-	//init();
-	//drawGui();
+	if (auto canvas = canvas_.lock(); canvas != nullptr) {
+		canvas->clear(tgui::Color::White);
+		canvas->display();
+	}
 }
 
-void GraphicScene::drawGui(uint32_t id_room, const std::vector<CellInfo>& info)
+void GraphicScene::drawGui(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf)
 {
 //	gui_.draw();
 	if (auto canvas = canvas_.lock(); canvas != nullptr) {
 		canvas->clear(tgui::Color::White);
-		for (const auto& cell : info)
+		sf::RectangleShape cell_shape;
+		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+		for(const auto& grass : grass_info)
 		{
-			sf::RectangleShape cell_shape;
-			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
-			float pos_x = static_cast<float>(cell.x *CELL_SIZE);
-			float pos_y = static_cast<float>(cell.y * CELL_SIZE);
+			float pos_x = static_cast<float>(grass.x *CELL_SIZE);
+			float pos_y = static_cast<float>(grass.y * CELL_SIZE);
 			cell_shape.setPosition(pos_x, pos_y); // 
-			cell_shape.setFillColor(getColorCellByType(cell.type, cell.bacterium_info));
+			cell_shape.setFillColor(tgui::Color::Green);
+			cell_shape.setOutlineColor(sf::Color::Black);
+			canvas->draw(cell_shape);
+		}
+		for (const auto& bact : bact_inf)
+		{
+			float pos_x = static_cast<float>(bact.x *CELL_SIZE);
+			float pos_y = static_cast<float>(bact.y * CELL_SIZE);
+			cell_shape.setPosition(pos_x, pos_y); // 
+			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy,getCellColorByBacteriumId(bact.id_type)));
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canvas->draw(cell_shape);
 		}
@@ -132,34 +143,6 @@ void GraphicScene::drawGui(uint32_t id_room, const std::vector<CellInfo>& info)
 void GraphicScene::update()
 {
 	gui_.draw();
-	/*gui_.draw();
-
-	if (auto canvas = canvas_.lock(); canvas != nullptr) {
-		canvas->clear(tgui::Color::White);
-*/
-		//if (start_button->isMouseDown())
-			//field_state_info_->reset();
-
-		//if (timer_.timedOut())
-			//field_state_info_->update();
-		
-		//auto field_data = field_state_info_->getCellInfo();
-
-		//for (const auto& cell : field_data)
-		//{
-		//	sf::RectangleShape cell_shape;
-		//	cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE)); //
-		//	float pos_x = static_cast<float>(cell.x *CELL_SIZE);
-		//	float pos_y = static_cast<float>(cell.y * CELL_SIZE);
-		//	cell_shape.setPosition(pos_x, pos_y); // 
-		//	cell_shape.setFillColor(getColorCellByType(cell.type, cell.bacterium_info));
-		//	cell_shape.setOutlineColor(sf::Color::Black);
-		//	canvas->draw(cell_shape);
-		//}
-	//	drawMarkupField(canvas);
-
-	//	canvas->display();
-	//}
 }
 
 void GraphicScene::handleEvent(const sf::Event& event)
@@ -234,7 +217,7 @@ void GraphicScene::createRoom(int id_room, const std::string& room)
 	});
 	grid->setVisible(false);
 	grid->setEnabled(false);
-	gui_.add(grid, "grid_"+std::to_string(id_room));
+	gui_.add(grid, "grid_" + std::to_string(id_room));
 	config_grid_for_room_.insert({id_room, grid});
 	
 }
@@ -311,33 +294,33 @@ tgui::EditBox::Ptr GraphicScene::createEditBox(const ConfigEditBox& conf) const
 	edit_box->setDefaultText(conf.text);
 	return edit_box;
 }
-
-tgui::Color GraphicScene::getColorCellByType(TypeCell type, std::shared_ptr<BacteriumInfo> inf_bacterium)
-{
-	switch (type)
-	{
-	case TypeCell::GRASS:
-		return tgui::Color::Green;
-	case TypeCell::BACTERIUM:
-	{
-		if (inf_bacterium!=nullptr)
-		{
-			tgui::Color color_bacterium = getCellColorByBacteriumId(inf_bacterium->id_type);
-			return getCellColorByBacteriumEnergy(inf_bacterium->energy, color_bacterium);
-		}
-	}
-	case TypeCell::EMPTY:
-		return tgui::Color::White;
-	}
-	return tgui::Color::White;
-}
+//
+//tgui::Color GraphicScene::getColorCellByType(TypeCell type, std::shared_ptr<BacteriumInfo> inf_bacterium)
+//{
+//	switch (type)
+//	{
+//	case TypeCell::GRASS:
+//		return tgui::Color::Green;
+//	case TypeCell::BACTERIUM:
+//	{
+//		if (inf_bacterium!=nullptr)
+//		{
+//			tgui::Color color_bacterium = getCellColorByBacteriumId(inf_bacterium->id_type);
+//			return getCellColorByBacteriumEnergy(inf_bacterium->energy, color_bacterium);
+//		}
+//	}
+//	case TypeCell::EMPTY:
+//		return tgui::Color::White;
+//	}
+//	return tgui::Color::White;
+//}
 
 tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int energy, tgui::Color color) const
 {
-	//if (energy < game_config_->energy_base * 0.25)
-	//	return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.4) };
-	//if (energy < game_config_->energy_base * 0.7)
-	//	return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };
+	/*if (energy < game_config_->energy_base * 0.25)
+		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.4) };
+	if (energy < game_config_->energy_base * 0.7)
+		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };*/
 	return color;
 }
 
