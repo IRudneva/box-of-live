@@ -47,7 +47,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 		auto pt_new_room = std::static_pointer_cast<server_packet::PTNewRoom>(packet);
 		std::cout << "i received PTCreateRoom "  << pt_new_room->room.id << std::endl;
 			
-		graphic_scene_->createRoom(pt_new_room->room.id, pt_new_room->room.name);
+		graphic_scene_->createRoom(static_cast<int>(pt_new_room->room.id), pt_new_room->room.name);
 		break;
 	}
 	case PacketType::SRV_ROOM_LIST:
@@ -66,20 +66,41 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	{
 		graphic_scene_->initConnectionFlag(false);
 		graphic_scene_->initButtonStart(false);
+		graphic_scene_->initButtonCloseRoom(false);
+
 		graphic_scene_->backToMenu();
+		break;
+	}
+	case PacketType::SRV_START_GAME:
+	{
+		std::cout << "i received START_GAME" << std::endl;
+		//auto pt_start_game = std::static_pointer_cast<server_packet::PTStartGame>(packet);
+		
+		break;
+	}
+	case PacketType::SRV_INIT_CHOOSE_ROOM:
+	{
+		std::cout << "i received InitChooseRoom" << std::endl;
+		auto pt_choose_room = std::static_pointer_cast<server_packet::PTInitChooseRoom>(packet);
+		graphic_scene_->initButtonStart(true);
+		graphic_scene_->initButtonCloseRoom(true);
+		graphic_scene_->initConfigGrid(pt_choose_room->id_room, true);
 		break;
 	}
 	case PacketType::SRV_ROOM_STATE:
 	{
 		std::cout << "i received SRVROOM_STATE" << std::endl;
 		auto pt_room_state = std::static_pointer_cast<server_packet::PTRoomState>(packet);
-		graphic_scene_->initButtonStart(true);
-		graphic_scene_->initConfigGrid(pt_room_state->id_room, true);
+
 		graphic_scene_->drawGui(pt_room_state->id_room, pt_room_state->grass_info, pt_room_state->bacterium_info);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:
+	{
+		auto pt_close_room = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
+		graphic_scene_->backToMenu(pt_close_room->id_room);
 		break;
+	}
 	default:
 		break;
 	}

@@ -29,14 +29,17 @@ public:
 
 	void sendPacket(uint32_t id_channel, const Packet& packet);
 
-	void stop();
+	void sendPacketAllClients(const Packet& packet);
 
-	void start();
+	void stop();
 
 private:
 	static NetworkServer* p_instance;
 	static NetworkServerDestroyer destroyer;
-	std::map<uint32_t, std::weak_ptr<BOLSocketChannel>> channel_map_;
+
+	using IdChannel = uint32_t;
+
+	std::map<IdChannel, std::weak_ptr<BOLSocketChannel>> channel_map_;
 	std::mutex m_;
 	BOLTcpServer server_;
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
@@ -53,5 +56,5 @@ private:
 
 	void deleteChannel(const BOLTcpServer::TSocketChannelPtr& channel);
 
-	bool findChannel(uint32_t id_channel);
+	bool findChannel(IdChannel id_channel);
 };

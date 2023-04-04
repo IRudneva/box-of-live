@@ -28,10 +28,10 @@ std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(Pack
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_get_room);
 		return result;
 	}
-	case PacketType::CLI_GET_ROOM_STATE:
+	case PacketType::CLI_CHOOSE_ROOM:
 	{
-		auto packet = msgpack::unpack<client_packet::PTGetRoomState>(data);
-		auto pt_get_room_state = std::make_shared<client_packet::PTGetRoomState>(packet.id_room);
+		auto packet = msgpack::unpack<client_packet::PTChooseRoom>(data);
+		auto pt_get_room_state = std::make_shared<client_packet::PTChooseRoom>(packet.id_room);
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_get_room_state);
 		return result;
 	}
@@ -89,7 +89,28 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	{
 		auto packet = msgpack::unpack<server_packet::PTNewConfig>(data);
 		auto pt_new_config = std::make_shared<server_packet::PTNewConfig>(packet.id_room, packet.game_config);///////////////////
-		auto result = std::static_pointer_cast<server_packet::PTNewConfig>(pt_new_config);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_new_config);
+		return result;
+	}
+	case PacketType::SRV_START_GAME:
+	{
+		auto packet = msgpack::unpack<server_packet::PTStartGame>(data);
+		auto pt_start = std::make_shared<server_packet::PTStartGame>(packet.id_room);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_start);
+		return result;
+	}
+	case PacketType::SRV_INIT_CHOOSE_ROOM:
+	{
+		auto packet = msgpack::unpack<server_packet::PTInitChooseRoom>(data);
+		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_init);
+		return result;
+	}
+	case PacketType::SRV_CLOSE_ROOM:
+	{
+		auto packet = msgpack::unpack<server_packet::PTCloseRoom>(data);
+		auto pt_close_room = std::make_shared<server_packet::PTCloseRoom>(packet.id_room);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_close_room);
 		return result;
 	}
 	default:

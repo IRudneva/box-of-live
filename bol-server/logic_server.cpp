@@ -21,6 +21,7 @@ void LogicServer::handleQueue() const
 		{
 			srv_manager_->handlePacket(queue_->popPacket());
 		}
+		srv_manager_->updateGameState();
 	}
 }
 

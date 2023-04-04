@@ -16,7 +16,13 @@ public:
 
 	void initConfigGrid(uint32_t id_room, bool status);
 
-	void initButtonStart(bool status) const { gui_.get("button_start")->setEnabled(status); };
+	void initGameLayout(uint32_t id_room);
+
+	void initButtonStart(bool status) const { gui_.get("button_start")->setEnabled(status); }
+
+	void initButtonCloseRoom(bool status) const { gui_.get("button_close_room")->setEnabled(status); }
+
+	void backToMenu(uint32_t id_room);
 
 	void backToMenu();
 
@@ -31,11 +37,12 @@ public:
 	void createRoomList(const std::vector<Room>& room_list);
 
 private:
-	std::weak_ptr<tgui::CanvasSFML> canvas_;
+	using IdRoom = int;
+	std::map<IdRoom, std::weak_ptr<tgui::CanvasSFML>> canvas_for_room_;
 	tgui::GuiSFML gui_;
 	tgui::ListBox::Ptr room_list_;
 	tgui::Panel::Ptr connection_flag_;
-	std::map<int, tgui::Grid::Ptr> config_grid_for_room_;
+	std::map<IdRoom, tgui::Grid::Ptr> config_grid_for_room_;
 	int id_selected_room_ = 0;
 	//tgui::Grid::Ptr config_grid_;
 	std::unique_ptr<ConfigHelper> conf_helper_ = std::make_unique<ConfigHelper>();

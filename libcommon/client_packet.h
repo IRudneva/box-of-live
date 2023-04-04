@@ -40,10 +40,10 @@ namespace client_packet {
 		void pack(msgpack::Unpacker& unpacker) override { }
 	};
 
-	struct PTGetRoomState : ClientPacket
+	struct PTChooseRoom : ClientPacket
 	{
-		PTGetRoomState() : ClientPacket(PacketType::CLI_GET_ROOM_STATE) {}
-		PTGetRoomState(uint32_t id) : ClientPacket(PacketType::CLI_GET_ROOM_STATE), id_room(id) {}
+		PTChooseRoom() : ClientPacket(PacketType::CLI_CHOOSE_ROOM) {}
+		PTChooseRoom(uint32_t id) : ClientPacket(PacketType::CLI_CHOOSE_ROOM), id_room(id) {}
 
 		uint32_t id_room = 0;
 

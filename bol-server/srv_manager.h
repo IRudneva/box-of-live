@@ -5,16 +5,28 @@
 struct Room;
 struct PacketWithIdChannel;
 
+using IdRoom = int;
+using IdChannel = int;
+
 class SrvManager
 {
 public:
-	const std::map<int, Room>& getRoomList() const { return room_list_; }
+	const std::vector<IdRoom> getRoomList() const
+	{
+		std::vector<IdRoom> room_list;
+		for(const auto& [id, field_state] : rooms_state_)
+		{
+			room_list.push_back(id);
+		}
+		return room_list;
+	}
 
 	void handlePacket(const client_packet::PacketWithIdChannel& packet);
 
+	void updateGameState();
+
 private:
-	using IdRoom = int;
-	std::map<IdRoom, Room> room_list_;
 	std::map<IdRoom, FieldStateInfo> rooms_state_;
+	std::map<IdRoom, std::vector<IdChannel>> room_subscription_;
 	int last_id_room_ = 0;
 };

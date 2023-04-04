@@ -18,7 +18,7 @@ namespace server_packet {
 	struct PTRoomList : ServerPacket
 	{
 		PTRoomList() :ServerPacket(PacketType::SRV_ROOM_LIST) {}
-		PTRoomList(const std::vector<Room>& oth_list) :ServerPacket(PacketType::SRV_ROOM_LIST), room_list(oth_list) {}
+		PTRoomList(const std::vector<Room>& rl) :ServerPacket(PacketType::SRV_ROOM_LIST), room_list(rl) {}
 		std::vector<Room> room_list;
 
 		void pack(msgpack::Packer& packer) const  override { packer(room_list); }
@@ -37,7 +37,8 @@ namespace server_packet {
 
 	struct PTCloseRoom : ServerPacket
 	{
-		PTCloseRoom() :ServerPacket(PacketType::SRV_CLOSE_ROOM) {}
+		PTCloseRoom() : ServerPacket(PacketType::SRV_CLOSE_ROOM) {}
+		PTCloseRoom(uint32_t id) : ServerPacket(PacketType::SRV_CLOSE_ROOM), id_room(id){}
 		uint32_t id_room = 0;
 		void pack(msgpack::Packer& packer) const  override { packer(id_room); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
@@ -68,5 +69,23 @@ namespace server_packet {
 		std::shared_ptr<GameConfig> game_config;
 		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,*game_config); }
+	};
+
+	struct PTStartGame : ServerPacket
+	{
+		PTStartGame() :ServerPacket(PacketType::SRV_START_GAME) {}
+		PTStartGame(uint32_t id) :ServerPacket(PacketType::SRV_START_GAME), id_room(id) {}
+		uint32_t id_room = 0;
+		void pack(msgpack::Packer& packer) const  override { packer(id_room); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
+	};
+
+	struct PTInitChooseRoom : ServerPacket
+	{
+		PTInitChooseRoom() :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM) {}
+		PTInitChooseRoom(uint32_t id) :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id) {}
+		uint32_t id_room = 0;
+		void pack(msgpack::Packer& packer) const  override { packer(id_room); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 	};
 } // namespace server_packet

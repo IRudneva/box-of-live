@@ -19,9 +19,8 @@ void GraphicScene::init()
 
 	room_list_->onItemSelect([this](const tgui::String& item_name, const tgui::String& id)
 	{
-		std::cout <<"press item: " << item_name << std::endl;
 		uint32_t id_room = static_cast<uint32_t>(std::stoi(id.toStdString()));
-		client_packet::PTGetRoomState packet(id_room);
+		client_packet::PTChooseRoom packet(id_room);
 		NetworkClient::getInstance().sendPacket(packet);
 		id_selected_room_ = static_cast<int>(id_room);
 	});
@@ -43,30 +42,19 @@ void GraphicScene::init()
 
 	fields->add(settings_layout, "settings_layout");
 
-	auto game_layout = createLayout({ tgui::Color::White,
-		{ tgui::bindLeft(settings_layout), tgui::bindBottom(settings_layout) },
-		HEIGHT_WINDOW - settings_layout->getSize().y, WIDTH_WINDOW - room_list_->getSize().x}
-	);
-	fields->add(game_layout);
-	
-	auto canvas = tgui::CanvasSFML::create();
-	game_layout->add(canvas, "game_canvas");
-	canvas_ = canvas;
-
 	auto buttons = tgui::Group::create();
 
 	auto size_room_list = room_list_->getSize();
 
-	auto button_create_room = createButton({ tgui::Color::Red,
-		tgui::Color::Red,
+	auto button_create_room = createButton({ tgui::Color::Yellow,
+		tgui::Color::Yellow,
 		tgui::Color::Magenta,
 		{ tgui::bindLeft(fields),size_room_list.y * 0.9 },
 		{ size_room_list.x, size_room_list.y * 0.1 },
 		"CREATE ROOM" });
-	button_create_room->getRenderer()->setTextColor(tgui::Color::White);
+	//button_create_room->getRenderer()->setTextColor(tgui::Color::White);
 
 	button_create_room->onPress([] {
-		std::cout << "press BCreateR" << std::endl;
 		client_packet::PTCreateRoom packet;
 		NetworkClient::getInstance().sendPacket(packet);
 	});
@@ -76,7 +64,7 @@ void GraphicScene::init()
 	auto button_start = createButton({ tgui::Color::Green,
 		tgui::Color::Green,
 		tgui::Color::Magenta,
-		{size_settings_layout.x,size_settings_layout.y * 0.25 },
+		{size_settings_layout.x,size_settings_layout.y * 0.15 },
 		{ size_settings_layout.x *0.25, size_settings_layout.y *0.4 },
 		"START" });
 
@@ -88,9 +76,24 @@ void GraphicScene::init()
 		NetworkClient::getInstance().sendPacket(packet);
 	});
 
+	auto button_close_room = createButton({ tgui::Color::Red,
+		tgui::Color::Red,
+		tgui::Color::Magenta,
+		{tgui::bindLeft(button_start),tgui::bindBottom(button_start) },
+		{ button_start->getSize().x, button_start->getSize().y },
+		"CLOSE ROOM" });
 
-	buttons->add(button_create_room);
+	button_close_room->getRenderer()->setTextColor(tgui::Color::White);
+	button_close_room->setEnabled(false);
+
+	button_close_room->onPress([this] {
+		client_packet::PTCloseRoom packet(static_cast<uint32_t>(id_selected_room_));
+		NetworkClient::getInstance().sendPacket(packet);
+	});
+
+	buttons->add(button_create_room, "button_create_room");
 	buttons->add(button_start, "button_start");
+	buttons->add(button_close_room, "button_close_room");
 
 
 	gui_.add(fields, "fields");
@@ -102,41 +105,67 @@ void GraphicScene::init()
 	//	timer_.initDouble(0.5);
 }
 
+void GraphicScene::backToMenu(uint32_t id_room)
+{
+	if (auto canv = canvas_for_room_[static_cast<int>(id_room)].lock(); canv != nullptr) {
+		canv->clear(tgui::Color::White);
+		canv->display();
+	}
+}
+
 void GraphicScene::backToMenu()
 {
-	if (auto canvas = canvas_.lock(); canvas != nullptr) {
-		canvas->clear(tgui::Color::White);
-		canvas->display();
+	for(const auto& [id, canvas] : canvas_for_room_)
+	{
+		backToMenu(id);
 	}
+}
+
+void GraphicScene::initGameLayout(uint32_t id_room)
+{
+	auto settings_pos = gui_.get("settings_layout")->getPosition();
+	auto settings_size = gui_.get("settings_layout")->getSize();
+
+	auto game_layout = createLayout({ tgui::Color::White,
+		{ settings_pos.x, settings_pos.y+settings_size.y},
+		HEIGHT_WINDOW - settings_size.y,
+		WIDTH_WINDOW - room_list_->getSize().x }
+	);
+
+	auto canvas = tgui::CanvasSFML::create();
+	game_layout->add(canvas, "game_canvas_" + std::to_string(id_room));
+
+	gui_.add(game_layout, "game_layout_" + std::to_string(id_room));
+
+	canvas_for_room_[static_cast<int>(id_room)] = canvas;
 }
 
 void GraphicScene::drawGui(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf)
 {
-//	gui_.draw();
-	if (auto canvas = canvas_.lock(); canvas != nullptr) {
-		canvas->clear(tgui::Color::White);
+	if (auto canv = canvas_for_room_[static_cast<int>(id_room)].lock(); canv != nullptr) {
+		canv->clear(tgui::Color::White);
 		sf::RectangleShape cell_shape;
 		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-		for(const auto& grass : grass_info)
+		for (const auto& grass : grass_info)
 		{
 			float pos_x = static_cast<float>(grass.x *CELL_SIZE);
 			float pos_y = static_cast<float>(grass.y * CELL_SIZE);
 			cell_shape.setPosition(pos_x, pos_y); // 
 			cell_shape.setFillColor(tgui::Color::Green);
 			cell_shape.setOutlineColor(sf::Color::Black);
-			canvas->draw(cell_shape);
+			canv->draw(cell_shape);
 		}
 		for (const auto& bact : bact_inf)
 		{
 			float pos_x = static_cast<float>(bact.x *CELL_SIZE);
 			float pos_y = static_cast<float>(bact.y * CELL_SIZE);
 			cell_shape.setPosition(pos_x, pos_y); // 
-			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy,getCellColorByBacteriumId(bact.id_type)));
+			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy, getCellColorByBacteriumId(bact.id_type)));
 			cell_shape.setOutlineColor(sf::Color::Black);
-			canvas->draw(cell_shape);
+			canv->draw(cell_shape);
 		}
-		drawMarkupField(canvas);
-		canvas->display();
+		drawMarkupField(canv);
+		canv->display();
 	}
 }
 
@@ -219,6 +248,7 @@ void GraphicScene::createRoom(int id_room, const std::string& room)
 	grid->setEnabled(false);
 	gui_.add(grid, "grid_" + std::to_string(id_room));
 	config_grid_for_room_.insert({id_room, grid});
+	initGameLayout(id_room);
 	
 }
 
