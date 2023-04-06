@@ -101,32 +101,19 @@ void GraphicScene::initGraphicScene()
 
 	gui_.add(fields, "fields");
 	gui_.add(buttons, "buttons");
-	
-
-	//field_state_info_->init(game_config_);
-
-	//	timer_.initDouble(0.5);
 }
 
-void GraphicScene::clearRoomList()
+void GraphicScene::clearRoomList() const
 {
 	room_list_->removeAllItems();
-	canvas_for_room_.clear();
+	//clearGameCanvas();
 }
 
-void GraphicScene::backToMenu(uint32_t id_room)
+void GraphicScene::clearGameCanvas() const
 {
-	if (auto canv = canvas_for_room_[static_cast<int>(id_room)].lock(); canv != nullptr) {
+	if (auto canv = game_canvas_.lock(); canv != nullptr) {
 		canv->clear(tgui::Color::White);
 		canv->display();
-	}
-}
-
-void GraphicScene::backToMenu()
-{
-	for(const auto& [id, canvas] : canvas_for_room_)
-	{
-		backToMenu(id);
 	}
 }
 
@@ -146,14 +133,12 @@ void GraphicScene::initGameLayout(uint32_t id_room)
 
 	gui_.add(game_layout, "game_layout_" + std::to_string(id_room));
 
-	canvas_for_room_[static_cast<int>(id_room)] = canvas;
+	game_canvas_ = canvas;
 }
 
-void GraphicScene::drawGui(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf)
+void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf)
 {
-	backToMenu();
-
-	if (auto canv = canvas_for_room_[static_cast<int>(id_room)].lock(); canv != nullptr) {
+	if (auto canv = game_canvas_.lock(); canv != nullptr) {
 		canv->clear(tgui::Color::White);
 		sf::RectangleShape cell_shape;
 		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
@@ -306,6 +291,7 @@ tgui::Label::Ptr GraphicScene::createLabel(const ConfigLabel& conf) const
 
 void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const
 {
+	std::cout << "DRAW MARKUP" << std::endl;
 	auto x_field_size = canvas->getSize().x;
 	auto y_field_size = canvas->getSize().y;
 

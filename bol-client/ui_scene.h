@@ -12,8 +12,6 @@ public:
 
 	void initGraphicScene();
 
-	//bool checkIdRoom(uint32_t id) const { return id_selected_room_ == id; }
-
 	void initGameLayout(uint32_t id_room);
 
 	void initConnectionFlag(bool status);
@@ -26,13 +24,11 @@ public:
 
 	void setConfigForRoom(uint32_t id_room, std::shared_ptr<GameConfig> conf);
 
-	void clearRoomList();
+	void clearRoomList() const;
 
-	void backToMenu(uint32_t id_room);
+	void clearGameCanvas() const;
 
-	void backToMenu();
-
-	void drawGui(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
+	void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
 
 	void update();
 
@@ -44,7 +40,8 @@ public:
 
 private:
 	using IdRoom = int;
-	std::map<IdRoom, std::weak_ptr<tgui::CanvasSFML>> canvas_for_room_;
+
+	std::weak_ptr<tgui::CanvasSFML> game_canvas_;
 	tgui::GuiSFML gui_;
 	tgui::ListBox::Ptr room_list_;
 	tgui::Panel::Ptr connection_flag_;

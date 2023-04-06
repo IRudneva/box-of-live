@@ -68,7 +68,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 		graphic_scene_->initButtonStart(false);
 		graphic_scene_->initButtonCloseRoom(false);
 		graphic_scene_->clearRoomList();
-	//	graphic_scene_->backToMenu();
+		graphic_scene_->clearGameCanvas();
 		break;
 	}
 	case PacketType::SRV_START_GAME:
@@ -92,13 +92,13 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 		auto pt_room_state = std::static_pointer_cast<server_packet::PTRoomState>(packet);
 		std::cout << std::this_thread::get_id() << "thread" << std::endl;
 		std::cout << "i received SRVROOM_STATE  " << pt_room_state->id_room << std::endl;
-		graphic_scene_->drawGui(pt_room_state->id_room, pt_room_state->grass_info, pt_room_state->bacterium_info);
+		graphic_scene_->drawGameCanvas(pt_room_state->id_room, pt_room_state->grass_info, pt_room_state->bacterium_info);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:
 	{
-		auto pt_close_room = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
-		graphic_scene_->backToMenu(pt_close_room->id_room);
+		/*auto pt_close_room = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
+		graphic_scene_->clearRoomList();*/
 		break;
 	}
 	case PacketType::SRV_NEW_CONFIG:
