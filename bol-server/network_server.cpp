@@ -36,6 +36,7 @@ void NetworkServer::init()
 			}
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
+				deleteChannel(channel);
 			}
 		};
 

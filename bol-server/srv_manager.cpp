@@ -58,13 +58,17 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		std::cout << "i received ChooseRoom" << std::endl;
 
 		auto pt_choose_room = std::static_pointer_cast<client_packet::PTChooseRoom>(packet.packet);
-		/*
-				auto state = rooms_state_.at(static_cast<int>(pt_choose_room->id_room));
-
-				const server_packet::PTRoomState pt_room_state(pt_choose_room->id_room,
-					state.getCellInfo(),
-					state.getBacteriumInfo());
+		/*auto subsc = room_subscription_[static_cast<int>(pt_choose_room->id_room)];
+		if (auto cli = std::find(subsc.begin(), subsc.end(), static_cast<int>(packet.id_channel)); cli == subsc.end())
+			room_subscription_[static_cast<int>(pt_choose_room->id_room)].push_back(static_cast<int>(packet.id_channel));
 		*/
+			//клиент может быть подписан только на 1 комнату
+		for(auto& [id_room, id_channels] : room_subscription_)
+		{
+			id_channels.erase(std::remove(id_channels.begin(),id_channels.end(),static_cast<int>(packet.id_channel)), id_channels.end());
+		}
+		room_subscription_[static_cast<int>(pt_choose_room->id_room)].push_back(static_cast<int>(packet.id_channel));
+	
 		const server_packet::PTInitChooseRoom pt_init_game(pt_choose_room->id_room);
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_init_game);
 		/*
@@ -77,6 +81,8 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		std::cout << "i received PTChangeConfig" << std::endl;
 		auto pt_change_config = std::static_pointer_cast<client_packet::PTChangeConfig>(packet.packet);
 		rooms_state_.at(static_cast<int>(pt_change_config->id_room)).init(pt_change_config->game_config);
+		server_packet::PTNewConfig new_config(pt_change_config->id_room, pt_change_config->game_config);
+		NetworkServer::getInstance().sendPacketAllClients(new_config);
 		//{//test
 		//	std::cout << "new config for room: " << pt_change_config->id_room << std::endl;
 		//	std::cout << "eb " << pt_change_config->game_config->energy_base << std::endl;
@@ -92,24 +98,8 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 		std::cout << "i received PTStartGame" << std::endl;
 		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
-
-		auto subsc = room_subscription_[static_cast<int>(pt_st->id_room)];
-		if (auto cli = std::find(subsc.begin(), subsc.end(), static_cast<int>(packet.id_channel)) == subsc.end())
-			room_subscription_[static_cast<int>(pt_st->id_room)].push_back(static_cast<int>(packet.id_channel));
-
-		const server_packet::PTStartGame pt_start_game(pt_st->id_room);
-
+			//перезапускаем состояние игрового поля
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).reset();
-
-		const server_packet::PTRoomState pt_room_state(pt_st->id_room,
-			rooms_state_.at(static_cast<int>(pt_st->id_room)).getCellInfo(),
-			rooms_state_.at(static_cast<int>(pt_st->id_room)).getBacteriumInfo());
-
-		for (const auto& cli : room_subscription_[static_cast<int>(pt_st->id_room)])
-		{
-			NetworkServer::getInstance().sendPacket(static_cast<uint32_t>(cli), pt_start_game);
-			NetworkServer::getInstance().sendPacket(static_cast<uint32_t>(cli), pt_room_state);
-		}
 
 		break;
 	}
@@ -122,16 +112,28 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 void SrvManager::updateGameState()
 {
-	for(const auto& [id_room, clients] : room_subscription_)
+	if (send_field_state_timer_.timedOut())
 	{
-		rooms_state_.at(id_room).update();
-		const server_packet::PTRoomState state(id_room,
-			rooms_state_.at(id_room).getCellInfo(),
-			rooms_state_.at(id_room).getBacteriumInfo());
-
-		for (const auto& cli : clients)
+		for (auto&[room, state] : rooms_state_)
 		{
-			NetworkServer::getInstance().sendPacket(static_cast<uint32_t>(cli), state);
+			state.update();
+			std::cout << "update room:  " << room << std::endl;
+		}
+
+		for (const auto&[id_room, clients] : room_subscription_)
+		{
+			if(clients.empty())
+				continue;
+
+			const server_packet::PTRoomState state(id_room,
+				rooms_state_.at(id_room).getCellInfo(),
+				rooms_state_.at(id_room).getBacteriumInfo());
+
+			for (const auto& client : clients)
+			{
+				std::cout << "send state cli:  " << client << "  id room:  " << id_room << std::endl;
+				NetworkServer::getInstance().sendPacket(static_cast<uint32_t>(client), state);
+			}
 		}
 	}
 }

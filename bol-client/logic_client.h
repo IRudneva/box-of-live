@@ -3,6 +3,7 @@
 #include "shared_packet_queue.h"
 #include "ui_scene.h"
 #include "game_domain.h"
+#include <mutex>
 
 class LogicClient
 {

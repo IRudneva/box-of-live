@@ -8,6 +8,12 @@ static std::chrono::steady_clock::time_point getCurrentTime() {
 
 class Timer {
 public:
+	Timer() = default;
+
+	explicit Timer(int interval) { initInt(interval); }
+
+	explicit Timer(double interval) { initDouble(interval); }
+
 	void initInt(int interval)
 	{
 		interval_ = std::chrono::milliseconds(std::chrono::seconds(interval));

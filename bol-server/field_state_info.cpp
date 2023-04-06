@@ -1,10 +1,12 @@
 #include "pch_server.h"
 #include "field_state_info.h"
+
+#include <utility>
 #include "bacterium.h"
 
 void FieldStateInfo::init(std::shared_ptr<GameConfig> config)
 {
-	config_ = config;
+	config_ = std::move(config);
 	game_state_->initConfig(config_);
 }
 

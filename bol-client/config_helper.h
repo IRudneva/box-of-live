@@ -30,8 +30,9 @@ public:
 
 	const std::map<std::string, ConfigRecord>& getRecords() const { return records; }
 
+	void setOption(GameConfig& config, const std::string & str, int value) { records[str].setter_function(value); }
+
 private:
 	std::map<std::string, ConfigRecord> records;
 	bool is_change_config_ = false;
-	void setOption(GameConfig& config, const std::string & str, int value) { records[str].setter_function(value); }
 };

@@ -6,7 +6,7 @@
 #include "client_packet.h"
 #include "network_client.h"
 
-void GraphicScene::init()
+void GraphicScene::initGraphicScene()
 {
 	auto fields = tgui::Group::create();
 
@@ -19,10 +19,14 @@ void GraphicScene::init()
 
 	room_list_->onItemSelect([this](const tgui::String& item_name, const tgui::String& id)
 	{
+		if (item_name.empty() || id.empty())
+			return;
+
 		uint32_t id_room = static_cast<uint32_t>(std::stoi(id.toStdString()));
-		client_packet::PTChooseRoom packet(id_room);
-		NetworkClient::getInstance().sendPacket(packet);
 		id_selected_room_ = static_cast<int>(id_room);
+
+		client_packet::PTChooseRoom packet(id_selected_room_);
+		NetworkClient::getInstance().sendPacket(packet);
 	});
 
 	fields->add(room_list_, "room_list");
@@ -52,7 +56,6 @@ void GraphicScene::init()
 		{ tgui::bindLeft(fields),size_room_list.y * 0.9 },
 		{ size_room_list.x, size_room_list.y * 0.1 },
 		"CREATE ROOM" });
-	//button_create_room->getRenderer()->setTextColor(tgui::Color::White);
 
 	button_create_room->onPress([] {
 		client_packet::PTCreateRoom packet;
@@ -105,6 +108,12 @@ void GraphicScene::init()
 	//	timer_.initDouble(0.5);
 }
 
+void GraphicScene::clearRoomList()
+{
+	room_list_->removeAllItems();
+	canvas_for_room_.clear();
+}
+
 void GraphicScene::backToMenu(uint32_t id_room)
 {
 	if (auto canv = canvas_for_room_[static_cast<int>(id_room)].lock(); canv != nullptr) {
@@ -142,6 +151,8 @@ void GraphicScene::initGameLayout(uint32_t id_room)
 
 void GraphicScene::drawGui(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf)
 {
+	backToMenu();
+
 	if (auto canv = canvas_for_room_[static_cast<int>(id_room)].lock(); canv != nullptr) {
 		canv->clear(tgui::Color::White);
 		sf::RectangleShape cell_shape;
@@ -160,7 +171,7 @@ void GraphicScene::drawGui(uint32_t id_room, const std::vector<GrassInfo>& grass
 			float pos_x = static_cast<float>(bact.x *CELL_SIZE);
 			float pos_y = static_cast<float>(bact.y * CELL_SIZE);
 			cell_shape.setPosition(pos_x, pos_y); // 
-			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy, getCellColorByBacteriumId(bact.id_type)));
+			cell_shape.setFillColor(getCellColorByBacteriumEnergy(static_cast<int>(id_room), bact.energy, getCellColorByBacteriumId(bact.id_type)));
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canv->draw(cell_shape);
 		}
@@ -181,15 +192,14 @@ void GraphicScene::handleEvent(const sf::Event& event)
 
 void GraphicScene::initConfigGrid(uint32_t id_room, bool status)
 {
-	std::for_each(config_grid_for_room_.begin(), config_grid_for_room_.end(),
-		[](auto config_grid)
+	for(const auto& config :config_for_room_)
 	{
-		config_grid.second->setVisible(false);
-		config_grid.second->setEnabled(false);
+		config.second.grid->setVisible(false);
+		config.second.grid->setEnabled(false);
 	}
-	);
-	config_grid_for_room_.at(static_cast<int>(id_room))->setVisible(status);
-	config_grid_for_room_.at(static_cast<int>(id_room))->setEnabled(status);
+
+	config_for_room_.at(static_cast<int>(id_room)).grid->setVisible(status);
+	config_for_room_.at(static_cast<int>(id_room)).grid->setEnabled(status);
 	std::cout << "set visible config room " << id_room << std::endl;
 }
 
@@ -208,15 +218,16 @@ void GraphicScene::createRoom(int id_room, const std::string& room)
 	auto id_item = room_list_->addItem(std::to_string(id_room) +" "+room, std::to_string(id_room));
 
 	std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
-	conf_helper_->init(*game_config);
-	client_packet::PTChangeConfig pt_def_config({ static_cast<uint32_t>(id_room), game_config });
-	NetworkClient::getInstance().sendPacket(pt_def_config);
+
+	auto conf_helper = std::make_unique<ConfigHelper>();
+
+	conf_helper->init(*game_config);
 
 	auto grid = tgui::Grid::create();
 	grid->setAutoSize(true);
 	grid->setPosition(tgui::bindRight(room_list_), tgui::bindTop(room_list_));
-	//
-	conf_helper_->doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
+
+	conf_helper->doWithAll([&](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
 		auto label = createLabel({ config_name, 14 });
 
 		grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
@@ -228,14 +239,10 @@ void GraphicScene::createRoom(int id_room, const std::string& room)
 			if (!text.empty())
 			{
 				config_record.setter_function(text.toInt());
-				/*
-				std::shared_ptr<GameConfig> gc = std::make_shared<GameConfig>();
-				for(const auto& [name, conf] : conf_helper_->getRecords())
-				{
-					
-				}
-				client_packet::PTChangeConfig pt_change_config({ static_cast<uint32_t>(id_selected_room_), gc});
-				NetworkClient::getInstance().sendPacket(pt_change_config);*/
+				
+				
+				client_packet::PTChangeConfig pt_change_config({ static_cast<uint32_t>(id_selected_room_), config_for_room_[id_selected_room_].config });
+				NetworkClient::getInstance().sendPacket(pt_change_config);
 			}
 		});
 
@@ -247,9 +254,17 @@ void GraphicScene::createRoom(int id_room, const std::string& room)
 	grid->setVisible(false);
 	grid->setEnabled(false);
 	gui_.add(grid, "grid_" + std::to_string(id_room));
-	config_grid_for_room_.insert({id_room, grid});
+	config_for_room_[id_room] = UIConfig(grid, game_config, std::move(conf_helper));
 	initGameLayout(id_room);
-	
+
+	client_packet::PTChangeConfig pt_def_config({ static_cast<uint32_t>(id_room), config_for_room_[id_room].config });
+	NetworkClient::getInstance().sendPacket(pt_def_config);
+}
+
+void GraphicScene::setConfigForRoom(uint32_t id_room, std::shared_ptr<GameConfig> conf)
+{
+	//КАК ИЗМЕНИТЬ ТЕКСТ В EDIT BOX
+	//config_for_room_[id_room].grid.edit_boxes->
 }
 
 void GraphicScene::createRoomList(const std::vector<Room>& room_list)
@@ -324,33 +339,13 @@ tgui::EditBox::Ptr GraphicScene::createEditBox(const ConfigEditBox& conf) const
 	edit_box->setDefaultText(conf.text);
 	return edit_box;
 }
-//
-//tgui::Color GraphicScene::getColorCellByType(TypeCell type, std::shared_ptr<BacteriumInfo> inf_bacterium)
-//{
-//	switch (type)
-//	{
-//	case TypeCell::GRASS:
-//		return tgui::Color::Green;
-//	case TypeCell::BACTERIUM:
-//	{
-//		if (inf_bacterium!=nullptr)
-//		{
-//			tgui::Color color_bacterium = getCellColorByBacteriumId(inf_bacterium->id_type);
-//			return getCellColorByBacteriumEnergy(inf_bacterium->energy, color_bacterium);
-//		}
-//	}
-//	case TypeCell::EMPTY:
-//		return tgui::Color::White;
-//	}
-//	return tgui::Color::White;
-//}
 
-tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int energy, tgui::Color color) const
+tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int id_room, int energy, tgui::Color color) const
 {
-	/*if (energy < game_config_->energy_base * 0.25)
+	if (energy < config_for_room_.at(id_room).config->energy_base * 0.25)
 		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.4) };
-	if (energy < game_config_->energy_base * 0.7)
-		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };*/
+	if (energy < config_for_room_.at(id_room).config->energy_base * 0.7)
+		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };
 	return color;
 }
 

@@ -66,7 +66,7 @@ namespace server_packet {
 		PTNewConfig() : ServerPacket(PacketType::SRV_NEW_CONFIG) {}
 		PTNewConfig(uint32_t id, std::shared_ptr<GameConfig> conf) : ServerPacket(PacketType::SRV_NEW_CONFIG), id_room(id), game_config(conf) {}
 		uint32_t id_room;
-		std::shared_ptr<GameConfig> game_config;
+		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
 		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,*game_config); }
 	};

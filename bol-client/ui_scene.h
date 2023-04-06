@@ -10,17 +10,23 @@ class GraphicScene final
 public:
 	GraphicScene(sf::RenderWindow& window) : gui_(window) {}
 
-	void init();
+	void initGraphicScene();
+
+	//bool checkIdRoom(uint32_t id) const { return id_selected_room_ == id; }
+
+	void initGameLayout(uint32_t id_room);
 
 	void initConnectionFlag(bool status);
 
 	void initConfigGrid(uint32_t id_room, bool status);
 
-	void initGameLayout(uint32_t id_room);
-
 	void initButtonStart(bool status) const { gui_.get("button_start")->setEnabled(status); }
 
 	void initButtonCloseRoom(bool status) const { gui_.get("button_close_room")->setEnabled(status); }
+
+	void setConfigForRoom(uint32_t id_room, std::shared_ptr<GameConfig> conf);
+
+	void clearRoomList();
 
 	void backToMenu(uint32_t id_room);
 
@@ -42,14 +48,22 @@ private:
 	tgui::GuiSFML gui_;
 	tgui::ListBox::Ptr room_list_;
 	tgui::Panel::Ptr connection_flag_;
-	std::map<IdRoom, tgui::Grid::Ptr> config_grid_for_room_;
+
+	struct UIConfig
+	{
+		UIConfig() = default;
+		UIConfig(tgui::Grid::Ptr g, std::shared_ptr<GameConfig> gc, std::unique_ptr<ConfigHelper> ch)
+		: grid(g), config(std::move(gc)), helper(std::move(ch)){}
+
+		tgui::Grid::Ptr grid;
+		std::shared_ptr<GameConfig> config = std::make_shared<GameConfig>();
+		std::unique_ptr<ConfigHelper> helper = std::make_unique<ConfigHelper>();
+	};
+
+	std::map<IdRoom, UIConfig> config_for_room_;
+
 	int id_selected_room_ = 0;
-	//tgui::Grid::Ptr config_grid_;
-	std::unique_ptr<ConfigHelper> conf_helper_ = std::make_unique<ConfigHelper>();
-//	Timer timer_;
 	std::map<int, tgui::Color> color_bacterium_by_type_;
-	//std::shared_ptr<GuiFieldState> field_state_info_ = std::make_shared<GuiFieldState>();
-	//std::shared_ptr<GameConfig> game_config_ = std::make_shared<GameConfig>();
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
 	
@@ -61,7 +75,7 @@ private:
 
 	tgui::EditBox::Ptr createEditBox(const ConfigEditBox& conf) const;
 
-	tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
+	tgui::Color getCellColorByBacteriumEnergy(int id_room, int energy, tgui::Color color) const;
 
 	tgui::Color getCellColorByBacteriumId(int id);
 };

@@ -6,7 +6,7 @@
 void LogicClient::initGraphicScene()
 {
 	graphic_scene_ = std::make_unique<GraphicScene>(window_);
-	graphic_scene_->init();
+	graphic_scene_->initGraphicScene();
 }
 
 void LogicClient::updateGameScene()
@@ -67,8 +67,8 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 		graphic_scene_->initConnectionFlag(false);
 		graphic_scene_->initButtonStart(false);
 		graphic_scene_->initButtonCloseRoom(false);
-
-		graphic_scene_->backToMenu();
+		graphic_scene_->clearRoomList();
+	//	graphic_scene_->backToMenu();
 		break;
 	}
 	case PacketType::SRV_START_GAME:
@@ -89,9 +89,9 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	}
 	case PacketType::SRV_ROOM_STATE:
 	{
-		std::cout << "i received SRVROOM_STATE" << std::endl;
 		auto pt_room_state = std::static_pointer_cast<server_packet::PTRoomState>(packet);
-
+		std::cout << std::this_thread::get_id() << "thread" << std::endl;
+		std::cout << "i received SRVROOM_STATE  " << pt_room_state->id_room << std::endl;
 		graphic_scene_->drawGui(pt_room_state->id_room, pt_room_state->grass_info, pt_room_state->bacterium_info);
 		break;
 	}
@@ -99,6 +99,13 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	{
 		auto pt_close_room = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
 		graphic_scene_->backToMenu(pt_close_room->id_room);
+		break;
+	}
+	case PacketType::SRV_NEW_CONFIG:
+	{
+		std::cout << "i received NewConfig" << std::endl;
+		auto pt_config = std::static_pointer_cast<server_packet::PTNewConfig>(packet);
+		graphic_scene_->setConfigForRoom(pt_config->id_room, pt_config->game_config);
 		break;
 	}
 	default:
