@@ -30,7 +30,7 @@ void NetworkServer::init()
 			if (channel->isConnected()) {
 				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				addChannel(channel);
-				ConnectionMessage message{ PacketType::MSG_CONNECTED };
+				ConnectionMessage message{ PacketType::MSG_CONNECTED, channel->id() };
 				sendPacket(channel->id(), message);
 				std::cout << "send message CONNECTED" << std::endl;
 			}
@@ -94,6 +94,10 @@ void NetworkServer::deleteChannel(const BOLTcpServer::TSocketChannelPtr& channel
 {
 	std::lock_guard<std::mutex> lock(m_);
 	channel_map_.erase(channel->id());
+
+	auto msg = std::make_shared<ConnectionMessage>(PacketType::MSG_DISABLE, channel->id());
+	client_packet::PacketWithIdChannel pt_msg(msg, msg->id_channel);
+	queue_->pushPacket(pt_msg);
 }
 
 bool NetworkServer::findChannel(uint32_t id_channel)

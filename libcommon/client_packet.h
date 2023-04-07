@@ -72,7 +72,10 @@ namespace client_packet {
 
 	struct PacketWithIdChannel
 	{
-		std::shared_ptr<ClientPacket> packet = nullptr;
+		PacketWithIdChannel(std::shared_ptr<Packet> p, uint32_t id)
+			: packet(std::move(p)), id_channel(id){}
+
+		std::shared_ptr<Packet> packet = nullptr;
 		uint32_t id_channel;
 	};
 } // namespace client_packet

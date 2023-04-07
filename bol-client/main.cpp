@@ -12,7 +12,7 @@ int main()
 	NetworkClient::getInstance().initQueue(shared_packet_queue);
 
 	network_client.run();
-	logic_client.updateGameScene();
+	logic_client.updateGraphicScene();
 	network_client.stop();
 	return 0;
 }

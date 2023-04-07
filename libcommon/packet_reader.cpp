@@ -74,7 +74,8 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	}
 	case PacketType::MSG_CONNECTED:
 	{
-		auto msg_connection = std::make_shared<ConnectionMessage>(PacketType::MSG_CONNECTED);
+		auto packet = msgpack::unpack<ConnectionMessage>(data);
+		auto msg_connection = std::make_shared<ConnectionMessage>(PacketType::MSG_CONNECTED, packet.id_channel);
 		auto result = std::static_pointer_cast<Packet>(msg_connection);
 		return result;
 	}
@@ -83,20 +84,6 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 		auto packet = msgpack::unpack<server_packet::PTRoomState>(data);
 		auto pt_room_state = std::make_shared<server_packet::PTRoomState>(packet.id_room, packet.grass_info, packet.bacterium_info);///////////////////
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_room_state);
-		return result;
-	}
-	case PacketType::SRV_NEW_CONFIG:
-	{
-		auto packet = msgpack::unpack<server_packet::PTNewConfig>(data);
-		auto pt_new_config = std::make_shared<server_packet::PTNewConfig>(packet.id_room, packet.game_config);///////////////////
-		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_new_config);
-		return result;
-	}
-	case PacketType::SRV_START_GAME:
-	{
-		auto packet = msgpack::unpack<server_packet::PTStartGame>(data);
-		auto pt_start = std::make_shared<server_packet::PTStartGame>(packet.id_room);
-		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_start);
 		return result;
 	}
 	case PacketType::SRV_INIT_CHOOSE_ROOM:

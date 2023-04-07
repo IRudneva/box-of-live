@@ -14,12 +14,11 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 	case PacketType::CLI_CREATE_ROOM:
 	{
-		std::cout << "i received PTCreateRoom" << std::endl;
-
 		std::cout << "room " << last_id_room_ << " created." << std::endl;
 
 		FieldStateInfo game_field_state;
 		rooms_state_.insert({ last_id_room_, game_field_state });
+
 		server_packet::PTNewRoom pt_new_room(static_cast<uint32_t>(last_id_room_), "room");
 		NetworkServer::getInstance().sendPacketAllClients(pt_new_room);
 		++last_id_room_;
@@ -29,13 +28,24 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 		auto pt_cl = std::static_pointer_cast<client_packet::PTCloseRoom>(packet.packet);
 		std::cout << "i received PTCloseRoom" << std::endl;
-		auto client = std::find(room_subscription_[pt_cl->id_room].begin(), room_subscription_[pt_cl->id_room].end(), packet.id_channel);
-		if (client != room_subscription_[pt_cl->id_room].end())
-			room_subscription_[static_cast<int>(pt_cl->id_room)].erase(client);
+
+		for (auto it = room_subscription_.begin(); it != room_subscription_.end();)
+		{
+			if (it->first == pt_cl->id_room)
+				it = room_subscription_.erase(it);
+			else
+				++it;
+		}
+		for (auto it = rooms_state_.begin(); it != rooms_state_.end();)
+		{
+			if (it->first == pt_cl->id_room)
+				it = rooms_state_.erase(it);
+			else
+				++it;
+		}
 
 		server_packet::PTCloseRoom pt_close_room(static_cast<uint32_t>(pt_cl->id_room));
-
-		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_close_room);
+		NetworkServer::getInstance().sendPacketAllClients(pt_close_room);
 
 		break;
 	}
@@ -58,11 +68,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		std::cout << "i received ChooseRoom" << std::endl;
 
 		auto pt_choose_room = std::static_pointer_cast<client_packet::PTChooseRoom>(packet.packet);
-		/*auto subsc = room_subscription_[static_cast<int>(pt_choose_room->id_room)];
-		if (auto cli = std::find(subsc.begin(), subsc.end(), static_cast<int>(packet.id_channel)); cli == subsc.end())
-			room_subscription_[static_cast<int>(pt_choose_room->id_room)].push_back(static_cast<int>(packet.id_channel));
-		*/
-			//клиент может быть подписан только на 1 комнату
+		
 		for(auto& [id_room, id_channels] : room_subscription_)
 		{
 			id_channels.erase(std::remove(id_channels.begin(),id_channels.end(),static_cast<int>(packet.id_channel)), id_channels.end());
@@ -71,9 +77,6 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	
 		const server_packet::PTInitChooseRoom pt_init_game(pt_choose_room->id_room);
 		NetworkServer::getInstance().sendPacket(packet.id_channel, pt_init_game);
-		/*
-
-				NetworkServer::getInstance().sendPacket(packet.id_channel, pt_room_state);*/
 		break;
 	}
 	case PacketType::CLI_CHANGE_CONFIG:
@@ -81,26 +84,24 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		std::cout << "i received PTChangeConfig" << std::endl;
 		auto pt_change_config = std::static_pointer_cast<client_packet::PTChangeConfig>(packet.packet);
 		rooms_state_.at(static_cast<int>(pt_change_config->id_room)).init(pt_change_config->game_config);
-		server_packet::PTNewConfig new_config(pt_change_config->id_room, pt_change_config->game_config);
-		NetworkServer::getInstance().sendPacketAllClients(new_config);
-		//{//test
-		//	std::cout << "new config for room: " << pt_change_config->id_room << std::endl;
-		//	std::cout << "eb " << pt_change_config->game_config->energy_base << std::endl;
-		//	std::cout << "eac " << pt_change_config->game_config->energy_action_cost << std::endl;
-		//	std::cout << "efg " << pt_change_config->game_config->energy_from_grass << std::endl;
-		//	std::cout << "etc " << pt_change_config->game_config->energy_to_clone << std::endl;
-		//	std::cout << "ut " << pt_change_config->game_config->update_time << std::endl;
-		//	std::cout << "gut " << pt_change_config->game_config->grass_update_time << std::endl;
-		//}
 		break;
 	}
 	case PacketType::CLI_START_GAME:
 	{
 		std::cout << "i received PTStartGame" << std::endl;
 		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
-			//перезапускаем состояние игрового поля
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).reset();
-
+		break;
+	}
+	case PacketType::MSG_DISABLE:
+	{
+		std::cout << "i received MSG DISABLE" << std::endl;
+		auto pt_st = std::static_pointer_cast<ConnectionMessage>(packet.packet);
+		
+		for (auto&[id_room, id_channels] : room_subscription_)
+		{
+			id_channels.erase(std::remove(id_channels.begin(), id_channels.end(), static_cast<int>(packet.id_channel)), id_channels.end());
+		}
 		break;
 	}
 	default:
@@ -110,8 +111,21 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	}
 }
 
+const std::vector<IdRoom> SrvManager::getRoomList() const
+{
+	std::vector<IdRoom> room_list;
+	for (const auto&[id, field_state] : rooms_state_)
+	{
+		room_list.push_back(id);
+	}
+	return room_list;
+}
+
 void SrvManager::updateGameState()
 {
+	if (NetworkServer::getInstance().getConnectionCount() == 0)
+		return;
+
 	if (send_field_state_timer_.timedOut())
 	{
 		for (auto&[room, state] : rooms_state_)

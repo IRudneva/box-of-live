@@ -17,10 +17,21 @@ public:
 
 struct ConnectionMessage : Packet
 {
+	ConnectionMessage() = default;
 	ConnectionMessage(PacketType ty) :Packet(ty) {}
+	ConnectionMessage(PacketType ty, uint32_t id)
+	: Packet(ty), id_channel(id) {}
 
-	void pack(msgpack::Packer& packer) const  override {}
-	void pack(msgpack::Unpacker& unpacker) override {}
+	uint32_t id_channel;
+
+	void pack(msgpack::Packer& packer) const  override
+	{
+		packer(id_channel);
+	}
+	void pack(msgpack::Unpacker& unpacker) override
+	{
+		unpacker(id_channel);
+	}
 };
 
 struct PacketHeader

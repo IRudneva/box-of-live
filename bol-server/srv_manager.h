@@ -12,15 +12,7 @@ using IdChannel = int;
 class SrvManager
 {
 public:
-	const std::vector<IdRoom> getRoomList() const
-	{
-		std::vector<IdRoom> room_list;
-		for(const auto& [id, field_state] : rooms_state_)
-		{
-			room_list.push_back(id);
-		}
-		return room_list;
-	}
+	const std::vector<IdRoom> getRoomList() const;
 
 	void handlePacket(const client_packet::PacketWithIdChannel& packet);
 

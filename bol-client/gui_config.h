@@ -33,3 +33,11 @@ struct ConfigLayout
 	tgui::Layout width;
 };
 
+struct ConfigListBox
+{
+	tgui::Layout2d size;
+	unsigned int item_height = 0;
+	tgui::Color color_background;
+	tgui::ListBox::TextAlignment al;
+	tgui::Color color_border;
+};

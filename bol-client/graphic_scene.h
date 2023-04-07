@@ -12,27 +12,27 @@ public:
 
 	void initGraphicScene();
 
-	void initGameLayout(uint32_t id_room);
-
-	void initConnectionFlag(bool status);
-
-	void initConfigGrid(uint32_t id_room, bool status);
+	void initConnectionFlag(bool status) const;
 
 	void initButtonStart(bool status) const { gui_.get("button_start")->setEnabled(status); }
 
 	void initButtonCloseRoom(bool status) const { gui_.get("button_close_room")->setEnabled(status); }
 
-	void setConfigForRoom(uint32_t id_room, std::shared_ptr<GameConfig> conf);
+	void initConfigGrid(uint32_t id_room, bool status);
 
-	void clearRoomList() const;
+	void initAllConfigGrid(bool status);
+
+	void clearRoomList() const { room_list_->removeAllItems(); }
 
 	void clearGameCanvas() const;
 
 	void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
 
-	void update();
+	void update() { gui_.draw(); }
 
 	void handleEvent(const sf::Event& event);
+
+	void deleteRoom(uint32_t id_room);
 
 	void createRoom(int id_room, const std::string& room);
 
@@ -63,6 +63,8 @@ private:
 	std::map<int, tgui::Color> color_bacterium_by_type_;
 
 	void drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const;
+
+	void createGridConfig(int id_room);
 	
 	tgui::Panel::Ptr createLayout(const ConfigLayout& conf) const;
 
@@ -71,6 +73,8 @@ private:
 	tgui::Label::Ptr createLabel(const ConfigLabel& conf) const;
 
 	tgui::EditBox::Ptr createEditBox(const ConfigEditBox& conf) const;
+
+	tgui::ListBox::Ptr createListBox(const ConfigListBox& conf);
 
 	tgui::Color getCellColorByBacteriumEnergy(int id_room, int energy, tgui::Color color) const;
 

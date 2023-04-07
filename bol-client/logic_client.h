@@ -1,9 +1,8 @@
 #pragma once
 #include "server_packet.h"
 #include "shared_packet_queue.h"
-#include "ui_scene.h"
+#include "graphic_scene.h"
 #include "game_domain.h"
-#include <mutex>
 
 class LogicClient
 {
@@ -12,7 +11,7 @@ public:
 
 	void initGraphicScene();
 
-	void updateGameScene();
+	void updateGraphicScene();
 
 private:
 	std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> queue_;

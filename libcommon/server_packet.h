@@ -61,25 +61,6 @@ namespace server_packet {
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, grass_info, bacterium_info); }
 	};
 
-	struct PTNewConfig : ServerPacket
-	{
-		PTNewConfig() : ServerPacket(PacketType::SRV_NEW_CONFIG) {}
-		PTNewConfig(uint32_t id, std::shared_ptr<GameConfig> conf) : ServerPacket(PacketType::SRV_NEW_CONFIG), id_room(id), game_config(conf) {}
-		uint32_t id_room;
-		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
-		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,*game_config); }
-	};
-
-	struct PTStartGame : ServerPacket
-	{
-		PTStartGame() :ServerPacket(PacketType::SRV_START_GAME) {}
-		PTStartGame(uint32_t id) :ServerPacket(PacketType::SRV_START_GAME), id_room(id) {}
-		uint32_t id_room = 0;
-		void pack(msgpack::Packer& packer) const  override { packer(id_room); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
-	};
-
 	struct PTInitChooseRoom : ServerPacket
 	{
 		PTInitChooseRoom() :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM) {}
