@@ -12,8 +12,9 @@ void FieldStateInfo::init(std::shared_ptr<GameConfig> config)
 
 void FieldStateInfo::update()
 {
-	game_state_->update();
-	fillVectorsInfo();
+		game_state_->update();
+
+		fillVectorsInfo();
 }
 
 void FieldStateInfo::reset()

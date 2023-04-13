@@ -12,12 +12,12 @@ int main()
 	
 	NetworkServer& network_server = NetworkServer::getInstance();
 	NetworkServer::getInstance().initQueue(shared_packet_queue);
-	network_server.init();
+	NetworkServer::getInstance().init();
 
 	if(getchar() == '\n')
 	{
 		server.stopLogicLoop();
-		network_server.stop();
+		NetworkServer::getInstance().stop();
 	}
 	return 0;
 }

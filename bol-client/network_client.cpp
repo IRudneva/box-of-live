@@ -13,6 +13,7 @@ void  NetworkClientDestroyer::initialize (NetworkClient* p) {
 	p_instance = p;
 }
 NetworkClient&  NetworkClient::getInstance() {
+	std::lock_guard<std::mutex> lock(m_);
 	if (!p_instance) {
 		p_instance = new  NetworkClient();
 		destroyer.initialize(p_instance);
@@ -34,8 +35,6 @@ void NetworkClient::run()
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				unlinkChannel();
-				auto message = std::make_shared<ConnectionMessage>(PacketType::MSG_DISABLE);
-				queue_->pushPacket(message);
 			}
 			if (client_.isReconnect()) {
 				printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
@@ -99,12 +98,16 @@ void NetworkClient::linkChannel(const BOLTcpClient::TSocketChannelPtr& channel)
 {
 	std::lock_guard<std::mutex> lock(m_);
 	channel_ = channel;
+	auto message = std::make_shared<ConnectionMessage>(PacketType::MSG_CONNECTED);
+	queue_->pushPacket(message);
 }
 
 void NetworkClient::unlinkChannel()
 {
 	std::lock_guard<std::mutex> lock(m_);
 	channel_ = nullptr;
+	auto message = std::make_shared<ConnectionMessage>(PacketType::MSG_DISABLE);
+	queue_->pushPacket(message);
 }
 
 bool NetworkClient::checkChannelIsValid()

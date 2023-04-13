@@ -29,7 +29,7 @@ namespace server_packet {
 	{
 		PTNewRoom() : ServerPacket(PacketType::SRV_NEW_ROOM){}
 		PTNewRoom(const Room& other) : ServerPacket(PacketType::SRV_NEW_ROOM), room(other) {}
-		PTNewRoom(uint32_t id_room, const std::string& name) :ServerPacket(PacketType::SRV_NEW_ROOM), room(id_room,name) {}
+		PTNewRoom(uint32_t id_room, const std::string& name, std::shared_ptr<GameConfig> conf) :ServerPacket(PacketType::SRV_NEW_ROOM), room(id_room,name, std::move(conf)) {}
 		Room room;
 		void pack(msgpack::Packer& packer) const  override { packer(room); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(room); }
@@ -64,9 +64,12 @@ namespace server_packet {
 	struct PTInitChooseRoom : ServerPacket
 	{
 		PTInitChooseRoom() :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM) {}
-		PTInitChooseRoom(uint32_t id) :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id) {}
+		PTInitChooseRoom(uint32_t id, std::shared_ptr<GameConfig> conf) :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id), config(std::move(conf)) {}
+
 		uint32_t id_room = 0;
-		void pack(msgpack::Packer& packer) const  override { packer(id_room); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
+		std::shared_ptr<GameConfig> config = std::make_shared<GameConfig>();
+
+		void pack(msgpack::Packer& packer) const  override { packer(id_room, *config); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *config); }
 	};
 } // namespace server_packet

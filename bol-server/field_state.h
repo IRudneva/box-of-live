@@ -34,9 +34,9 @@ public:
 
 private:
 	std::shared_ptr<GameConfig> config_ = std::make_shared<GameConfig>();
-	std::map<int, std::shared_ptr<Cell>> cells_;
+	using ID = int;
+	std::map<ID, std::shared_ptr<Cell>> cells_;
 	Timer timer_grass_;
-
 
 private:
 	Position getRandomEmptyPosition() const;

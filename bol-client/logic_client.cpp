@@ -2,6 +2,7 @@
 #include "logic_client.h"
 
 #include "network_client.h"
+#include "log_duration.h"
 
 void LogicClient::initGraphicScene()
 {
@@ -13,28 +14,33 @@ void LogicClient::updateGraphicScene()
 {
 	while (window_.isOpen())
 	{
-		if (queue_->hasPacket())
+		if (update_state_timer_.timedOut())
 		{
-			auto packet = queue_->popPacket();
-			handlePacket(packet);
-		}
+			LOG_DURATION("update LOGIC_CLIENT");
 
-		sf::Event event{};
-		while (window_.pollEvent(event))
-		{
-			graphic_scene_->handleEvent(event);
-
-			if (event.type == sf::Event::Closed)
+			if (queue_->hasPacket())
 			{
-				graphic_scene_ = nullptr;
-				window_.close();
-				return;
+				auto packet = queue_->popPacket();
+				handlePacket(packet);
 			}
-		}
 
-		window_.clear();
-		graphic_scene_->update();
-		window_.display();
+			sf::Event event{};
+			while (window_.pollEvent(event))
+			{
+				graphic_scene_->handleEvent(event);
+
+				if (event.type == sf::Event::Closed)
+				{
+					graphic_scene_ = nullptr;
+					window_.close();
+					return;
+				}
+			}
+
+			window_.clear();
+			graphic_scene_->update();
+			window_.display();
+		}
 	}
 }
 
@@ -45,7 +51,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	case PacketType::SRV_NEW_ROOM: 
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTNewRoom>(packet);			
-		graphic_scene_->createRoom(static_cast<int>(pckt->room.id), pckt->room.name);
+		graphic_scene_->createRoom(static_cast<int>(pckt->room.id), pckt->room.name, *pckt->room.config);
 		break;
 	}
 	case PacketType::SRV_ROOM_LIST:
@@ -56,25 +62,18 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	}
 	case  PacketType::MSG_CONNECTED:
 	{
-		graphic_scene_->initConnectionFlag(true);
+		graphic_scene_->onNetworkConnect();
 		break;
 	}
 	case PacketType::MSG_DISABLE:
 	{
-		graphic_scene_->initConnectionFlag(false);
-		graphic_scene_->initButtonStart(false);
-		graphic_scene_->initButtonCloseRoom(false);
-		graphic_scene_->initAllConfigGrid(false);
-		graphic_scene_->clearRoomList();
-		graphic_scene_->clearGameCanvas();
+		graphic_scene_->onNetworkDisconnect();
 		break;
 	}
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTInitChooseRoom>(packet);
-		graphic_scene_->initButtonStart(true);
-		graphic_scene_->initButtonCloseRoom(true);
-		graphic_scene_->initConfigGrid(pckt->id_room, true);
+		graphic_scene_->onChooseRoom(*pckt->config);
 		break;
 	}
 	case PacketType::SRV_ROOM_STATE:
@@ -85,12 +84,8 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	}
 	case PacketType::SRV_CLOSE_ROOM:
 	{
-		auto pt_room = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
-		graphic_scene_->initConfigGrid(pt_room->id_room, false);
-		graphic_scene_->deleteRoom(pt_room->id_room);
-		graphic_scene_->clearGameCanvas();
-		graphic_scene_->initButtonStart(false);
-		graphic_scene_->initButtonCloseRoom(false);
+		auto pckt = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
+		graphic_scene_->onCloseRoom(static_cast<int>(pckt->id_room));
 		break;
 	}
 	default:

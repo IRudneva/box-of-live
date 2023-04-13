@@ -31,23 +31,23 @@ public:
 
 	void sendPacketAllClients(const Packet& packet);
 
-	int getConnectionCount() const { return channel_map_.size(); }
+	int getConnectionCount() const { return static_cast<int>(channel_map_.size()); }
 
 	void stop();
 
 private:
 	static NetworkServer* p_instance;
 	static NetworkServerDestroyer destroyer;
+	static inline std::mutex m_;
 
 	using IdChannel = uint32_t;
 
-	std::mutex m_;
 	std::map<IdChannel, std::weak_ptr<BOLSocketChannel>> channel_map_;
 	BOLTcpServer server_;
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
 
 	NetworkServer(const NetworkServer&) = delete;
-	NetworkServer& operator=(NetworkServer&) =delete;
+	NetworkServer& operator=(NetworkServer&) = delete;
 	NetworkServer() = default;
 	~NetworkServer() = default;
 	friend class NetworkServerDestroyer;

@@ -12,6 +12,7 @@ void NetworkServerDestroyer::initialize(NetworkServer* p) {
 	p_instance = p;
 }
 NetworkServer& NetworkServer::getInstance() {
+	std::lock_guard<std::mutex> lock(m_);
 	if (!p_instance) {
 		p_instance = new NetworkServer();
 		destroyer.initialize(p_instance);
@@ -21,7 +22,6 @@ NetworkServer& NetworkServer::getInstance() {
 
 void NetworkServer::init()
 {
-	std::cout << "NS::run thread " << std::this_thread::get_id() << std::endl;
 	if (initSocket(1234))
 	{
 		printf("server listen on port %d ... \n", 1234);
@@ -30,9 +30,6 @@ void NetworkServer::init()
 			if (channel->isConnected()) {
 				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
 				addChannel(channel);
-				ConnectionMessage message{ PacketType::MSG_CONNECTED, channel->id() };
-				sendPacket(channel->id(), message);
-				std::cout << "send message CONNECTED" << std::endl;
 			}
 			else {
 				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
@@ -64,7 +61,6 @@ void NetworkServer::init()
 void NetworkServer::sendPacket(uint32_t id_channel, const Packet& packet)
 {
 	PacketWriter writer;
-	//проверить, подключен ли клиент
 	if (findChannel(id_channel))
 	{
 		if (auto client = channel_map_[id_channel].lock(); client != nullptr)
@@ -77,17 +73,18 @@ void NetworkServer::sendPacket(uint32_t id_channel, const Packet& packet)
 
 void NetworkServer::sendPacketAllClients(const Packet& packet)
 {
-	for(const auto& [id_channel, wclient] : channel_map_)
+	for(const auto& [id_channel, weak_client] : channel_map_)
 	{
 		sendPacket(id_channel, packet);
+		std::cout << "send packet for   " << id_channel << std::endl;
 	}
 }
 
 void NetworkServer::addChannel(const BOLTcpServer::TSocketChannelPtr& channel)
 {
 	std::lock_guard<std::mutex> lock(m_);
-	std::weak_ptr<BOLSocketChannel> wp(channel);
-	channel_map_[channel->id()] = wp;
+	const std::weak_ptr<BOLSocketChannel> wp(channel);
+	channel_map_.emplace(channel->id_, wp);
 }
 
 void NetworkServer::deleteChannel(const BOLTcpServer::TSocketChannelPtr& channel)

@@ -19,20 +19,15 @@ public:
 
 	void init(GameConfig& config);
 
-	bool isChanged()
-	{
-		auto buf = is_change_config_;
-		is_change_config_ = false;
-		return buf;
-	}
-
 	void doWithAll(const std::function<void(const std::string&, ConfigRecord&)> & visitor);
 
 	const std::map<std::string, ConfigRecord>& getRecords() const { return records; }
 
-	void setOption(GameConfig& config, const std::string & str, int value) { records[str].setter_function(value); }
+	void setOption(/*std::shared_ptr<GameConfig>& config, */const std::string & str, int value)
+	{
+		records[str].setter_function(value);
+	}
 
 private:
 	std::map<std::string, ConfigRecord> records;
-	bool is_change_config_ = false;
 };

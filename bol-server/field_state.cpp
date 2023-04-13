@@ -2,6 +2,7 @@
 #include "field_state.h"
 #include "bacterium.h"
 #include "grass.h"
+#include "log_duration.h"
 
 void FieldState::addColonyBacterium(int max_count)
 {
@@ -90,20 +91,21 @@ void FieldState::update()
 
 	if (timer_grass_.timedOut())
 		addGrass(50);
-
-	for (const auto&[id, cell] : cells_)
 	{
-		if (cell != nullptr) {
-			cell->update(*this);
-			if (cell->isReadyToReset())
-				resetCell(id);
+		LOG_DURATION("FIELD_STATE::UPDATE CELLS");
+		for (const auto&[id, cell] : cells_)
+		{
+			if (cell != nullptr) {
+				cell->update(*this);
+				if (cell->isReadyToReset())
+					resetCell(id);
+			}
 		}
 	}
-
-	for (auto it = cells_.begin(); it != cells_.end(); )
-	{
-		it->second == nullptr ? it = cells_.erase(it) : ++it;
-	}
+		for (auto it = cells_.begin(); it != cells_.end(); )
+		{
+			it->second == nullptr ? it = cells_.erase(it) : ++it;
+		}
 }
 
 void FieldState::restart()

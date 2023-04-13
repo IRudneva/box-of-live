@@ -55,15 +55,18 @@ struct BacteriumInfo
 
 struct GameConfig
 {
+	GameConfig() = default;
+
 	int energy_base = 0;
 	int energy_action_cost = 0;
 	int energy_to_clone = 0;
 	int update_time = 0;
 	int grass_update_time = 0;
 	int energy_from_grass = 0;
+	int playing_field_size = 0;
 
 	template<class T>
 	void pack(T& packer) {
-		packer(energy_base, energy_action_cost, energy_to_clone, update_time, grass_update_time, energy_from_grass);
+		packer(energy_base, energy_action_cost, energy_to_clone, update_time, grass_update_time, energy_from_grass, playing_field_size);
 	}
 };

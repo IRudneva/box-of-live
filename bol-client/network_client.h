@@ -34,10 +34,11 @@ public:
 private:
 	static NetworkClient* p_instance;
 	static NetworkClientDestroyer destroyer;
+	static inline std::mutex m_;
+
 	BOLTcpClient client_;
 	std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> queue_;
 	BOLTcpClient::TSocketChannelPtr channel_ = nullptr;
-	std::mutex m_;
 
 	NetworkClient() = default;
 	~NetworkClient() = default;

@@ -11,7 +11,8 @@ std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(Pack
 	{
 	case PacketType::CLI_CREATE_ROOM:
 	{
-		auto pt_create_room = std::make_shared<client_packet::PTCreateRoom>();
+		auto packet = msgpack::unpack<client_packet::PTCreateRoom>(data);
+		auto pt_create_room = std::make_shared<client_packet::PTCreateRoom>(packet.game_config);
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_create_room);
 		return result;
 	}
@@ -35,17 +36,17 @@ std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(Pack
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_get_room_state);
 		return result;
 	}
-	case PacketType::CLI_CHANGE_CONFIG:
+	/*case PacketType::CLI_CHANGE_CONFIG:
 	{
 		auto packet = msgpack::unpack<client_packet::PTChangeConfig>(data);
 		auto pt_change_config = std::make_shared<client_packet::PTChangeConfig>(packet.id_room, packet.game_config);
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_change_config);
 		return result;
-	}
+	}*/
 	case PacketType::CLI_START_GAME:
 	{
 		auto packet = msgpack::unpack<client_packet::PTStartGame>(data);
-		auto pt_start = std::make_shared<client_packet::PTStartGame>(packet.id_room);
+		auto pt_start = std::make_shared<client_packet::PTStartGame>(packet.id_room, packet.game_config);
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_start);
 		return result;
 	}
@@ -61,7 +62,7 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	case PacketType::SRV_NEW_ROOM:
 	{
 		auto packet = msgpack::unpack<server_packet::PTNewRoom>(data);
-		auto pt_new_room = std::make_shared<server_packet::PTNewRoom>(packet.room.id, packet.room.name);
+		auto pt_new_room = std::make_shared<server_packet::PTNewRoom>(packet.room.id, packet.room.name, packet.room.config);
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_new_room);
 		return result;
 	}
@@ -89,7 +90,7 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto packet = msgpack::unpack<server_packet::PTInitChooseRoom>(data);
-		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room);
+		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room, packet.config);
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_init);
 		return result;
 	}

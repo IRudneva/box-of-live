@@ -17,9 +17,11 @@ namespace client_packet {
 	struct PTCreateRoom : ClientPacket
 	{
 		PTCreateRoom() : ClientPacket(PacketType::CLI_CREATE_ROOM) {}
+		PTCreateRoom(std::shared_ptr<GameConfig> conf) :ClientPacket(PacketType::CLI_CREATE_ROOM),game_config(std::move(conf)) {}
 
-		void pack(msgpack::Packer& packer) const override { }
-		void pack(msgpack::Unpacker& unpacker) override { }
+		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
+		void pack(msgpack::Packer& packer) const override { packer(*game_config); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(*game_config); }
 	};
 
 	struct PTCloseRoom : ClientPacket
@@ -51,23 +53,24 @@ namespace client_packet {
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 	};
 
-	struct PTChangeConfig :ClientPacket
+	/*struct PTChangeConfig :ClientPacket
 	{
 		PTChangeConfig() : ClientPacket(PacketType::CLI_CHANGE_CONFIG) {}
-		PTChangeConfig(uint32_t id, std::shared_ptr<GameConfig> conf) : ClientPacket(PacketType::CLI_CHANGE_CONFIG), id_room(id),game_config(conf) {}
+		PTChangeConfig(uint32_t id, std::shared_ptr<GameConfig> conf) : ClientPacket(PacketType::CLI_CHANGE_CONFIG), id_room(id), game_config(std::move(conf)) {}
 		uint32_t id_room;
 		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
 		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,*game_config); }
-	};
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *game_config); }
+	};*/
 
 	struct PTStartGame : ClientPacket
 	{
 		PTStartGame() :ClientPacket(PacketType::CLI_START_GAME) {}
-		PTStartGame(uint32_t id):ClientPacket(PacketType::CLI_START_GAME),id_room(id){}
+		PTStartGame(uint32_t id, std::shared_ptr<GameConfig> conf):ClientPacket(PacketType::CLI_START_GAME),id_room(id), game_config(std::move(conf)) {}
 		uint32_t id_room;
-		void pack(msgpack::Packer& packer) const override { packer(id_room); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
+		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
+		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *game_config); }
 	};
 
 	struct PacketWithIdChannel

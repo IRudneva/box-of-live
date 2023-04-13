@@ -45,7 +45,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 	if (checkAllBacteriumAroundSameType(all_adjacent))
 		return;
 
-	auto id_bacterium = findPriorytyCell(all_adjacent, TypeCell::BACTERIUM);
+	const auto id_bacterium = findPriorytyCell(all_adjacent, TypeCell::BACTERIUM);
 	if (id_bacterium != NO_RESULT)
 	{
 		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium)))
@@ -55,7 +55,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 		}
 	}
 
-	auto id_grass = findPriorytyCell(all_adjacent, TypeCell::GRASS);
+	const auto id_grass = findPriorytyCell(all_adjacent, TypeCell::GRASS);
 	if (id_grass != NO_RESULT)
 	{
 		eatGrass(field_state.getData().at(id_grass));
