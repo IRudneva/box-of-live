@@ -53,6 +53,16 @@ struct BacteriumInfo
 	void pack(msgpack::Unpacker& unpacker) { unpacker(x, y,id_type, energy); }
 };
 
+struct DeletedPosition
+{
+	DeletedPosition() = default;
+	DeletedPosition(int ox, int oy) : x(ox), y(oy){}
+	int x = 0;
+	int y = 0;
+	void pack(msgpack::Packer& packer) const { packer(x, y); }
+	void pack(msgpack::Unpacker& unpacker) { unpacker(x, y); }
+};
+
 struct GameConfig
 {
 	GameConfig() = default;

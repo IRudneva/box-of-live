@@ -7,21 +7,10 @@
 
 using BOLTcpServer = hv::TcpServerTmpl<BOLSocketChannel>;
 
-class NetworkServer;
-
-class NetworkServerDestroyer
-{
-private:
-	NetworkServer* p_instance;
-public:
-	~NetworkServerDestroyer();
-	void initialize(NetworkServer* p);
-};
-
 class NetworkServer
 {
 public:
-	static NetworkServer& getInstance();
+	static NetworkServer* getInstance();
 
 	void init();
 
@@ -36,21 +25,17 @@ public:
 	void stop();
 
 private:
-	static NetworkServer* p_instance;
-	static NetworkServerDestroyer destroyer;
-	static inline std::mutex m_;
-
 	using IdChannel = uint32_t;
 
 	std::map<IdChannel, std::weak_ptr<BOLSocketChannel>> channel_map_;
 	BOLTcpServer server_;
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
+	std::mutex m_;
 
 	NetworkServer(const NetworkServer&) = delete;
 	NetworkServer& operator=(NetworkServer&) = delete;
 	NetworkServer() = default;
 	~NetworkServer() = default;
-	friend class NetworkServerDestroyer;
 
 	bool initSocket(int port);
 

@@ -2,7 +2,7 @@
 #include "logic_client.h"
 
 #include "network_client.h"
-#include "log_duration.h"
+#include "client_logger.h"
 
 void LogicClient::initGraphicScene()
 {
@@ -16,7 +16,8 @@ void LogicClient::updateGraphicScene()
 	{
 		if (update_state_timer_.timedOut())
 		{
-			LOG_DURATION("update LOGIC_CLIENT");
+			//ClientLogger::getInstance()->registerLog("UPDATE::GRAPHIC SCENE");
+			//LOG_DURATION("update LOGIC_CLIENT");
 
 			if (queue_->hasPacket())
 			{
@@ -79,7 +80,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	case PacketType::SRV_ROOM_STATE:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTRoomState>(packet);
-		graphic_scene_->drawGameCanvas(pckt->id_room, pckt->grass_info, pckt->bacterium_info);
+		graphic_scene_->drawGameCanvas(pckt->id_room, pckt->grass_info, pckt->bacterium_info/*, pckt->deleted_position*/);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:

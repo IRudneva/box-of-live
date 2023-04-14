@@ -99,7 +99,7 @@
       <PrecompiledHeaderFile>pch_client.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(OutputPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>libcommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -154,7 +154,7 @@
       <PrecompiledHeaderFile>pch_client.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -163,6 +163,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="client_logger.cpp" />
     <ClCompile Include="logic_client.cpp" />
     <ClCompile Include="config_helper.cpp" />
     <ClCompile Include="main.cpp" />
@@ -174,6 +175,7 @@
     <ClCompile Include="graphic_scene.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="client_logger.h" />
     <ClInclude Include="logic_client.h" />
     <ClInclude Include="bol_socket_channel.h" />
     <ClInclude Include="config_helper.h" />

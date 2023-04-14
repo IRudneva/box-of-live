@@ -2,24 +2,14 @@
 #include "bol_socket_channel.h"
 #include "packet_writer.h"
 #include "shared_packet_queue.h"
+#include "bol_timer.h"
 
 using BOLTcpClient = hv::TcpClientTmpl<BOLSocketChannel>;
-
-class NetworkClient;
-
-class NetworkClientDestroyer
-{
-private:
-	NetworkClient* p_instance;
-public:
-	~NetworkClientDestroyer();
-	void initialize(NetworkClient* p);
-};
 
 class NetworkClient
 {
 public:
-	static NetworkClient& getInstance();
+	static NetworkClient* getInstance();
 
 	void initQueue(std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> queue) { queue_ = queue; }
 
@@ -32,13 +22,13 @@ public:
 	bool checkChannelIsValid();
 
 private:
-	static NetworkClient* p_instance;
-	static NetworkClientDestroyer destroyer;
-	static inline std::mutex m_;
-
+	std::mutex m_;
 	BOLTcpClient client_;
 	std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> queue_;
 	BOLTcpClient::TSocketChannelPtr channel_ = nullptr;
+
+	Timer count_byte_timer_{ std::chrono::milliseconds(1000) };
+	size_t count_bytes_ = 0;
 
 	NetworkClient() = default;
 	~NetworkClient() = default;

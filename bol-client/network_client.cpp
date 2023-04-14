@@ -1,24 +1,10 @@
 #include "pch_client.h"
 #include "network_client.h"
+#include "client_logger.h"
 
-#include <iostream>
-
-NetworkClient*  NetworkClient::p_instance = 0;
-NetworkClientDestroyer  NetworkClient::destroyer;
-
-NetworkClientDestroyer::~NetworkClientDestroyer() {
-	delete p_instance;
-}
-void  NetworkClientDestroyer::initialize (NetworkClient* p) {
-	p_instance = p;
-}
-NetworkClient&  NetworkClient::getInstance() {
-	std::lock_guard<std::mutex> lock(m_);
-	if (!p_instance) {
-		p_instance = new  NetworkClient();
-		destroyer.initialize(p_instance);
-	}
-	return *p_instance;
+NetworkClient*  NetworkClient::getInstance() {
+	static NetworkClient inst;
+	return &inst;
 }
 
 void NetworkClient::run()
@@ -29,21 +15,27 @@ void NetworkClient::run()
 
 			std::string peeraddr = channel->peeraddr();
 			if (channel->isConnected()) {
-				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
+				ClientLogger::getInstance()->registerLog("CLIENT::CONNECTED TO::" + peeraddr + "::CONNFD=" + std::to_string(channel->fd()));
 				linkChannel(channel);
 			}
 			else {
-				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
+				ClientLogger::getInstance()->registerLog("CLIENT::DISCONNECTED TO::" + peeraddr + "::CONNFD=" + std::to_string(channel->fd()));
 				unlinkChannel();
 			}
 			if (client_.isReconnect()) {
-				printf("reconnect cnt=%d, delay=%d\n", client_.reconn_setting->cur_retry_cnt, client_.reconn_setting->cur_delay);
+				ClientLogger::getInstance()->registerLog("CLIENT::RECONNECT::CNT=" + std::to_string(client_.reconn_setting->cur_retry_cnt) + "::DELAY=" + std::to_string(client_.reconn_setting->cur_delay));
 			}
 		};
 
 		client_.onMessage = [this](const BOLTcpClient::TSocketChannelPtr& channel, hv::Buffer* buf) {
 			uint8_t* it = (uint8_t*)buf->data();
 			size_t size_left = buf->size();
+			count_bytes_ += buf->size();
+			if (count_byte_timer_.timedOut())
+			{
+				ClientLogger::getInstance()->registerLog("CLIENT::RECEIVED BYTES PER SECOND::   " + std::to_string(count_bytes_));
+				count_bytes_ = 0;
+			}
 			do {
 				size_left = channel->reader_.readNetworkPacket(&it, size_left);
 				if (channel->reader_.isAllDataComplete()) {
@@ -80,7 +72,7 @@ bool NetworkClient::initSocket(int port)
 	if (connfd < 0) {
 		return false;
 	}
-	printf("client connect to port %d, connfd=%d ...\n", port, connfd);
+	ClientLogger::getInstance()->registerLog("CLIENT::CONNECTED TO PORT::" + std::to_string(port) + "::CONNFD=" + std::to_string(connfd));
 	return true;
 }
 
@@ -91,7 +83,7 @@ void NetworkClient::sendPacket(const client_packet::ClientPacket& packet)
 	PacketWriter writer;
 	std::vector<uint8_t> s_packet = writer.serialize(packet);
 	channel_->write(s_packet.data(), (int)s_packet.size());
-	std::cout << "send packet!" << std::endl;
+	ClientLogger::getInstance()->registerLog("CLIENT::SEND PACKET::SIZE   " + std::to_string(s_packet.size()));
 }
 
 void NetworkClient::linkChannel(const BOLTcpClient::TSocketChannelPtr& channel)

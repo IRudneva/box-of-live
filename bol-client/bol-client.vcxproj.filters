@@ -42,6 +42,9 @@
     <ClCompile Include="graphic_scene.cpp">
       <Filter>UI scene</Filter>
     </ClCompile>
+    <ClCompile Include="client_logger.cpp">
+      <Filter>UI scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch_client.h">
@@ -63,6 +66,9 @@
       <Filter>logic</Filter>
     </ClInclude>
     <ClInclude Include="graphic_scene.h">
+      <Filter>UI scene</Filter>
+    </ClInclude>
+    <ClInclude Include="client_logger.h">
       <Filter>UI scene</Filter>
     </ClInclude>
   </ItemGroup>

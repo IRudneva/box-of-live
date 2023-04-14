@@ -11,9 +11,40 @@ using Sec = std::chrono::seconds;
 using TimePoint = std::chrono::steady_clock::time_point;
 using AdjacentCellsUMap = std::unordered_map<Position, std::shared_ptr<Cell>, PositionHasher>;
 
+//struct DeltaGameState
+//{
+//	std::vector<Position> deleted_cells;
+//	std::vector<Position> added_cells;
+//
+//	void clear()
+//	{
+//		deleted_cells.clear();
+//		added_cells.clear();
+//	}
+//};
+
 class FieldState
 {
 public:
+	/*DeltaGameState delta_state_;
+
+	const DeltaGameState getDeltaGameState()
+	{
+		const auto buff_delta = delta_state_;
+		delta_state_.clear();
+		return buff_delta;
+	}
+
+	std::shared_ptr<Cell> getCellInPosition(const Position& pos) const
+	{
+		for(const auto& [id, cell] :cells_)
+		{
+			if (cell->getPosition() == pos)
+				return cell;
+		}
+		return nullptr;
+	}*/
+
 	void initConfig(std::shared_ptr<GameConfig> config) { config_ = std::move(config); }
 
 	void update();

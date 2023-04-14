@@ -55,7 +55,10 @@ void FieldState::addColonyBacterium(int max_count)
 void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
 {
 	if (cells_.find(bacterium->getIdCell()) == cells_.end())
+	{
 		cells_.insert({ bacterium->getIdCell(), bacterium });
+	//	delta_state_.added_cells.push_back(bacterium->getPosition());
+	}
 }
 
 void FieldState::resetTypeCell(int id_cell) const
@@ -66,8 +69,11 @@ void FieldState::resetTypeCell(int id_cell) const
 
 void FieldState::resetCell(int id_cell)
 {
-	if (cells_.find(id_cell) != cells_.end())
+	if (const auto cell = cells_.find(id_cell); cell != cells_.end())
+	{
+	//	delta_state_.deleted_cells.push_back(cell->second->getPosition());
 		cells_.at(id_cell) = nullptr;
+	}
 }
 
 void FieldState::addGrass(int amount_grass)
@@ -80,6 +86,7 @@ void FieldState::addGrass(int amount_grass)
 		auto new_grass = std::make_shared<Grass>();
 		new_grass->setPosition(new_position);
 		cells_.insert({ new_grass->getIdCell(), new_grass });
+	//	delta_state_.added_cells.push_back(new_grass->getPosition());
 		++count;
 	}
 }
@@ -92,7 +99,7 @@ void FieldState::update()
 	if (timer_grass_.timedOut())
 		addGrass(50);
 	{
-		LOG_DURATION("FIELD_STATE::UPDATE CELLS");
+		//LOG_DURATION("FIELD_STATE::UPDATE CELLS");
 		for (const auto&[id, cell] : cells_)
 		{
 			if (cell != nullptr) {

@@ -69,6 +69,9 @@
     <ClInclude Include="log_duration.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="logger.h">
+      <Filter>common</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="packet_reader.cpp">
@@ -78,6 +81,9 @@
       <Filter>packet writer</Filter>
     </ClCompile>
     <ClCompile Include="pch.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="logger.cpp">
       <Filter>common</Filter>
     </ClCompile>
   </ItemGroup>

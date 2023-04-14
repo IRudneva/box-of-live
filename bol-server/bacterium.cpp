@@ -42,14 +42,15 @@ void Bacterium::changeDirection(FieldState& field_state)
 {
 	const auto all_adjacent = field_state.getPositionsAround(position_);
 
-	if (checkAllBacteriumAroundSameType(all_adjacent))
+	if (checkAllBacteriumAroundSameType(all_adjacent)) // если все соседние бактерии такого же типа
 		return;
 
 	const auto id_bacterium = findPriorytyCell(all_adjacent, TypeCell::BACTERIUM);
 	if (id_bacterium != NO_RESULT)
 	{
-		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium)))
+		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium))) // если получилось съесть бауктерию другого типа
 		{
+			//field_state.delta_state_.added_cells.push_back(position_);
 			field_state.resetTypeCell(id_bacterium);
 			return;
 		}
@@ -59,6 +60,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 	if (id_grass != NO_RESULT)
 	{
 		eatGrass(field_state.getData().at(id_grass));
+		//field_state.delta_state_.added_cells.push_back(position_);
 		field_state.resetTypeCell(id_grass);
 		if (canClone())
 		{
@@ -72,6 +74,7 @@ void Bacterium::changeDirection(FieldState& field_state)
 
 	auto pos_empty_cell = findEmptyCell(all_adjacent);
 	position_ = pos_empty_cell;
+	//field_state.delta_state_.added_cells.push_back(position_);
 }
 
 int Bacterium::findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell type) const

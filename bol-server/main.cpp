@@ -10,14 +10,13 @@ int main()
 	LogicServer server(shared_packet_queue);
 	server.runLogicLoop();
 	
-	NetworkServer& network_server = NetworkServer::getInstance();
-	NetworkServer::getInstance().initQueue(shared_packet_queue);
-	NetworkServer::getInstance().init();
+	NetworkServer::getInstance()->initQueue(shared_packet_queue);
+	NetworkServer::getInstance()->init();
 
 	if(getchar() == '\n')
 	{
 		server.stopLogicLoop();
-		NetworkServer::getInstance().stop();
+		NetworkServer::getInstance()->stop();
 	}
 	return 0;
 }

@@ -47,18 +47,19 @@ namespace server_packet {
 	struct PTRoomState : ServerPacket
 	{
 		PTRoomState() : ServerPacket(PacketType::SRV_ROOM_STATE) {}
-		PTRoomState(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info)
+		PTRoomState(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info/*, std::vector<DeletedPosition> del_pos*/)
 		: ServerPacket(PacketType::SRV_ROOM_STATE),
 		id_room(id),
 		grass_info(g_info),
-		bacterium_info(bact_info) {}
+		bacterium_info(bact_info)/*,
+		deleted_position(del_pos)*/{}
 
 		uint32_t id_room = 0;
 		std::vector<GrassInfo> grass_info = {};
 		std::vector<BacteriumInfo> bacterium_info = {};
-
-		void pack(msgpack::Packer& packer) const override { packer(id_room, grass_info, bacterium_info); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, grass_info, bacterium_info); }
+	//	std::vector<DeletedPosition> deleted_position = {};
+		void pack(msgpack::Packer& packer) const override { packer(id_room, grass_info, bacterium_info/*, deleted_position*/); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, grass_info, bacterium_info/*, deleted_position*/); }
 	};
 
 	struct PTInitChooseRoom : ServerPacket

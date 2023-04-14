@@ -1,38 +1,27 @@
 ﻿#include "pch_server.h"
 #include "network_server.h"
-#include <iostream>
 
-NetworkServer* NetworkServer::p_instance = 0;
-NetworkServerDestroyer NetworkServer::destroyer;
+#include "logger.h"
 
-NetworkServerDestroyer::~NetworkServerDestroyer() {
-	delete p_instance;
-}
-void NetworkServerDestroyer::initialize(NetworkServer* p) {
-	p_instance = p;
-}
-NetworkServer& NetworkServer::getInstance() {
-	std::lock_guard<std::mutex> lock(m_);
-	if (!p_instance) {
-		p_instance = new NetworkServer();
-		destroyer.initialize(p_instance);
-	}
-	return *p_instance;
+NetworkServer* NetworkServer::getInstance() {
+	static NetworkServer inst;
+	return &inst;
 }
 
 void NetworkServer::init()
 {
 	if (initSocket(1234))
 	{
-		printf("server listen on port %d ... \n", 1234);
+		Logger::getInstance()->registerLog("SERVER::LISTEN ON PORT::" + std::to_string(1234));
+		
 		server_.onConnection = [this](const BOLTcpServer::TSocketChannelPtr& channel) {
 			std::string peeraddr = channel->peeraddr();
 			if (channel->isConnected()) {
-				printf("connected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
+				Logger::getInstance()->registerLog("SERVER::CONNECTED TO::" + peeraddr + "::CONNFD=" + std::to_string(channel->fd()));
 				addChannel(channel);
 			}
 			else {
-				printf("disconnected to %s! connfd=%d\n", peeraddr.c_str(), channel->fd());
+				Logger::getInstance()->registerLog("SERVER::DISCONNECTED TO::" + peeraddr + "::CONNFD=" + std::to_string(channel->fd()));
 				deleteChannel(channel);
 			}
 		};
@@ -67,6 +56,7 @@ void NetworkServer::sendPacket(uint32_t id_channel, const Packet& packet)
 		{
 			auto s_packet = writer.serialize(packet);
 			client->write(s_packet.data(), (int)s_packet.size());
+			Logger::getInstance()->registerLog("SERVER::NUMBER OF BYTES SENT::   " + std::to_string(s_packet.size()));
 		}
 	}
 }
@@ -76,7 +66,7 @@ void NetworkServer::sendPacketAllClients(const Packet& packet)
 	for(const auto& [id_channel, weak_client] : channel_map_)
 	{
 		sendPacket(id_channel, packet);
-		std::cout << "send packet for   " << id_channel << std::endl;
+		Logger::getInstance()->registerLog("SERVER::SEND PACKET::ID CHANNEL::" + std::to_string(id_channel));
 	}
 }
 

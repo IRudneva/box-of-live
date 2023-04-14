@@ -24,6 +24,8 @@ public:
 
 	bool isAllDataComplete() const;
 
+	size_t getAllCountByte() const { return raw_data_.size(); }
+
 private:
 	std::optional<PacketHeader> header_;
 	PacketType packet_type_;

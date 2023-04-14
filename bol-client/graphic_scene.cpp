@@ -7,6 +7,7 @@
 
 #include "client_packet.h"
 #include "network_client.h"
+#include "client_logger.h"
 #include "log_duration.h"
 
 void GraphicScene::initGraphicScene()
@@ -26,7 +27,7 @@ void GraphicScene::initLayout()
 		HEIGHT_WINDOW, WIDTH_WINDOW
 		});
 
-	createListBox({ {(int)common_layout->getSize().x * 0.25, (int)common_layout->getSize().y*0.8},
+	createListBox({ {(int)common_layout->getSize().x * 0.25, (int)common_layout->getSize().y * 0.8},
 		26,
 		tgui::Color(210, 210, 210),
 		tgui::ListBox::TextAlignment::Center,
@@ -55,9 +56,29 @@ void GraphicScene::initLayout()
 	common_layout->add(settings_layout, "settings_layout");
 	common_layout->add(game_layout, "game_layout");
 
+
+	/*const auto log_layout = createLayout({ tgui::Color::Black,
+		{ 0, 0 },
+		, WIDTH_WINDOW
+		});*/
+
+	log_box_ = tgui::ChatBox::create();
+	log_box_->setSize(WIDTH_WINDOW, 200);
+	log_box_->setTextSize(11);
+	log_box_->getRenderer()->setBackgroundColor(tgui::Color::Black);
+	log_box_->setPosition(tgui::bindLeft(common_layout), tgui::bindBottom(common_layout));
+	log_box_->setLinesStartFromTop();
+	/*chatbox->addLine("texus: Hey, this is TGUI!", tgui::Color::Green);
+	chatbox->addLine("Me: Looks awesome! ;)", tgui::Color::Yellow);
+	chatbox->addLine("texus: Thanks! :)", tgui::Color::Green);
+	chatbox->addLine("Me: The widgets rock ^^", tgui::Color::Yellow);*/
+	//log_box_->addLine("Me: The widgets rock ^^", tgui::Color::Black);
 	fields->add(common_layout, "common_layout");
 
 	gui_.add(fields, "fields");
+	gui_.add(log_box_, "log_box");
+
+	ClientLogger::getInstance()->init(log_box_);
 }
 
 void GraphicScene::initCanvas()
@@ -91,7 +112,7 @@ void GraphicScene::initButtons()
 
 	button_close_room->onPress([this] {
 		client_packet::PTCloseRoom packet(static_cast<uint32_t>(id_selected_room_));
-		NetworkClient::getInstance().sendPacket(packet);
+		NetworkClient::getInstance()->sendPacket(packet);
 	});
 
 	const auto button_create_room = createButton({ tgui::Color::Yellow,
@@ -104,7 +125,7 @@ void GraphicScene::initButtons()
 	button_create_room->onPress([this] {
 		config_.helper->init(config_.config);
 		const client_packet::PTCreateRoom packet(std::make_shared<GameConfig>(config_.config));
-		NetworkClient::getInstance().sendPacket(packet);
+		NetworkClient::getInstance()->sendPacket(packet);
 	});
 
 	auto size_settings_layout = gui_.get("settings_layout")->getSize();
@@ -120,7 +141,7 @@ void GraphicScene::initButtons()
 
 	button_start->onPress([this] {
 		client_packet::PTStartGame packet(static_cast<uint32_t>(id_selected_room_), std::make_shared<GameConfig>(config_.config));
-		NetworkClient::getInstance().sendPacket(packet);
+		NetworkClient::getInstance()->sendPacket(packet);
 	});
 
 	buttons->add(button_create_room, "button_create_room");
@@ -201,10 +222,17 @@ void GraphicScene::clearGameCanvas() const
 		canv->display();
 	}
 }
+//
+//void GraphicScene::saveLastDeltaForRoom(int id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf)
+//{
+//	last_state_for_room_[static_cast<int>(id_room)].bact_inf = bact_inf;
+//	last_state_for_room_[static_cast<int>(id_room)].grass_info = cell_info;
+//}
 
-void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf)
+void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_positions*/)
 {
 	//LOG_DURATION("draw");
+
 	if (auto canv = game_canvas_.lock(); canv != nullptr) {
 		canv->clear(tgui::Color::White);
 		sf::RectangleShape cell_shape;
@@ -227,6 +255,15 @@ void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canv->draw(cell_shape);
 		}
+		/*for(const auto& pos:deleted_positions)
+		{
+			const float pos_x = static_cast<float>(pos.x *CELL_SIZE);
+			const float pos_y = static_cast<float>(pos.y * CELL_SIZE);
+			cell_shape.setPosition(pos_x, pos_y);
+			cell_shape.setFillColor(tgui::Color::White);
+			cell_shape.setOutlineColor(sf::Color::White);
+			canv->draw(cell_shape);
+		}*/
 		drawMarkupField(canv);
 		canv->display();
 	}
@@ -264,7 +301,7 @@ void  GraphicScene::initConnectionFlag(bool status) const
 	if(connection_flag_)
 	{
 		const client_packet::PTGetRoomList get_room_list;
-		NetworkClient::getInstance().sendPacket(get_room_list);
+		NetworkClient::getInstance()->sendPacket(get_room_list);
 	}
 }
 
@@ -338,7 +375,7 @@ void GraphicScene::createListBox(const ConfigListBox& conf)
 		id_selected_room_ = static_cast<int>(id_room);
 
 		client_packet::PTChooseRoom packet(id_selected_room_);
-		NetworkClient::getInstance().sendPacket(packet);
+		NetworkClient::getInstance()->sendPacket(packet);
 	});
 }
 

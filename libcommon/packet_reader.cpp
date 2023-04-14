@@ -36,13 +36,6 @@ std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(Pack
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_get_room_state);
 		return result;
 	}
-	/*case PacketType::CLI_CHANGE_CONFIG:
-	{
-		auto packet = msgpack::unpack<client_packet::PTChangeConfig>(data);
-		auto pt_change_config = std::make_shared<client_packet::PTChangeConfig>(packet.id_room, packet.game_config);
-		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_change_config);
-		return result;
-	}*/
 	case PacketType::CLI_START_GAME:
 	{
 		auto packet = msgpack::unpack<client_packet::PTStartGame>(data);
@@ -83,7 +76,7 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	case PacketType::SRV_ROOM_STATE:
 	{
 		auto packet = msgpack::unpack<server_packet::PTRoomState>(data);
-		auto pt_room_state = std::make_shared<server_packet::PTRoomState>(packet.id_room, packet.grass_info, packet.bacterium_info);///////////////////
+		auto pt_room_state = std::make_shared<server_packet::PTRoomState>(packet.id_room, packet.grass_info, packet.bacterium_info/*, packet.deleted_position*/);
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_room_state);
 		return result;
 	}

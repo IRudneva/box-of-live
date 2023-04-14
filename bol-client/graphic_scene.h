@@ -16,7 +16,9 @@ public:
 
 	void update() { gui_.draw(); }
 
-	void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
+//	void saveLastDeltaForRoom(int id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
+
+	void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_pos*/);
 
 	void handleEvent(const sf::Event& event) { gui_.handleEvent(event); }
 
@@ -34,6 +36,8 @@ public:
 
 	void setConfig(const GameConfig& conf) { config_.config = conf; }
 
+	tgui::ChatBox::Ptr getLogBox()const { return log_box_; }
+
 private:
 	using IdRoom = int;
 
@@ -41,6 +45,7 @@ private:
 	tgui::GuiSFML gui_;
 	tgui::ListBox::Ptr room_list_;
 	tgui::Panel::Ptr connection_flag_;
+	tgui::ChatBox::Ptr log_box_;
 
 	struct UIConfig
 	{
@@ -52,6 +57,14 @@ private:
 
 	int id_selected_room_ = 0;
 	std::map<int, tgui::Color> color_bacterium_by_type_;
+
+	//struct DeltaState
+	//{
+	//	std::vector<GrassInfo> grass_info;
+	//	std::vector<BacteriumInfo> bact_inf;
+	//};
+
+	//std::map<IdRoom, DeltaState> last_state_for_room_;
 
 	void initLayout();
 

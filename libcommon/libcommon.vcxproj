@@ -168,6 +168,7 @@
   <ItemGroup>
     <ClInclude Include="client_packet.h" />
     <ClInclude Include="bol_timer.h" />
+    <ClInclude Include="logger.h" />
     <ClInclude Include="log_duration.h" />
     <ClInclude Include="msgpack.hpp" />
     <ClInclude Include="packet.h" />
@@ -182,6 +183,7 @@
     <ClInclude Include="shared_packet_queue.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="logger.cpp" />
     <ClCompile Include="packet_reader.cpp" />
     <ClCompile Include="packet_writer.cpp" />
     <ClCompile Include="pch.cpp">

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <chrono>
-#include <iostream>
+#include "logger.h"
 
 #define PROFILE_CONCAT_INTERNAL(X, Y) X##Y
 #define PROFILE_CONCAT(X, Y) PROFILE_CONCAT_INTERNAL(X, Y)
@@ -10,8 +10,6 @@
 
 class LogDuration {
 public:
-    // заменим имя типа std::chrono::steady_clock
-    // с помощью using для удобства
     using Clock = std::chrono::steady_clock;
 
     LogDuration(const std::string& id)
@@ -24,7 +22,8 @@ public:
 
         const auto end_time = Clock::now();
         const auto dur = end_time - start_time_;
-        std::cerr << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
+		Logger::getInstance()->registerLog(id_ + ": " + std::to_string(duration_cast<milliseconds>(dur).count()) + " ms");
+      //  std::cerr << id_ << ": "s << duration_cast<milliseconds>(dur).count() << " ms"s << std::endl;
     }
 
 private:
