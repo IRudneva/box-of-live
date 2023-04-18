@@ -97,7 +97,7 @@ void FieldState::update()
 		return;
 
 	if (timer_grass_.timedOut())
-		addGrass(50);
+		addGrass(config_->count_grass);
 	{
 		//LOG_DURATION("FIELD_STATE::UPDATE CELLS");
 		for (const auto&[id, cell] : cells_)
@@ -121,7 +121,7 @@ void FieldState::restart()
 	IdCell::reset();
 	timer_grass_.initInt(config_->grass_update_time);
 	addColonyBacterium(20);
-	addGrass(300);
+	addGrass(config_->count_grass * 2);
 
 }
 

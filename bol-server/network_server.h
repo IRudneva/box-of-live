@@ -3,6 +3,7 @@
 #include "packet_writer.h"
 #include "server_packet.h"
 #include "shared_packet_queue.h"
+#include "bol_timer.h"
 #include <map>
 
 using BOLTcpServer = hv::TcpServerTmpl<BOLSocketChannel>;
@@ -31,6 +32,9 @@ private:
 	BOLTcpServer server_;
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
 	std::mutex m_;
+
+	Timer count_byte_timer_{ std::chrono::milliseconds(1000) };
+	size_t count_bytes_ = 0;
 
 	NetworkServer(const NetworkServer&) = delete;
 	NetworkServer& operator=(NetworkServer&) = delete;

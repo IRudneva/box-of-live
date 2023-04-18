@@ -70,13 +70,17 @@ struct GameConfig
 	int energy_base = 0;
 	int energy_action_cost = 0;
 	int energy_to_clone = 0;
-	int update_time = 0;
+	int min_update_time = 0;
+	int max_update_time = 0;
 	int grass_update_time = 0;
+	int count_grass = 0;
 	int energy_from_grass = 0;
-	int playing_field_size = 0;
+	double delta_game_field_size = 1.0;
 
 	template<class T>
 	void pack(T& packer) {
-		packer(energy_base, energy_action_cost, energy_to_clone, update_time, grass_update_time, energy_from_grass, playing_field_size);
+		packer(energy_base, energy_action_cost, energy_to_clone, 
+			min_update_time, max_update_time, grass_update_time, 
+			count_grass, energy_from_grass, delta_game_field_size);
 	}
 };

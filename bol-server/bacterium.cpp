@@ -8,11 +8,12 @@ Bacterium::Bacterium(int id_type, std::shared_ptr<GameConfig> config) :id_type_(
 {
 	setCellType(TypeCell::BACTERIUM);
 	energy_base_ = config_->energy_base;
+	update_time_ = getRandomInt(config_->min_update_time, config_->max_update_time);
 }
 
 bool Bacterium::isReadyUpdate()
 {
-	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= Millisec(Sec(config_->update_time)))
+	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= Millisec(Sec(update_time_)))
 	{
 		last_action_time_ = getCurrentTime();
 		return true;

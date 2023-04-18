@@ -16,6 +16,13 @@ public:
 
 	void update() { gui_.draw(); }
 
+	void setGameCanvasSize(double delta) const
+	{
+		if (auto canv = game_canvas_.lock(); canv != nullptr)
+			canv->setSize(WIDTH_PLAYING_FIELD * delta,
+				HEIGHT_PLAYING_FIELD * delta);
+	}
+
 //	void saveLastDeltaForRoom(int id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
 
 	void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_pos*/);

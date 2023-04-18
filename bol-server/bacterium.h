@@ -29,6 +29,7 @@ private:
 	int id_type_ = 0;
 	int energy_base_ = 0;
 	TimePoint last_action_time_;
+	int update_time_ = 0;
 	std::shared_ptr<GameConfig> config_;
 
 private:

@@ -56,7 +56,12 @@ void NetworkServer::sendPacket(uint32_t id_channel, const Packet& packet)
 		{
 			auto s_packet = writer.serialize(packet);
 			client->write(s_packet.data(), (int)s_packet.size());
-			Logger::getInstance()->registerLog("SERVER::NUMBER OF BYTES SENT::   " + std::to_string(s_packet.size()));
+			count_bytes_ += s_packet.size();
+			if (count_byte_timer_.timedOut()) 
+			{
+				Logger::getInstance()->registerLog("SERVER::NUMBER OF BYTES SENT::   " + std::to_string(count_bytes_));
+				count_bytes_ = 0;
+			}
 		}
 	}
 }

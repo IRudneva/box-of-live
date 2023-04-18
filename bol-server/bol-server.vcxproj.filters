@@ -63,6 +63,9 @@
     <ClCompile Include="position.cpp">
       <Filter>game state\game logic</Filter>
     </ClCompile>
+    <ClCompile Include="bol_database.cpp">
+      <Filter>Исходные файлы</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch_server.h">
@@ -97,6 +100,9 @@
     </ClInclude>
     <ClInclude Include="position.h">
       <Filter>game state\game logic</Filter>
+    </ClInclude>
+    <ClInclude Include="bol_database.h">
+      <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

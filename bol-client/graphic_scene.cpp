@@ -48,19 +48,13 @@ void GraphicScene::initLayout()
 
 	auto game_layout = createLayout({ tgui::Color::White,
 		{ settings_layout->getPosition().x, settings_layout->getPosition().y + settings_layout->getSize().y},
-		HEIGHT_WINDOW - settings_layout->getSize().y,
-		WIDTH_WINDOW - room_list_->getSize().x }
+		/*HEIGHT_WINDOW - settings_layout->getSize().y*/HEIGHT_PLAYING_FIELD,
+		/*WIDTH_WINDOW - room_list_->getSize().x*/WIDTH_PLAYING_FIELD }
 	);
 
 	common_layout->add(room_list_, "room_list");
 	common_layout->add(settings_layout, "settings_layout");
 	common_layout->add(game_layout, "game_layout");
-
-
-	/*const auto log_layout = createLayout({ tgui::Color::Black,
-		{ 0, 0 },
-		, WIDTH_WINDOW
-		});*/
 
 	log_box_ = tgui::ChatBox::create();
 	log_box_->setSize(WIDTH_WINDOW, 200);
@@ -68,11 +62,6 @@ void GraphicScene::initLayout()
 	log_box_->getRenderer()->setBackgroundColor(tgui::Color::Black);
 	log_box_->setPosition(tgui::bindLeft(common_layout), tgui::bindBottom(common_layout));
 	log_box_->setLinesStartFromTop();
-	/*chatbox->addLine("texus: Hey, this is TGUI!", tgui::Color::Green);
-	chatbox->addLine("Me: Looks awesome! ;)", tgui::Color::Yellow);
-	chatbox->addLine("texus: Thanks! :)", tgui::Color::Green);
-	chatbox->addLine("Me: The widgets rock ^^", tgui::Color::Yellow);*/
-	//log_box_->addLine("Me: The widgets rock ^^", tgui::Color::Black);
 	fields->add(common_layout, "common_layout");
 
 	gui_.add(fields, "fields");
@@ -141,7 +130,7 @@ void GraphicScene::initButtons()
 
 	button_start->onPress([this] {
 		client_packet::PTStartGame packet(static_cast<uint32_t>(id_selected_room_), std::make_shared<GameConfig>(config_.config));
-		NetworkClient::getInstance()->sendPacket(packet);
+		NetworkClient::getInstance()->sendPacket(packet); //////////////////////////////////// ТУТ ОТПРАВЛЯЕТСЯ КОНФИГ, РАЗМЕР ПОЛЯ ПРОКИНУТЬ В NServer
 	});
 
 	buttons->add(button_create_room, "button_create_room");
@@ -154,16 +143,17 @@ void GraphicScene::initButtons()
 void GraphicScene::initGrid()
 {
 	config_.grid->setAutoSize(true);
+	
 	config_.grid->setPosition(tgui::bindRight(room_list_), tgui::bindTop(room_list_));
 
 	config_.helper->init(config_.config);
 
 	config_.helper->doWithAll([this](const std::string& config_name, ConfigHelper::ConfigRecord& config_record) {
-		auto label = createLabel({ config_name, 14 });
+		auto label = createLabel({ config_name, 13 });
 
 		config_.grid->addWidget(label, config_record.row_id, config_record.column_id * 2, tgui::Grid::Alignment::Left);
 
-		auto edit_box = createEditBox({ {100, 16}, 14, std::to_string(config_record.default_value) });
+		auto edit_box = createEditBox({ {50, 15}, 13, std::to_string(config_record.default_value) });
 
 		edit_box->onTextChange([this, edit_box, &config_record]() {
 			auto text = edit_box->getText();
@@ -178,6 +168,38 @@ void GraphicScene::initGrid()
 			config_record.column_id * 2 + 1,
 			tgui::Grid::Alignment::Left);
 	});
+
+	auto label = createLabel({ "game_field_size", 13 });
+	config_.grid->addWidget(label, 7, 2, tgui::Grid::Alignment::Left);
+	auto tabs = tgui::Tabs::create();
+	tabs->setTabHeight(15);
+	tabs->add("small");
+	tabs->add("middle");
+	tabs->add("large");
+
+	tabs->onTabSelect([this, tabs]
+	{
+		auto indx = tabs->getSelected();
+		auto game_field_size = gui_.get("game_layout")->getSize();
+		if (indx == "small")
+		{
+			config_.config.delta_game_field_size = 0.5;
+			setGameCanvasSize(config_.config.delta_game_field_size);
+		}
+		else if (indx == "middle")
+		{
+			config_.config.delta_game_field_size = 0.8;
+			setGameCanvasSize(config_.config.delta_game_field_size);
+		}
+		else if (indx == "large")
+		{
+			config_.config.delta_game_field_size = 1.0;
+			setGameCanvasSize(config_.config.delta_game_field_size);
+		}
+
+	});
+	config_.grid->addWidget(tabs, 7, 3, tgui::Grid::Alignment::Left);
+
 	config_.grid->setVisible(false);
 	config_.grid->setEnabled(false);
 
