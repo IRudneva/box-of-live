@@ -6,10 +6,10 @@ const Position Position::getRandomDirection() const
 	Position curr_pos = { x,y };
 
 	int minXDelta = x > 0 ? -1 : 0;
-	int maxXDelta = x < COUNT_POSITION_X ? 1 : 0;
+	int maxXDelta = x < static_cast<int>(MAX_COUNT_POSITION_X * delta_) ? 1 : 0;
 
 	int minYDelta = y > 0 ? -1 : 0;
-	int maxYDelta = y < COUNT_POSITION_Y ? 1 : 0;
+	int maxYDelta = y < static_cast<int>(MAX_COUNT_POSITION_Y* delta_) ? 1 : 0;
 
 	auto positionDelta =
 		PositionDelta{
@@ -39,7 +39,7 @@ const std::vector<Position> Position::getAllAdjacentPosition() const
 			auto pos = start_pos + delta;
 			if (!(pos == curr_pos))
 			{
-				if ((pos.x > 0 && pos.y > 0) && (pos.x < COUNT_POSITION_X && pos.y < COUNT_POSITION_Y))
+				if ((pos.x > 0 && pos.y > 0) && (pos.x < static_cast<int>(MAX_COUNT_POSITION_X * delta_) && pos.y < static_cast<int>(MAX_COUNT_POSITION_Y * delta_)))
 				{
 					adjacent_position.push_back({ pos.x,pos.y });
 				}

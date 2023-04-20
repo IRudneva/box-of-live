@@ -47,30 +47,34 @@ namespace server_packet {
 	struct PTRoomState : ServerPacket
 	{
 		PTRoomState() : ServerPacket(PacketType::SRV_ROOM_STATE) {}
-		PTRoomState(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info/*, std::vector<DeletedPosition> del_pos*/)
+		PTRoomState(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info, const std::vector<DeletedPosition>& del_pos)
 		: ServerPacket(PacketType::SRV_ROOM_STATE),
 		id_room(id),
 		grass_info(g_info),
-		bacterium_info(bact_info)/*,
-		deleted_position(del_pos)*/{}
+		bacterium_info(bact_info),
+		deleted_position(del_pos) {}
 
 		uint32_t id_room = 0;
 		std::vector<GrassInfo> grass_info = {};
 		std::vector<BacteriumInfo> bacterium_info = {};
-	//	std::vector<DeletedPosition> deleted_position = {};
-		void pack(msgpack::Packer& packer) const override { packer(id_room, grass_info, bacterium_info/*, deleted_position*/); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, grass_info, bacterium_info/*, deleted_position*/); }
+		std::vector<DeletedPosition> deleted_position = {};
+		void pack(msgpack::Packer& packer) const override { packer(id_room, grass_info, bacterium_info, deleted_position); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, grass_info, bacterium_info, deleted_position); }
 	};
 
 	struct PTInitChooseRoom : ServerPacket
 	{
 		PTInitChooseRoom() :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM) {}
-		PTInitChooseRoom(uint32_t id, std::shared_ptr<GameConfig> conf) :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id), config(std::move(conf)) {}
+		PTInitChooseRoom(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info, std::shared_ptr<GameConfig> conf)
+		:ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id), config(std::move(conf)),
+		 grass_info(g_info), bacterium_info(bact_info) {}
 
 		uint32_t id_room = 0;
 		std::shared_ptr<GameConfig> config = std::make_shared<GameConfig>();
+		std::vector<GrassInfo> grass_info = {};
+		std::vector<BacteriumInfo> bacterium_info = {};
 
-		void pack(msgpack::Packer& packer) const  override { packer(id_room, *config); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *config); }
+		void pack(msgpack::Packer& packer) const  override { packer(id_room, *config, grass_info, bacterium_info); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *config, grass_info, bacterium_info); }
 	};
 } // namespace server_packet

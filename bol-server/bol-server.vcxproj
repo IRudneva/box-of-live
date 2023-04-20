@@ -184,6 +184,7 @@
     <ClInclude Include="bacterium.h" />
     <ClInclude Include="bol_database.h" />
     <ClInclude Include="cell.h" />
+    <ClInclude Include="data_for_save.h" />
     <ClInclude Include="field_state.h" />
     <ClInclude Include="field_state_info.h" />
     <ClInclude Include="grass.h" />

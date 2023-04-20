@@ -74,13 +74,14 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTInitChooseRoom>(packet);
-		graphic_scene_->onChooseRoom(*pckt->config);
+		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config);
 		break;
 	}
 	case PacketType::SRV_ROOM_STATE:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTRoomState>(packet);
-		graphic_scene_->drawGameCanvas(pckt->id_room, pckt->grass_info, pckt->bacterium_info/*, pckt->deleted_position*/);
+		//graphic_scene_->drawGameCanvas(pckt->id_room, pckt->grass_info, pckt->bacterium_info/*, pckt->deleted_position*/);
+		graphic_scene_->updateCurrentFieldState(pckt->grass_info, pckt->bacterium_info, pckt->deleted_position);
 		break;
 	}
 	case PacketType::SRV_CLOSE_ROOM:

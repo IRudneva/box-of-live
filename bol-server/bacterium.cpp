@@ -34,8 +34,11 @@ void Bacterium::update(FieldState& field_state)
 		spendEnergy(config_->energy_action_cost);
 		changeDirection(field_state);
 
-		if (energy_base_ <= 0)
+		if (energy_base_ <= 0) {
 			field_state.resetTypeCell(getIdCell());
+			// удаляем, если закончилась энергия
+			field_state.delta_state_.deleted_cells.push_back(position_);
+		}
 	}
 }
 
@@ -49,9 +52,13 @@ void Bacterium::changeDirection(FieldState& field_state)
 	const auto id_bacterium = findPriorytyCell(all_adjacent, TypeCell::BACTERIUM);
 	if (id_bacterium != NO_RESULT)
 	{
+		auto old_pos = position_;
 		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium))) // если получилось съесть бауктерию другого типа
 		{
-			//field_state.delta_state_.added_cells.push_back(position_);
+			// удаляем старую позицию
+			field_state.delta_state_.deleted_cells.push_back(old_pos);
+
+			field_state.delta_state_.update_cells.push_back(position_);
 			field_state.resetTypeCell(id_bacterium);
 			return;
 		}
@@ -60,8 +67,13 @@ void Bacterium::changeDirection(FieldState& field_state)
 	const auto id_grass = findPriorytyCell(all_adjacent, TypeCell::GRASS);
 	if (id_grass != NO_RESULT)
 	{
+		auto old_pos = position_;
+		// удаляем старую прзицию
+		field_state.delta_state_.deleted_cells.push_back(old_pos);
+
 		eatGrass(field_state.getData().at(id_grass));
-		//field_state.delta_state_.added_cells.push_back(position_);
+		field_state.delta_state_.update_cells.push_back(position_);
+
 		field_state.resetTypeCell(id_grass);
 		if (canClone())
 		{
@@ -74,8 +86,12 @@ void Bacterium::changeDirection(FieldState& field_state)
 	}
 
 	auto pos_empty_cell = findEmptyCell(all_adjacent);
+	auto old_pos = position_;
+	// удаляем старую прзицию
+	field_state.delta_state_.deleted_cells.push_back(old_pos);
+
 	position_ = pos_empty_cell;
-	//field_state.delta_state_.added_cells.push_back(position_);
+	field_state.delta_state_.update_cells.push_back(position_);
 }
 
 int Bacterium::findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell type) const

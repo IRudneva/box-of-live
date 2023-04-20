@@ -8,8 +8,8 @@ constexpr static int HEIGHT_PLAYING_FIELD = static_cast<int>(HEIGHT_WINDOW * 0.7
 constexpr static int WIDTH_PLAYING_FIELD = static_cast<int>(WIDTH_WINDOW * 0.75);
 constexpr static int CELL_SIZE = 8;
 constexpr static int NUMBER_BACTERIAL_COLONIES = 3;
-constexpr static int COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
-constexpr static int COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
+constexpr static int MAX_COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
+constexpr static int MAX_COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
 constexpr static int NO_RESULT = -1;
 
 enum class TypeCell : uint32_t
@@ -75,12 +75,14 @@ struct GameConfig
 	int grass_update_time = 0;
 	int count_grass = 0;
 	int energy_from_grass = 0;
-	double delta_game_field_size = 1.0;
+	int delta_game_field_size = 10;
 
-	template<class T>
-	void pack(T& packer) {
-		packer(energy_base, energy_action_cost, energy_to_clone, 
-			min_update_time, max_update_time, grass_update_time, 
-			count_grass, energy_from_grass, delta_game_field_size);
-	}
+	void pack(msgpack::Packer& packer) const { packer(energy_base, energy_action_cost, energy_to_clone,
+		min_update_time, max_update_time, grass_update_time,
+		count_grass, energy_from_grass, delta_game_field_size); }
+
+	void pack(msgpack::Unpacker& unpacker) { unpacker(energy_base, energy_action_cost, energy_to_clone,
+		min_update_time, max_update_time, grass_update_time,
+		count_grass, energy_from_grass, delta_game_field_size); }
+
 };

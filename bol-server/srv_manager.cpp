@@ -1,4 +1,11 @@
 #include "pch_server.h"
+
+
+#include "data_for_save.h"
+#include "bol_database.h"
+
+
+
 #include "client_packet.h"
 #include "srv_manager.h"
 #include "packet_writer.h"  
@@ -23,7 +30,13 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		const server_packet::PTNewRoom pt_new_room(last_id_room_, "room", game_field_state.getGameConfig());
 		NetworkServer::getInstance()->sendPacketAllClients(pt_new_room);
+
+	/*	auto data_for_save = std::make_shared<DataForTabRooms>(last_id_room_);
+
+		DataBuffer::getInstance()->pushData(data_for_save);*/
+
 		++last_id_room_;
+
 		break;
 	}
 	case PacketType::CLI_CLOSE_ROOM:
@@ -50,7 +63,6 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		Logger::getInstance()->registerLog("SERVER::RECEIVED::GET ROOM LIST");
 
 		server_packet::PTRoomList pt_room_list;
-
 		for (const auto& [id_room, state] : rooms_state_)
 		{
 			pt_room_list.room_list.emplace_back(static_cast<uint32_t>(id_room), "room", state.getGameConfig());
@@ -70,8 +82,18 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 			state.deleteSubscription(static_cast<int>(packet.id_channel));
 		}
 		rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).addSubscription(static_cast<int>(packet.id_channel));
-	
-		const server_packet::PTInitChooseRoom pt_init_game(pt_choose_room->id_room, rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getGameConfig());
+
+		rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).fillAllCellsInGameState();
+
+		auto current_state = rooms_state_.at(static_cast<int>(pt_choose_room->id_room));
+
+		const server_packet::PTInitChooseRoom pt_init_game(
+			pt_choose_room->id_room,
+			current_state.getGrassInfo(),
+			current_state.getBacteriumInfo(),
+			current_state.getGameConfig()
+		);
+
 		NetworkServer::getInstance()->sendPacket(packet.id_channel, pt_init_game);
 		break;
 	}
@@ -113,7 +135,7 @@ void SrvManager::updateGameState()
 		for (auto&[room, state] : rooms_state_)
 		{
 		//	LOG_DURATION("UPDATE GAME STATE::ROOM::" + std::to_string(room));
-		//	if(state.isDeltaEmpty())
+			if(state.isDeltaEmpty())
 				state.update();
 		}
 
@@ -123,11 +145,11 @@ void SrvManager::updateGameState()
 				continue;
 
 			const server_packet::PTRoomState game_state(id_room,
-				state.getCellInfo(),
-				state.getBacteriumInfo()/*, 
-				state.getDeletedPosition()*/);
+				state.getGrassInfo(),
+				state.getBacteriumInfo(), 
+				state.getDeletedPosition());
 
-		//	state.clearDelta();
+			state.clearDelta();
 
 			for (const auto& client : state.getSubscription())
 			{
@@ -136,5 +158,18 @@ void SrvManager::updateGameState()
 				NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), game_state);
 			}
 		}
+	}
+}
+
+void SrvManager::formDataForDatabase()
+{
+	for (auto&[id_room, state] : rooms_state_)
+	{
+		for(const auto& inf : state.getAllCellInfo())
+		{
+			auto pos = inf.second->getPosition();
+			DataBuffer::getInstance()->pushData(std::make_shared<DataForTabRoomsState>(id_room, pos.x, pos.y, inf.second->getCellType()));
+		}
+		
 	}
 }

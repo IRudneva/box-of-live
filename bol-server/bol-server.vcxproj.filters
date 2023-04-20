@@ -28,6 +28,9 @@
     <Filter Include="game state\game object">
       <UniqueIdentifier>{215ee474-b376-4893-b485-bf045697b77c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="database">
+      <UniqueIdentifier>{f9e6230f-983d-4214-8a78-8c21701cb8d8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -64,7 +67,7 @@
       <Filter>game state\game logic</Filter>
     </ClCompile>
     <ClCompile Include="bol_database.cpp">
-      <Filter>Исходные файлы</Filter>
+      <Filter>database</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -102,7 +105,10 @@
       <Filter>game state\game logic</Filter>
     </ClInclude>
     <ClInclude Include="bol_database.h">
-      <Filter>Файлы заголовков</Filter>
+      <Filter>database</Filter>
+    </ClInclude>
+    <ClInclude Include="data_for_save.h">
+      <Filter>database</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -14,18 +14,75 @@ public:
 
 	void initGraphicScene();
 
-	void update() { gui_.draw(); }
+	void update()
+	{
+		gui_.draw();
+		if (auto canv = game_canvas_.lock(); canv != nullptr) {
+			canv->clear(tgui::Color::White);
+			sf::RectangleShape cell_shape;
+			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+			for (const auto& grass : current_field_state_.grass_info)
+			{
+				cell_shape.setPosition(grass.x, grass.y);
+				cell_shape.setFillColor(tgui::Color::Green);
+				cell_shape.setOutlineColor(sf::Color::Black);
+				canv->draw(cell_shape);
+			}
+			for (const auto& bact : current_field_state_.bact_inf)
+			{
+				cell_shape.setPosition(bact.first.x, bact.first.y);
+				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, getCellColorByBacteriumId(bact.second.id_type)));
+				cell_shape.setOutlineColor(sf::Color::Black);
+				canv->draw(cell_shape);
+			}
+			drawMarkupField(canv);
+			canv->display();
+		}
+	}
 
-	void setGameCanvasSize(double delta) const
+	void setGameCanvasSize(int delta) const
 	{
 		if (auto canv = game_canvas_.lock(); canv != nullptr)
-			canv->setSize(WIDTH_PLAYING_FIELD * delta,
-				HEIGHT_PLAYING_FIELD * delta);
+			canv->setSize(WIDTH_PLAYING_FIELD * static_cast<double>(delta) / 10,
+				HEIGHT_PLAYING_FIELD * static_cast<double>(delta) / 10);
+	}
+
+	void clearCurrentFieldState()
+	{
+		current_field_state_.reset();
 	}
 
 //	void saveLastDeltaForRoom(int id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
 
-	void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_pos*/);
+	//void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_pos*/);
+
+	void updateCurrentFieldState(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const std::vector<DeletedPosition>& deleted_pos)
+	{
+		for (const auto& del_pos : deleted_pos)
+		{
+			UIPosition ui_pos(del_pos.x, del_pos.y);
+
+			auto it_del_grass = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), ui_pos);
+			if (it_del_grass != current_field_state_.grass_info.end())
+				current_field_state_.grass_info.erase(it_del_grass);
+
+			for (auto it = current_field_state_.bact_inf.begin(); it != current_field_state_.bact_inf.end(); )
+			{
+				it->first == ui_pos ? it = current_field_state_.bact_inf.erase(it) : ++it;
+			}
+		}
+
+		for (const auto& grass : grass_info)
+		{
+			current_field_state_.grass_info.emplace_back(grass.x, grass.y);
+		}
+
+		for (const auto& bact : bact_inf)
+		{
+			UIPosition ui_pos(bact.x, bact.y);
+			current_field_state_.bact_inf.insert({ ui_pos, bact });
+		}
+	}
 
 	void handleEvent(const sf::Event& event) { gui_.handleEvent(event); }
 
@@ -33,13 +90,13 @@ public:
 
 	void createRoomList(const std::vector<Room>& room_list);
 
-	void onNetworkDisconnect() const;
+	void onNetworkDisconnect();
 
 	void onNetworkConnect() const { initConnectionFlag(true); }
 
-	void onChooseRoom(const GameConfig& conf);
+	void onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf);
 
-	void onCloseRoom(int id_room) const;
+	void onCloseRoom(int id_room);
 
 	void setConfig(const GameConfig& conf) { config_.config = conf; }
 
@@ -65,11 +122,39 @@ private:
 	int id_selected_room_ = 0;
 	std::map<int, tgui::Color> color_bacterium_by_type_;
 
-	//struct DeltaState
-	//{
-	//	std::vector<GrassInfo> grass_info;
-	//	std::vector<BacteriumInfo> bact_inf;
-	//};
+	struct UIPosition
+	{
+		explicit UIPosition(int ox, int oy) : x(static_cast<float>(ox*CELL_SIZE)), y(static_cast<float>(oy*CELL_SIZE)){}
+
+		bool operator==(const UIPosition& other) const { return x == other.x && y == other.y; }
+
+		float x = 0;
+		float y = 0;
+	};
+
+	struct UIPositionHasher
+	{
+		size_t operator() (const UIPosition& p) const
+		{
+			size_t h_x = ui_hasher_(p.x);
+			size_t h_y = ui_hasher_(p.y);
+			return h_x * 137 + h_y * (137 * 137);
+		}
+	private:
+		std::hash<int> ui_hasher_;
+	};
+
+	struct DeltaState
+	{
+		std::vector<UIPosition> grass_info;
+		std::unordered_map<UIPosition, BacteriumInfo, UIPositionHasher> bact_inf;
+
+		void reset() 
+		{
+			grass_info.clear();
+			bact_inf.clear();
+		}
+	} current_field_state_;
 
 	//std::map<IdRoom, DeltaState> last_state_for_room_;
 

@@ -131,6 +131,8 @@ void GraphicScene::initButtons()
 	button_start->onPress([this] {
 		client_packet::PTStartGame packet(static_cast<uint32_t>(id_selected_room_), std::make_shared<GameConfig>(config_.config));
 		NetworkClient::getInstance()->sendPacket(packet); //////////////////////////////////// ТУТ ОТПРАВЛЯЕТСЯ КОНФИГ, РАЗМЕР ПОЛЯ ПРОКИНУТЬ В NServer
+		clearGameCanvas();
+		clearCurrentFieldState();
 	});
 
 	buttons->add(button_create_room, "button_create_room");
@@ -183,17 +185,17 @@ void GraphicScene::initGrid()
 		auto game_field_size = gui_.get("game_layout")->getSize();
 		if (indx == "small")
 		{
-			config_.config.delta_game_field_size = 0.5;
+			config_.config.delta_game_field_size = 5;
 			setGameCanvasSize(config_.config.delta_game_field_size);
 		}
 		else if (indx == "middle")
 		{
-			config_.config.delta_game_field_size = 0.8;
+			config_.config.delta_game_field_size = 8;
 			setGameCanvasSize(config_.config.delta_game_field_size);
 		}
 		else if (indx == "large")
 		{
-			config_.config.delta_game_field_size = 1.0;
+			config_.config.delta_game_field_size = 10;
 			setGameCanvasSize(config_.config.delta_game_field_size);
 		}
 
@@ -206,27 +208,35 @@ void GraphicScene::initGrid()
 	gui_.add(config_.grid, "grid");
 }
 
-void GraphicScene::onNetworkDisconnect() const
+void GraphicScene::onNetworkDisconnect()
 {
+	clearGameCanvas();
+	clearCurrentFieldState();
 	initConnectionFlag(false);
 	initButtonStart(false);
 	initButtonCloseRoom(false);
 	clearRoomList();
-	clearGameCanvas();
 }
 
-void GraphicScene::onChooseRoom(const GameConfig& conf)
+void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf)
 {
 	initButtonStart(true);
 	initButtonCloseRoom(true);
 	initConfigGrid(true);
 	setConfig(conf);
+	setGameCanvasSize(conf.delta_game_field_size);
+
+	clearCurrentFieldState();
+	std::vector<DeletedPosition> empty_vect;
+
+	updateCurrentFieldState(grass_info, bact_inf, empty_vect);
 }
 
-void GraphicScene::onCloseRoom(int id_room) const
+void GraphicScene::onCloseRoom(int id_room)
 {
 	deleteRoom(id_room);
 	clearGameCanvas();
+	clearCurrentFieldState();
 	initButtonStart(false);
 	initButtonCloseRoom(false);
 }
@@ -251,45 +261,45 @@ void GraphicScene::clearGameCanvas() const
 //	last_state_for_room_[static_cast<int>(id_room)].grass_info = cell_info;
 //}
 
-void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_positions*/)
-{
-	//LOG_DURATION("draw");
-
-	if (auto canv = game_canvas_.lock(); canv != nullptr) {
-		canv->clear(tgui::Color::White);
-		sf::RectangleShape cell_shape;
-		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-		for (const auto& grass : grass_info)
-		{
-			const float pos_x = static_cast<float>(grass.x *CELL_SIZE);
-			const float pos_y = static_cast<float>(grass.y * CELL_SIZE);
-			cell_shape.setPosition(pos_x, pos_y); 
-			cell_shape.setFillColor(tgui::Color::Green);
-			cell_shape.setOutlineColor(sf::Color::Black);
-			canv->draw(cell_shape);
-		}
-		for (const auto& bact : bact_inf)
-		{
-			const float pos_x = static_cast<float>(bact.x *CELL_SIZE);
-			const float pos_y = static_cast<float>(bact.y * CELL_SIZE);
-			cell_shape.setPosition(pos_x, pos_y);
-			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy, getCellColorByBacteriumId(bact.id_type)));
-			cell_shape.setOutlineColor(sf::Color::Black);
-			canv->draw(cell_shape);
-		}
-		/*for(const auto& pos:deleted_positions)
-		{
-			const float pos_x = static_cast<float>(pos.x *CELL_SIZE);
-			const float pos_y = static_cast<float>(pos.y * CELL_SIZE);
-			cell_shape.setPosition(pos_x, pos_y);
-			cell_shape.setFillColor(tgui::Color::White);
-			cell_shape.setOutlineColor(sf::Color::White);
-			canv->draw(cell_shape);
-		}*/
-		drawMarkupField(canv);
-		canv->display();
-	}
-}
+//void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_positions*/)
+//{
+//	//LOG_DURATION("draw");
+//
+//	if (auto canv = game_canvas_.lock(); canv != nullptr) {
+//		canv->clear(tgui::Color::White);
+//		sf::RectangleShape cell_shape;
+//		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+//		for (const auto& grass : grass_info)
+//		{
+//			const float pos_x = static_cast<float>(grass.x *CELL_SIZE);
+//			const float pos_y = static_cast<float>(grass.y * CELL_SIZE);
+//			cell_shape.setPosition(pos_x, pos_y); 
+//			cell_shape.setFillColor(tgui::Color::Green);
+//			cell_shape.setOutlineColor(sf::Color::Black);
+//			canv->draw(cell_shape);
+//		}
+//		for (const auto& bact : bact_inf)
+//		{
+//			const float pos_x = static_cast<float>(bact.x *CELL_SIZE);
+//			const float pos_y = static_cast<float>(bact.y * CELL_SIZE);
+//			cell_shape.setPosition(pos_x, pos_y);
+//			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy, getCellColorByBacteriumId(bact.id_type)));
+//			cell_shape.setOutlineColor(sf::Color::Black);
+//			canv->draw(cell_shape);
+//		}
+//		/*for(const auto& pos:deleted_positions)
+//		{
+//			const float pos_x = static_cast<float>(pos.x *CELL_SIZE);
+//			const float pos_y = static_cast<float>(pos.y * CELL_SIZE);
+//			cell_shape.setPosition(pos_x, pos_y);
+//			cell_shape.setFillColor(tgui::Color::White);
+//			cell_shape.setOutlineColor(sf::Color::White);
+//			canv->draw(cell_shape);
+//		}*/
+//		drawMarkupField(canv);
+//		canv->display();
+//	}
+//}
 
 void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const
 {

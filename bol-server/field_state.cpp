@@ -13,6 +13,8 @@ void FieldState::addColonyBacterium(int max_count)
 
 		Position base_bac_position = getRandomEmptyPosition(); // находим для нее пустую клетку
 
+		base_bac_position.delta_ = delta_field_size_;
+
 		base_bacterium->setPosition(base_bac_position); // присваиваем бактерии эту позицию
 
 		addBacterium(base_bacterium);
@@ -57,7 +59,8 @@ void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
 	if (cells_.find(bacterium->getIdCell()) == cells_.end())
 	{
 		cells_.insert({ bacterium->getIdCell(), bacterium });
-	//	delta_state_.added_cells.push_back(bacterium->getPosition());
+
+		delta_state_.update_cells.push_back(bacterium->getPosition());
 	}
 }
 
@@ -70,10 +73,7 @@ void FieldState::resetTypeCell(int id_cell) const
 void FieldState::resetCell(int id_cell)
 {
 	if (const auto cell = cells_.find(id_cell); cell != cells_.end())
-	{
-	//	delta_state_.deleted_cells.push_back(cell->second->getPosition());
 		cells_.at(id_cell) = nullptr;
-	}
 }
 
 void FieldState::addGrass(int amount_grass)
@@ -86,9 +86,46 @@ void FieldState::addGrass(int amount_grass)
 		auto new_grass = std::make_shared<Grass>();
 		new_grass->setPosition(new_position);
 		cells_.insert({ new_grass->getIdCell(), new_grass });
-	//	delta_state_.added_cells.push_back(new_grass->getPosition());
+
+
+		delta_state_.update_cells.push_back(new_grass->getPosition());
 		++count;
 	}
+}
+
+void FieldState::addGrass(int x, int y)
+{
+	Position pos = {x, y};
+	auto new_grass = std::make_shared<Grass>();
+	new_grass->setPosition(pos);
+	cells_.insert({ new_grass->getIdCell(), new_grass });
+
+
+	delta_state_.update_cells.push_back(new_grass->getPosition());
+
+}
+
+const DeltaGameState FieldState::getDeltaGameState()
+{
+	const auto buff_delta = delta_state_;
+	delta_state_.clear();
+	return buff_delta;
+}
+
+std::shared_ptr<Cell> FieldState::getCellInPosition(const Position& pos) const
+{
+	for (const auto&[id, cell] : cells_)
+	{
+		if (cell->getPosition() == pos)
+			return cell;
+	}
+	return nullptr;
+}
+
+void FieldState::initConfig(std::shared_ptr<GameConfig> config)
+{
+	config_ = std::move(config);
+	delta_field_size_ = static_cast<double>(config_->delta_game_field_size) / 10;
 }
 
 void FieldState::update()
@@ -109,15 +146,17 @@ void FieldState::update()
 			}
 		}
 	}
-		for (auto it = cells_.begin(); it != cells_.end(); )
-		{
-			it->second == nullptr ? it = cells_.erase(it) : ++it;
-		}
+
+	for (auto it = cells_.begin(); it != cells_.end(); )
+	{
+		it->second == nullptr ? it = cells_.erase(it) : ++it;
+	}
 }
 
 void FieldState::restart()
 {
 	cells_.clear();
+	delta_state_.clear();
 	IdCell::reset();
 	timer_grass_.initInt(config_->grass_update_time);
 	addColonyBacterium(20);
@@ -127,11 +166,11 @@ void FieldState::restart()
 
 Position FieldState::getRandomEmptyPosition() const
 {
-	Position position = getRandomPosition(); // получаем рандомную позицию на поле
+	Position position = getRandomPosition(delta_field_size_); // получаем рандомную позицию на поле
 	for (const auto&[id, cell] : cells_)
 	{
 		if (cell->getPosition() == position)
-			position = getRandomPosition();
+			position = getRandomPosition(delta_field_size_);
 	}
 
 	return position;
