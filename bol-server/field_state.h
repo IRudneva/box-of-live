@@ -40,6 +40,8 @@ public:
 
 	void addBacterium(std::shared_ptr<Cell> bacterium);
 
+	void addBacterium(int x, int y, int id_type, int energy);
+
 	void addGrass(int amount_grass);
 
 	void addGrass(int x, int y);

@@ -66,6 +66,10 @@ struct DeletedPosition
 struct GameConfig
 {
 	GameConfig() = default;
+	GameConfig(int eb, int eac, int etc, int miut, int maut, int gut, int cgr, int efg, int dgfs)
+		:energy_base(eb),energy_action_cost(eac), energy_to_clone(etc),
+	min_update_time(miut), max_update_time(maut), grass_update_time(gut), count_grass(cgr),
+	energy_from_grass(efg), delta_game_field_size(dgfs){}
 
 	int energy_base = 0;
 	int energy_action_cost = 0;

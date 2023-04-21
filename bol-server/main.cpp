@@ -11,8 +11,7 @@ int main()
 
 	const database db("bol_database.db");
 	std::shared_ptr<DatabaseHandler> db_handler = std::make_shared<DatabaseHandler>(db);
-	QueueRequest::getInstance()->init(db_handler);
-
+	
 	LogicServer server(shared_packet_queue, db_handler);
 	server.runLogicLoop();
 	

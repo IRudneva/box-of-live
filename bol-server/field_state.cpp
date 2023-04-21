@@ -54,6 +54,17 @@ void FieldState::addColonyBacterium(int max_count)
 	}
 }
 
+void FieldState::addBacterium(int x, int y, int id_type, int energy)
+{
+	auto bacterium = std::make_shared<Bacterium>(id_type, config_); // создаем базовую бактерию
+
+	bacterium->setPosition(Position{ x, y, delta_field_size_ }); // присваиваем бактерии эту позицию
+
+	bacterium->setEnergy(energy);
+
+	addBacterium(bacterium);
+}
+
 void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
 {
 	if (cells_.find(bacterium->getIdCell()) == cells_.end())

@@ -12,7 +12,10 @@ class LogicServer
 public:
 	explicit LogicServer(std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue, std::shared_ptr<DatabaseHandler> db_handler)
 	: queue_(queue),
-	db_handler_(db_handler){}
+	db_handler_(db_handler)
+	{
+		srv_manager_->initState(db_handler_->getConfigData(), db_handler_->getFieldStateData(), db_handler_->getBacteriumData());
+	}
 
 	void runLogicLoop();
 

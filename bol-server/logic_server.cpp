@@ -1,10 +1,10 @@
 ﻿#include "pch_server.h"
 #include "logic_server.h"
 
+#include "logger.h"
+
 void LogicServer::runLogicLoop()
 {
-	srv_manager_->initRoomList();
-
 	thread_db_is_run_ = true;
 	thread_db_ = std::thread(std::bind(&LogicServer::handleDatabase, this));
 
@@ -36,14 +36,15 @@ void  LogicServer::handleDatabase()
 {
 	while (thread_db_is_run_)
 	{
-		if(timer_for_save_data_.timedOut())
+		if (timer_for_save_data_.timedOut())
 		{
-			srv_manager_->formDataForDatabase();
+			db_handler_->saveConfig(srv_manager_->formConfigForDatabase());
 
-			//if(DataBuffer::getInstance()->hasData())
-			//{
-				db_handler_->saveData(DataBuffer::getInstance()->popData());
-			//}
+			db_handler_->saveFieldsState(srv_manager_->formFieldsStateForDatabase());
+
+			db_handler_->saveBacteruium(srv_manager_->formBacteriumInfoForDatabase());
+
+			Logger::getInstance()->registerLog("__________SERVER::DATABASE::SAVE__________");
 		}
 		
 	}

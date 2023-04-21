@@ -16,6 +16,7 @@
 
 void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 {
+	std::lock_guard<std::mutex> lock(m_);
 	switch (packet.packet->type)
 	{
 	case PacketType::CLI_CREATE_ROOM:
@@ -30,11 +31,6 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		const server_packet::PTNewRoom pt_new_room(last_id_room_, "room", game_field_state.getGameConfig());
 		NetworkServer::getInstance()->sendPacketAllClients(pt_new_room);
-
-	/*	auto data_for_save = std::make_shared<DataForTabRooms>(last_id_room_);
-
-		DataBuffer::getInstance()->pushData(data_for_save);*/
-
 		++last_id_room_;
 
 		break;
@@ -83,7 +79,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		}
 		rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).addSubscription(static_cast<int>(packet.id_channel));
 
-		rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).fillAllCellsInGameState();
+	//	rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).fillAllCellsInGameState();
 
 		auto current_state = rooms_state_.at(static_cast<int>(pt_choose_room->id_room));
 
@@ -127,6 +123,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 void SrvManager::updateGameState()
 {
+	std::lock_guard<std::mutex> lock(m_);
 	if (NetworkServer::getInstance()->getConnectionCount() == 0)
 		return;
 
@@ -158,18 +155,5 @@ void SrvManager::updateGameState()
 				NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), game_state);
 			}
 		}
-	}
-}
-
-void SrvManager::formDataForDatabase()
-{
-	for (auto&[id_room, state] : rooms_state_)
-	{
-		for(const auto& inf : state.getAllCellInfo())
-		{
-			auto pos = inf.second->getPosition();
-			DataBuffer::getInstance()->pushData(std::make_shared<DataForTabRoomsState>(id_room, pos.x, pos.y, inf.second->getCellType()));
-		}
-		
 	}
 }

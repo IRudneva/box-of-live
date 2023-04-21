@@ -34,6 +34,22 @@ public:
 
 	std::map<int, std::shared_ptr<Cell>> getAllCellInfo() const { return game_state_->getData(); }
 
+	std::vector<BacteriumInfo> getAllBacteriumInfo() {
+		std::vector<BacteriumInfo> data;
+		for (const auto&[id, cell] : game_state_->getData())
+		{
+			const auto pos = cell->getPosition();
+			if (cell->getCellType() == TypeCell::BACTERIUM)
+			{
+				Cell& a = *cell;
+				auto bacterium = dynamic_cast<Bacterium&>(a);
+				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
+				data.emplace_back(inf_bac);
+			}
+		}
+		return data;
+	}
+
 	void update();
 
 	void reset();
@@ -53,6 +69,16 @@ public:
 		}
 		}
 	}
+	void addGrass(int x, int y)
+	{
+		game_state_->addGrass(x, y);
+	}
+
+	void addBacterium(int x, int y, int id_type, int energy)
+	{
+		game_state_->addBacterium(x, y, id_type, energy);
+	}
+					
 
 private:
 	std::vector<DeletedPosition> deleted_position_;
