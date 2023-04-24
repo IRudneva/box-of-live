@@ -10,25 +10,24 @@ protected:
 
 struct SaveCellInfo : DataForSave
 {
-	explicit SaveCellInfo(int id, int ox, int oy, TypeCell type)
-	: id_room(id), x(ox), y(oy), cell_type(static_cast<int>(type)) {}
+	explicit SaveCellInfo(int id, int ox, int oy, TypeCell type, int bact_id_type, int ener)
+	: id_room(id), x(ox), y(oy), cell_type(static_cast<int>(type)), bact_type(bact_id_type), energy(ener) {}
 
 	int id_room;
 	int x;
 	int y;
 	int cell_type;
+	int bact_type;
+	int energy;
 };
 
 struct SaveBacteriumInfo : DataForSave
 {
-	explicit SaveBacteriumInfo(int id_r, int ox, int oy, int id, int en, int r, int g, int b)
-		:id_room(id_r), pos_x(ox), pos_y(oy), id_type(id), energy(en),red(r), green(g), blue(b){}
+	explicit SaveBacteriumInfo(int id_r, int id, int r, int g, int b)
+		:id_room(id_r), id_type(id), red(r), green(g), blue(b){}
 
 	int id_room;
-	int pos_x;
-	int pos_y;
 	int id_type;
-	int energy;
 	int red;
 	int green;
 	int blue;

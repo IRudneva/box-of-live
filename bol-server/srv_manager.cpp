@@ -1,16 +1,11 @@
 #include "pch_server.h"
-
-
-#include "data_for_save.h"
-#include "bol_database.h"
-
-
-
 #include "client_packet.h"
 #include "srv_manager.h"
 #include "packet_writer.h"  
 #include "network_server.h"
 #include "log_duration.h"
+#include "request_handler.h"
+#include "room_state.h"
 
 #include "server_packet.h"
 
@@ -23,14 +18,18 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 		auto pt_cl = std::static_pointer_cast<client_packet::PTCreateRoom>(packet.packet);
 
-		FieldStateInfo game_field_state;
+		RoomState game_field_state(last_id_room_, false);
+
 		game_field_state.init(pt_cl->game_config);
+
 		rooms_state_.insert({ last_id_room_, game_field_state });
 
 		Logger::getInstance()->registerLog("SERVER::RECEIVED::CREATE ROOM::" + std::to_string(last_id_room_));
 
 		const server_packet::PTNewRoom pt_new_room(last_id_room_, "room", game_field_state.getGameConfig());
 		NetworkServer::getInstance()->sendPacketAllClients(pt_new_room);
+
+		RequestHandler::getInstance()->saveNewRoom(last_id_room_, RoomInfo(false, *game_field_state.getGameConfig()));
 		++last_id_room_;
 
 		break;
@@ -49,9 +48,10 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 				++it;
 		}
 
-		server_packet::PTCloseRoom pt_close_room(static_cast<uint32_t>(pt_cl->id_room));
+		server_packet::PTCloseRoom pt_close_room(pt_cl->id_room);
 		NetworkServer::getInstance()->sendPacketAllClients(pt_close_room);
 
+		RequestHandler::getInstance()->deleteRoom(static_cast<int>(pt_close_room.id_room));
 		break;
 	}
 	case PacketType::CLI_GET_ROOM_LIST:
@@ -79,15 +79,35 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		}
 		rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).addSubscription(static_cast<int>(packet.id_channel));
 
-	//	rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).fillAllCellsInGameState();
+		auto current_state = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getAllCellInfo();
 
-		auto current_state = rooms_state_.at(static_cast<int>(pt_choose_room->id_room));
+		auto current_config = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getGameConfig();
+
+		std::vector<GrassInfo> grass_info;
+		std::vector<BacteriumInfo> bacterium_info;
+		for(const auto& [id, cell] : current_state)
+		{
+			auto pos = cell->getPosition();
+
+			if (cell->getCellType() == TypeCell::BACTERIUM)
+			{
+				Cell& a = *cell;
+				auto bacterium = dynamic_cast<Bacterium&>(a);
+				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
+				bacterium_info.emplace_back(inf_bac);
+			}
+			else if (cell->getCellType() == TypeCell::GRASS)
+			{
+				GrassInfo inf_grass(pos.x, pos.y);
+				grass_info.emplace_back(inf_grass);
+			}
+		}
 
 		const server_packet::PTInitChooseRoom pt_init_game(
 			pt_choose_room->id_room,
-			current_state.getGrassInfo(),
-			current_state.getBacteriumInfo(),
-			current_state.getGameConfig()
+			grass_info,
+			bacterium_info,
+			current_config
 		);
 
 		NetworkServer::getInstance()->sendPacket(packet.id_channel, pt_init_game);
@@ -99,7 +119,11 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).init(pt_st->game_config);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).activate(true);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).reset();
+
+		RequestHandler::getInstance()->changeRoomStatus(static_cast<int>(pt_st->id_room), true);
+		RequestHandler::getInstance()->changeRoomConfig(static_cast<int>(pt_st->id_room), *pt_st->game_config);
 		break;
 	}
 	case PacketType::MSG_DISABLE:
@@ -123,7 +147,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 void SrvManager::updateGameState()
 {
-	std::lock_guard<std::mutex> lock(m_);
+	//std::lock_guard<std::mutex> lock(m_);
 	if (NetworkServer::getInstance()->getConnectionCount() == 0)
 		return;
 
@@ -131,29 +155,7 @@ void SrvManager::updateGameState()
 	{
 		for (auto&[room, state] : rooms_state_)
 		{
-		//	LOG_DURATION("UPDATE GAME STATE::ROOM::" + std::to_string(room));
-			if(state.isDeltaEmpty())
-				state.update();
-		}
-
-		for (auto&[id_room, state] : rooms_state_)
-		{
-			if(state.getSubscription().empty())
-				continue;
-
-			const server_packet::PTRoomState game_state(id_room,
-				state.getGrassInfo(),
-				state.getBacteriumInfo(), 
-				state.getDeletedPosition());
-
-			state.clearDelta();
-
-			for (const auto& client : state.getSubscription())
-			{
-			//	Logger::getInstance()->registerLog("SERVER::SEND::GAME STATE::CLIENT::" + std::to_string(client)+"::ID ROOM::"+std::to_string(id_room));
-				
-				NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), game_state);
-			}
+			state.update();
 		}
 	}
 }

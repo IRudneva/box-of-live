@@ -15,45 +15,52 @@ public:
 			createTable();
 		}
 		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
 		}
 	}
 
-	std::map<int, GameConfig> getConfigData()
+	std::map<int, RoomInfo> getRoomsData()
 	{
-		std::map<int, GameConfig> result;
+		std::map<int, RoomInfo> result;
 		try {
-			db_ << "SELECT * FROM config_for_room" >> [&](int id_room,
-				int energy_base,
-				int energy_action_cost,
-				int energy_to_clone,
-				int min_update_time,
-				int max_update_time,
-				int grass_update_time,
-				int count_grass,
-				int energy_from_grass,
-				int delta_game_field_size) {result[id_room] = GameConfig(energy_base, energy_action_cost, energy_to_clone, min_update_time,
-					max_update_time, grass_update_time, count_grass, energy_from_grass, delta_game_field_size
-				); };
+			db_ << "SELECT * FROM room" >> [&](
+				int id_room,
+				std::string name,
+				std::string status,
+				int conf_energy_base,
+				int conf_energy_action_cost,
+				int conf_energy_to_clone,
+				int conf_min_update_time,
+				int conf_max_update_time,
+				int conf_grass_update_time,
+				int conf_count_grass,
+				int conf_energy_from_grass,
+				int conf_delta_game_field_size) {
+				bool is_active = (status == "active" ? true : false);
+				result[id_room] = RoomInfo(is_active, GameConfig(conf_energy_base, conf_energy_action_cost, conf_energy_to_clone, conf_min_update_time,
+					conf_max_update_time, conf_grass_update_time, conf_count_grass, conf_energy_from_grass, conf_delta_game_field_size
+				));
+			};
 		}
 		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
 		}
 			return result;
 		
 
 	}
+
 	std::map<int, std::vector<SaveCellInfo>> getFieldStateData()
 	{
 		std::map<int, std::vector<SaveCellInfo>> result;
 		try {
-			db_ << "SELECT * FROM rooms_state" >> [&](int id_room, int x, int y, int cell_type)
+			db_ << "SELECT * FROM room_cells" >> [&](int id_room, int pos_x, int pos_y, int type_cell, int bact_type, int energy)
 			{
-				result[id_room].push_back(SaveCellInfo(id_room, x, y, static_cast<TypeCell>(cell_type)));
+				result[id_room].push_back(SaveCellInfo(id_room, pos_x, pos_y, static_cast<TypeCell>(type_cell), bact_type, energy));
 			};
 		}
 		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
 		}
 		return result;
 	}
@@ -62,101 +69,158 @@ public:
 	{
 		std::map<int, std::vector<SaveBacteriumInfo>> result;
 		try {
-			db_ << "SELECT * FROM bacterium_state" >> [&](int id_room, int x, int y, int type, int energy, int r, int g, int b)
+			db_ << "SELECT * FROM bacterium_color" >> [&](int id_room, int bact_type, int red, int green, int blue)
 			{
-				result[id_room].push_back(SaveBacteriumInfo(id_room, x, y, type, energy, r, g, b));
+				result[id_room].push_back(SaveBacteriumInfo(id_room, bact_type, red, green, blue));
 			};
 		}
 		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
 		}
 		return result;
 	}
 
-	void saveConfig(const std::map<int, GameConfig>& data)
+	void saveRoom(/*const std::map<int, RoomInfo>& data*/int id_room, const RoomInfo& inf)
 	{
-		clearDataConfig();
-		for (const auto&[id_room, d] : data)
-		{
+	/*	for (const auto&[id_room, inf] : data)
+		{*/
 			try
 			{
-				db_ << "INSERT INTO config_for_room "
-					"(id_room, "
-					"energy_base, "
-					"energy_action_cost, "
-					"energy_to_clone, "
-					"min_update_time, "
-					"max_update_time, "
-					"grass_update_time, "
-					"count_grass, "
-					"energy_from_grass, "
-					"delta_game_field_size)"
+				std::string status = (inf.is_active ? "active" : "inactive");
+				db_ << "INSERT INTO room "
+					"(id_room,"
+					"name,"
+					"status,"
+					"conf_energy_base,"
+					"conf_energy_action_cost,"
+					"conf_energy_to_clone,"
+					"conf_min_update_time,"
+					"conf_max_update_time,"
+					"conf_grass_update_time,"
+					"conf_count_grass,"
+					"conf_energy_from_grass,"
+					"conf_delta_game_field_size)"
 					" VALUES "
-					"(?,?,?,?,?,?,?,?,?,?)"
+					"(?,?,?,?,?,?,?,?,?,?,?,?)"
 					<< id_room
-					<< d.energy_base
-					<< d.energy_action_cost
-					<< d.energy_to_clone
-					<< d.min_update_time
-					<< d.max_update_time
-					<< d.grass_update_time
-					<< d.count_grass
-					<< d.energy_from_grass
-					<< d.delta_game_field_size;
+					<< "room"
+					<< status
+					<< inf.config.energy_base
+					<< inf.config.energy_action_cost
+					<< inf.config.energy_to_clone
+					<< inf.config.min_update_time
+					<< inf.config.max_update_time
+					<< inf.config.grass_update_time
+					<< inf.config.count_grass
+					<< inf.config.energy_from_grass
+					<< inf.config.delta_game_field_size;
 			}
 			catch (const std::exception& e) {
-				std::cout << e.what() << std::endl;
+				std::cout << e.what() << " line: " << __LINE__ << std::endl;
 			}
+	//	}
+	}
+
+	void deleteRoom(int id)
+	{
+		try
+		{
+			db_ << "DELETE FROM room WHERE id_room = (?)" << id;
+
+			db_ << "DELETE FROM room_cells WHERE id_room = (?)" << id;
+
+			db_ << "DELETE FROM bacterium_color WHERE id_room = (?)" << id;
+		}
+		catch (const std::exception& e) {
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
 		}
 	}
 
-	void saveFieldsState(const std::map<int, std::vector<SaveCellInfo>>& data)
+	void updateRoomStatus(const std::string& request, int id, bool st)
 	{
-		clearDataFieldsState();
-		for (const auto&[id_room, cell_inf] : data)
+		try
 		{
-			try
-			{
-				for (const auto& ci : cell_inf)
-				{
-					db_ << "INSERT INTO rooms_state (id_room, pos_x, pos_y, type_cell) VALUES (?,?,?,?)"
-						<< ci.id_room
-						<< ci.x
-						<< ci.y
-						<< ci.cell_type;
-				}
-			}
-			catch (const std::exception& e) {
-				std::cout << e.what() << std::endl;
-			}
+			std::string status = (st ? "active" : "inactive");
+			db_ << request << status << id;
 		}
+		catch (const std::exception& e) {
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
+		}
+	}
 
-	}
-	void saveBacteruium(const std::map<int, std::vector<SaveBacteriumInfo>>& data)
+	void updateRoomConfig(const std::string& request, int id, const GameConfig& config)
 	{
-		clearDataBacterium();
-		for (const auto&[id_room, cell_inf] : data)
+		try
 		{
-			try
-			{
-				for (const auto& ci : cell_inf)
-				{
-					db_ << "INSERT INTO bacterium_state (id_room, pos_x, pos_y, id_type, energy, red, green, blue) VALUES (?,?,?,?,?,?,?,?)"
-						<< id_room
-						<< ci.pos_x
-						<< ci.pos_y
-						<< ci.id_type
-						<< ci.energy
-						<< ci.red
-						<< ci.green
-						<< ci.blue;
-				}
-			}
-			catch (const std::exception& e) {
-				std::cout << e.what() << std::endl;
-			}
+		db_ << request
+			<< config.energy_base
+			<< config.energy_action_cost
+			<< config.energy_to_clone
+			<< config.min_update_time
+			<< config.max_update_time
+			<< config.grass_update_time
+			<< config.count_grass
+			<< config.energy_from_grass
+			<< config.delta_game_field_size
+			<< id;
+		}
+		catch (const std::exception& e) {
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
 		}
 	}
+
+	void saveRoomState(const std::vector<SaveCellInfo>& data)
+	{
+		try
+		{
+			for (const auto& ci : data)
+			{
+				db_ << "INSERT OR REPLACE INTO room_cells (id_room, pos_x, pos_y, type_cell, bact_type, energy) VALUES (?,?,?,?,?,?)"
+					<< ci.id_room
+					<< ci.x
+					<< ci.y
+					<< ci.cell_type
+					<< ci.bact_type
+					<< ci.energy;
+			}
+		}
+		catch (const std::exception& e) {
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
+		}
+	}
+
+	void deleteRowInTabRoomState(int id_room, int x, int y)
+	{
+		try
+		{
+			db_ << "DELETE FROM room_cells WHERE id_room = (?) AND pos_x = (?) AND pos_y = (?)" << id_room << x << y;
+		}
+		catch (const std::exception& e) {
+			std::cout << e.what() << " line: " << __LINE__ << std::endl;
+		}
+	}
+
+	//void saveBacteruium(int id_room, const std::vector<SaveBacteriumInfo> data)
+	//{
+	//	for (const auto&[id_room, cell_inf] : data)
+	//	{
+	//		try
+	//		{
+	//			for (const auto& ci : cell_inf)
+	//			{
+	//				db_ << "INSERT OR REPLACE INTO bacterium_color (id_room, bact_type, red, green, blue) VALUES (?,?,?,?,?)"
+	//					<< id_room
+	//					<< ci.id_type
+	//					<< ci.red
+	//					<< ci.green
+	//					<< ci.blue;
+	//			}
+	//		}
+	//		catch (const std::exception& e) {
+	//			std::cout << e.what() << " line: " << __LINE__ << std::endl;
+	//		}
+	//	}
+	//}
 
 
 private:
@@ -164,69 +228,39 @@ private:
 
 	void createTable()
 	{
-		db_ << "CREATE TABLE IF NOT EXISTS rooms_state ("
-			"id_room INTEGER,"	
-			"pos_x INTEGER,"
-			"pos_y INTEGER,"
-			"type_cell INTEGER"
+		db_ << "CREATE TABLE IF NOT EXISTS room ("
+			"id_room INTEGER PRIMARY KEY,"
+			"name TEXT,"
+			"status TEXT,"
+			"conf_energy_base INTEGER,"
+			"conf_energy_action_cost INTEGER,"
+			"conf_energy_to_clone INTEGER,"
+			"conf_min_update_time  INTEGER,"
+			"conf_max_update_time INTEGER,"
+			"conf_grass_update_time INTEGER,"
+			"conf_count_grass INTEGER,"
+			"conf_energy_from_grass INTEGER,"
+			"conf_delta_game_field_size INTEGER"
 			");";
 
-		db_ << "CREATE TABLE IF NOT EXISTS bacterium_state ("
+		db_ << "CREATE TABLE IF NOT EXISTS bacterium_color ("
+			"id_room INTEGER,"
+			"bact_type INTEGER,"
+			"red INTEGER,"
+			"green INTEGER,"
+			"blue INTEGER,"
+			"PRIMARY KEY(id_room, bact_type)"
+			");";
+
+		db_ << "CREATE TABLE IF NOT EXISTS room_cells ("
 			"id_room INTEGER,"
 			"pos_x INTEGER,"
 			"pos_y INTEGER,"
-			"id_type INTEGER,"
+			"type_cell INTEGER,"
+			"bact_type INTEGER,"
 			"energy INTEGER,"
-			"red INTEGER,"
-			"green INTEGER,"
-			"blue INTEGER"
+			"PRIMARY KEY(id_room, pos_x, pos_y)"
 			");";
 
-		db_ << "CREATE TABLE IF NOT EXISTS config_for_room ("
-			"id_room INTEGER PRIMARY KEY,"
-			"energy_base INTEGER,"
-			"energy_action_cost INTEGER,"
-			"energy_to_clone INTEGER,"
-			"min_update_time  INTEGER,"
-			"max_update_time INTEGER,"
-			"grass_update_time INTEGER,"
-			"count_grass INTEGER,"
-			"energy_from_grass INTEGER,"
-			"delta_game_field_size INTEGER"
-			");";
-	}
-
-
-	void clearDataConfig()
-	{
-		try
-		{
-			db_ << "DELETE FROM config_for_room;";
-		}
-		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
-		}
-	}
-
-	void clearDataFieldsState()
-	{
-		try
-		{
-			db_ << "DELETE FROM rooms_state;";
-		}
-		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
-		}
-	}
-
-	void clearDataBacterium()
-	{
-		try
-		{
-			db_ << "DELETE FROM bacterium_state;";
-		}
-		catch (const std::exception& e) {
-			std::cout << e.what() << std::endl;
-		}
 	}
 };

@@ -7,7 +7,7 @@ constexpr static unsigned int WIDTH_WINDOW = 800;
 constexpr static int HEIGHT_PLAYING_FIELD = static_cast<int>(HEIGHT_WINDOW * 0.75);
 constexpr static int WIDTH_PLAYING_FIELD = static_cast<int>(WIDTH_WINDOW * 0.75);
 constexpr static int CELL_SIZE = 8;
-constexpr static int NUMBER_BACTERIAL_COLONIES = 3;
+constexpr static int NUMBER_BACTERIAL_COLONIES = 4;
 constexpr static int MAX_COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
 constexpr static int MAX_COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
 constexpr static int NO_RESULT = -1;
@@ -89,4 +89,12 @@ struct GameConfig
 		min_update_time, max_update_time, grass_update_time,
 		count_grass, energy_from_grass, delta_game_field_size); }
 
+};
+
+struct RoomInfo
+{
+	RoomInfo() = default;
+	RoomInfo(bool status, GameConfig conf) : is_active(status), config(conf) {}
+	bool is_active = false;
+	GameConfig config;
 };

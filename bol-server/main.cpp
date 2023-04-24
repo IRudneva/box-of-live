@@ -4,6 +4,7 @@
 #include "shared_packet_queue.h"
 #include "network_server.h"
 #include "bol_database.h"
+#include "request_handler.h"
 
 int main()
 {
@@ -11,6 +12,7 @@ int main()
 
 	const database db("bol_database.db");
 	std::shared_ptr<DatabaseHandler> db_handler = std::make_shared<DatabaseHandler>(db);
+	RequestHandler::getInstance()->init(db_handler);
 	
 	LogicServer server(shared_packet_queue, db_handler);
 	server.runLogicLoop();

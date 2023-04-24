@@ -7,7 +7,7 @@
 void FieldState::addColonyBacterium(int max_count)
 {
 	srand(static_cast<unsigned int>(time(NULL)));
-	for (unsigned int id_bacterium = 0; id_bacterium < NUMBER_BACTERIAL_COLONIES; id_bacterium++)
+	for (unsigned int id_bacterium = 1; id_bacterium < NUMBER_BACTERIAL_COLONIES; id_bacterium++)
 	{
 		auto base_bacterium = std::make_shared<Bacterium>(id_bacterium, config_); // создаем базовую бактерию
 

@@ -168,7 +168,8 @@
     <ClCompile Include="bol_database.cpp" />
     <ClCompile Include="cell.cpp" />
     <ClCompile Include="field_state.cpp" />
-    <ClCompile Include="field_state_info.cpp" />
+    <ClCompile Include="request_handler.cpp" />
+    <ClCompile Include="room_state.cpp" />
     <ClCompile Include="grass.cpp" />
     <ClCompile Include="logic_server.cpp" />
     <ClCompile Include="main.cpp" />
@@ -186,7 +187,8 @@
     <ClInclude Include="cell.h" />
     <ClInclude Include="data_for_save.h" />
     <ClInclude Include="field_state.h" />
-    <ClInclude Include="field_state_info.h" />
+    <ClInclude Include="request_handler.h" />
+    <ClInclude Include="room_state.h" />
     <ClInclude Include="grass.h" />
     <ClInclude Include="logic_server.h" />
     <ClInclude Include="bol_socket_channel.h" />

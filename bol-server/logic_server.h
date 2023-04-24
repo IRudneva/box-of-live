@@ -14,7 +14,7 @@ public:
 	: queue_(queue),
 	db_handler_(db_handler)
 	{
-		srv_manager_->initState(db_handler_->getConfigData(), db_handler_->getFieldStateData(), db_handler_->getBacteriumData());
+		srv_manager_->initState(db_handler_->getRoomsData(), db_handler_->getFieldStateData(), db_handler_->getBacteriumData());
 	}
 
 	void runLogicLoop();

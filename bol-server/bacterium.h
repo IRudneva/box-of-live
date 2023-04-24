@@ -17,8 +17,6 @@ public:
 	void update(FieldState& cells) override;
 
 public:
-	void setIdType(int id) { id_type_ = id; }
-
 	void setEnergy(int energy) { energy_base_ = energy; }
 
 	int getIdType() const { return id_type_; }
