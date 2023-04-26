@@ -36,10 +36,7 @@ void LogicClient::updateGraphicScene()
 			}
 
 			window_.clear();
-			{
-				std::lock_guard<std::mutex> lock(m_);
-				graphic_scene_->update();
-			}
+			graphic_scene_->update();
 			window_.display();
 		}
 	}
@@ -47,7 +44,6 @@ void LogicClient::updateGraphicScene()
 
 void LogicClient::handlePacket(std::shared_ptr<Packet> packet)
 {
-	std::lock_guard<std::mutex> lock(m_);
 	switch (packet->type)
 	{
 	case PacketType::SRV_NEW_ROOM: 
@@ -75,8 +71,8 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet)
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTInitChooseRoom>(packet);
-		ClientLogger::getInstance()->registerLog("COLOR BACT " + std::to_string(pckt->bacterium_color_by_type.size()));
-		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config, pckt->bacterium_color_by_type);
+		bool status = pckt->status == "active" ? true : false;
+		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config, pckt->bacterium_color_by_type, status);
 		break;
 	}
 	case PacketType::SRV_ROOM_STATE:

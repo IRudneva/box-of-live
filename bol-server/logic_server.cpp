@@ -5,21 +5,20 @@
 
 void LogicServer::runLogicLoop()
 {
-	thread_queue_is_run_ = true;
-	thread_queue_ = std::thread(std::bind(&LogicServer::handleQueue, this));
-
-
 	thread_db_is_run_ = true;
 	thread_db_ = std::thread(std::bind(&LogicServer::handleDatabase, this));
+
+	thread_queue_is_run_ = true;
+	thread_queue_ = std::thread(std::bind(&LogicServer::handleQueue, this));
 
 }
 
 void LogicServer::stopLogicLoop()
 {
-	thread_queue_is_run_ = false;
 	thread_db_is_run_ = false;
-	thread_queue_.join();
+	thread_queue_is_run_ = false;
 	thread_db_.join();
+	thread_queue_.join();
 }
 
 void LogicServer::handleQueue()

@@ -22,7 +22,7 @@ void RoomState::update()
 	{
 		game_state_->update();
 	}
-
+	//////////////////////////?????????????????????????????????????
 	auto deleted_positions = getDeletedPosition(delta);
 	auto grass_positions = getGrassInfo(delta);
 	auto bacterium_info = getBacteriumInfo(delta);
@@ -35,8 +35,74 @@ void RoomState::update()
 	DbPayload::getInstance()->updateCellsRoomState(id_room_, info);
 }
 
-void RoomState::reset()
+std::vector<DeletedPosition> RoomState::getDeletedPosition(const DeltaGameState& delta)
 {
-	game_state_->restart();
+	std::vector<DeletedPosition> deleted_position;
+	for (const auto& pos : delta.getDeletedPositions())
+	{
+		deleted_position.emplace_back(pos.x, pos.y);
+	}
+	return deleted_position;
+}
+
+std::vector<GrassInfo> RoomState::getGrassInfo(const DeltaGameState& delta)
+{
+	std::vector<GrassInfo> grass_state;
+	for (const auto& pos : delta.getUpdatedPositions())
+	{
+		if (auto cell = game_state_->getCellInPosition(pos); cell != nullptr)
+		{
+			if (cell->getCellType() == TypeCell::GRASS)
+			{
+				GrassInfo inf_grass(pos.x, pos.y);
+				grass_state.emplace_back(inf_grass);
+			}
+		}
+	}
+	return grass_state;
+}
+
+std::vector<BacteriumInfo> RoomState::getBacteriumInfo(const DeltaGameState& delta)
+{
+	std::vector<BacteriumInfo> bacterium_state;
+	for (const auto& pos : delta.getUpdatedPositions())
+	{
+		if (auto cell = game_state_->getCellInPosition(pos); cell != nullptr)
+		{
+			if (cell->getCellType() == TypeCell::BACTERIUM)
+			{
+				Cell& a = *cell;
+				auto bacterium = dynamic_cast<Bacterium&>(a);
+				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
+				bacterium_state.emplace_back(inf_bac);
+			}
+		}
+	}
+	return bacterium_state;
+}
+
+void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf)
+{
+	const server_packet::PTRoomState game_state(id_room_,
+		grass_inf,
+		bact_inf,
+		del_inf);
+
+	NetworkServer::getInstance()->sendPacketAllClients(game_state);
+}
+
+void RoomState::setColorByBacteriumMap(std::map<int, SrvColor> color_map)
+{
+	color_bacterium_by_type_ = color_map;
+}
+
+void RoomState::setColorByBacteriumId(int id)
+{
+	SrvColor color;
+	color.red = getRandomInt(0, 255);
+	color.blue = getRandomInt(0, 255);
+	color.green = getRandomInt(0, 255);
+
+	color_bacterium_by_type_.insert({ id,color });
 }
 

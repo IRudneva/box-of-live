@@ -39,7 +39,7 @@ const std::vector<Position> Position::getAllAdjacentPosition() const
 			auto pos = start_pos + delta;
 			if (!(pos == curr_pos))
 			{
-				if ((pos.x > 0 && pos.y > 0) && (pos.x < static_cast<int>(MAX_COUNT_POSITION_X * delta_) && pos.y < static_cast<int>(MAX_COUNT_POSITION_Y * delta_)))
+				if ((pos.x >= 0 && pos.y >= 0) && (pos.x < static_cast<int>(MAX_COUNT_POSITION_X * delta_) && pos.y < static_cast<int>(MAX_COUNT_POSITION_Y * delta_)))
 				{
 					adjacent_position.push_back({ pos.x,pos.y });
 				}

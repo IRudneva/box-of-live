@@ -83,7 +83,8 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto packet = msgpack::unpack<server_packet::PTInitChooseRoom>(data);
-		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room, packet.grass_info, packet.bacterium_info, packet.config, packet.bacterium_color_by_type);
+		bool status = packet.status == "active" ? true : false;
+		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room, status, packet.grass_info, packet.bacterium_info, packet.config, packet.bacterium_color_by_type);
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_init);
 		return result;
 	}

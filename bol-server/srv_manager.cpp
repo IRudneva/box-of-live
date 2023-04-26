@@ -10,8 +10,8 @@
 
 void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>>& cell_inf, const std::map<int, std::vector<DbBacteriumColorState>>& bact_inf)
 {
-	rooms_state_.clear();
-
+	std::lock_guard<std::mutex> lock(m_);
+	
 	for (const auto&[id_room, room_info] : rooms_state)
 	{
 		RoomState state(id_room, room_info.is_active);
@@ -31,29 +31,36 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 
 		state.setColorByBacteriumMap(color_map);
 
-		if (cell_inf.find(id_room) != cell_inf.end())
+		if (cell_inf.find(id_room) == cell_inf.end())
 		{
-			for (const auto&[pos, info] : cell_inf.at(id_room))
+			rooms_state_.insert({ id_room, state });
+			last_id_room_ = id_room;
+			continue;
+		}
+
+		for(auto i = cell_inf.at(id_room).begin(); i != cell_inf.at(id_room).end(); ++i)
+		{
+		/*for (const auto&[pos, info] : cell_inf.at(id_room))
+		{*/
+			switch (static_cast<TypeCell>(i->second.cell_type))
 			{
-				switch (static_cast<TypeCell>(info.cell_type))
-				{
-				case TypeCell::GRASS:
-				{
-					state.addGrass(pos.first, pos.second);
-					break;
-				}
-				case TypeCell::BACTERIUM:
-				{
-					state.addBacterium(pos.first, pos.second, info.bact_type, info.energy);
-					break;
-				}
-				}
-
-
-				rooms_state_[id_room] = state;
-				last_id_room_ = id_room;
+			case TypeCell::GRASS:
+			{
+				state.addGrass(i->first.first, i->first.second);
+				break;
+			}
+			case TypeCell::BACTERIUM:
+			{
+				state.addBacterium(i->first.first, i->first.second, i->second.bact_type, i->second.energy);
+				break;
+			}
+			case TypeCell::EMPTY: break;
+			default: break;
 			}
 		}
+
+		rooms_state_[id_room] = state;
+		last_id_room_ = id_room;
 	}
 	if (!rooms_state.empty())
 		++last_id_room_;
@@ -61,7 +68,7 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 
 void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 {
-	//std::lock_guard<std::mutex> lock(m_);
+	std::lock_guard<std::mutex> lock(m_);
 
 	switch (packet.packet->type)
 	{
@@ -73,11 +80,6 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		game_field_state.init(pt_cl->game_config);
 
-		for (int i = 1; i < NUMBER_BACTERIAL_COLONIES; ++i)
-		{
-			game_field_state.setColorByBacteriumId(i);
-		}
-
 		rooms_state_.insert({ last_id_room_, game_field_state });
 
 		Logger::getInstance()->registerLog("SERVER::RECEIVED::CREATE ROOM::" + std::to_string(last_id_room_));
@@ -88,8 +90,6 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		DbPayload::getInstance()->updateRoomsConfigInfo(last_id_room_, DbRoomInfo(false, *game_field_state.getGameConfig()));
 
 		std::vector<DbBacteriumColorState> color_state;
-
-		Logger::getInstance()->registerLog("SERVER::COLOR BY BAC SIZE   " + std::to_string(game_field_state.getColorByBacterium().size()) + "ROOM " +std::to_string(last_id_room_));
 		for (const auto&[id_type, color] : game_field_state.getColorByBacterium())
 		{
 			color_state.emplace_back(last_id_room_, id_type, color.red, color.green, color.blue);
@@ -153,6 +153,8 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		auto bacterium_color = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getColorByBacterium();
 
+		auto current_status = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getStatus();
+
 		std::vector<GrassInfo> grass_info;
 		std::vector<BacteriumInfo> bacterium_info;
 		for (const auto&[id, cell] : current_state)
@@ -175,6 +177,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		const server_packet::PTInitChooseRoom pt_init_game(
 			pt_choose_room->id_room,
+			current_status,
 			grass_info,
 			bacterium_info,
 			current_config,
@@ -220,9 +223,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 void SrvManager::updateGameState()
 {
-	if (NetworkServer::getInstance()->getConnectionCount() == 0)
-		return;
-
+	std::lock_guard<std::mutex> lock(m_);
 	for (auto&[room, state] : rooms_state_)
 	{
 		state.update();

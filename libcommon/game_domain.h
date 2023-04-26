@@ -14,10 +14,10 @@ constexpr static int NO_RESULT = -1;
 
 enum class TypeCell : uint32_t
 {
-	BACTERIUM,
-	GRASS,
+	BACTERIUM = 1,
+	GRASS = 2,
 
-	EMPTY
+	EMPTY = 0
 };
 
 struct SrvColor

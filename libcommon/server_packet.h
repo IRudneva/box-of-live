@@ -65,17 +65,18 @@ namespace server_packet {
 	struct PTInitChooseRoom : ServerPacket
 	{
 		PTInitChooseRoom() :ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM) {}
-		PTInitChooseRoom(uint32_t id, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info, std::shared_ptr<GameConfig> conf, std::map<int, SrvColor> color)
-		:ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id), config(std::move(conf)),
+		PTInitChooseRoom(uint32_t id, bool stat, const std::vector<GrassInfo>& g_info, const std::vector<BacteriumInfo>& bact_info, std::shared_ptr<GameConfig> conf, const std::map<int, SrvColor>& color)
+		:ServerPacket(PacketType::SRV_INIT_CHOOSE_ROOM), id_room(id),status(stat? "active":"inactive"), config(std::move(conf)),
 		 grass_info(g_info), bacterium_info(bact_info), bacterium_color_by_type(color) {}
 
 		uint32_t id_room = 0;
+		std::string status;
 		std::shared_ptr<GameConfig> config = std::make_shared<GameConfig>();
 		std::vector<GrassInfo> grass_info = {};
 		std::vector<BacteriumInfo> bacterium_info = {};
 		std::map<int, SrvColor> bacterium_color_by_type = {};
 
-		void pack(msgpack::Packer& packer) const  override { packer(id_room, *config, grass_info, bacterium_info, bacterium_color_by_type); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *config, grass_info, bacterium_info, bacterium_color_by_type); }
+		void pack(msgpack::Packer& packer) const  override { packer(id_room, status, *config, grass_info, bacterium_info, bacterium_color_by_type); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, status, *config, grass_info, bacterium_info, bacterium_color_by_type); }
 	};
 } // namespace server_packet

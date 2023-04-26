@@ -133,6 +133,8 @@ void GraphicScene::initButtons()
 		NetworkClient::getInstance()->sendPacket(packet); //////////////////////////////////// ТУТ ОТПРАВЛЯЕТСЯ КОНФИГ, РАЗМЕР ПОЛЯ ПРОКИНУТЬ В NServer
 		clearGameCanvas();
 		clearCurrentFieldState();
+		initConfigGrid(false);
+		initButtonStart(false);
 	});
 
 	buttons->add(button_create_room, "button_create_room");
@@ -185,7 +187,7 @@ void GraphicScene::initGrid()
 		auto game_field_size = gui_.get("game_layout")->getSize();
 		if (indx == "small")
 		{
-			config_.config.delta_game_field_size = 5;
+			config_.config.delta_game_field_size = 1;
 			setGameCanvasSize(config_.config.delta_game_field_size);
 		}
 		else if (indx == "middle")
@@ -218,11 +220,14 @@ void GraphicScene::onNetworkDisconnect()
 	clearRoomList();
 }
 
-void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color)
+void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color, bool status)
 {
-	initButtonStart(true);
+	if (!status)
+	{
+		initButtonStart(true);
+		initConfigGrid(true);
+	}
 	initButtonCloseRoom(true);
-	initConfigGrid(true);
 	setConfig(conf);
 	setGameCanvasSize(conf.delta_game_field_size);
 	setColorForBacterium(color);

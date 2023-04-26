@@ -19,21 +19,27 @@ public:
 		gui_.draw();
 		if (auto canv = game_canvas_.lock(); canv != nullptr) {
 			canv->clear(tgui::Color::White);
-			sf::RectangleShape cell_shape;
-			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-			for (const auto& grass : current_field_state_.grass_info)
+			if (!current_field_state_.grass_info.empty() && !current_field_state_.bact_inf.empty() && !color_bacterium_by_type_.empty())
 			{
-				cell_shape.setPosition(grass.x, grass.y);
-				cell_shape.setFillColor(tgui::Color::Green);
-				cell_shape.setOutlineColor(sf::Color::Black);
-				canv->draw(cell_shape);
-			}
-			for (const auto& bact : current_field_state_.bact_inf)
-			{
-				cell_shape.setPosition(bact.first.x, bact.first.y);
-				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy,color_bacterium_by_type_.at(bact.second.id_type)));
-				cell_shape.setOutlineColor(sf::Color::Black);
-				canv->draw(cell_shape);
+				if (id_selected_room_ != -1)
+				{
+					sf::RectangleShape cell_shape;
+					cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+					for (const auto& grass : current_field_state_.grass_info)
+					{
+						cell_shape.setPosition(grass.x, grass.y);
+						cell_shape.setFillColor(tgui::Color::Green);
+						cell_shape.setOutlineColor(sf::Color::Black);
+						canv->draw(cell_shape);
+					}
+					for (const auto& bact : current_field_state_.bact_inf)
+					{
+						cell_shape.setPosition(bact.first.x, bact.first.y);
+						cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
+						cell_shape.setOutlineColor(sf::Color::Black);
+						canv->draw(cell_shape);
+					}
+				}
 			}
 			drawMarkupField(canv);
 			canv->display();
@@ -47,14 +53,7 @@ public:
 				HEIGHT_PLAYING_FIELD * static_cast<double>(delta) / 10);
 	}
 
-	void clearCurrentFieldState()
-	{
-		current_field_state_.reset();
-	}
-
-//	void saveLastDeltaForRoom(int id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf);
-
-	//void drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_pos*/);
+	void clearCurrentFieldState() { current_field_state_.reset(); }
 
 	void updateCurrentFieldState(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const std::vector<DeletedPosition>& deleted_pos)
 	{
@@ -94,7 +93,7 @@ public:
 
 	void onNetworkConnect() const { initConnectionFlag(true); }
 
-	void onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color);
+	void onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color, bool status);
 
 	void onCloseRoom(int id_room);
 
@@ -126,7 +125,7 @@ private:
 		std::unique_ptr<ConfigHelper> helper = std::make_unique<ConfigHelper>();
 	} config_;
 
-	int id_selected_room_ = 0;
+	int id_selected_room_ = -1;
 	std::map<int, tgui::Color> color_bacterium_by_type_;
 
 	struct UIPosition
@@ -200,6 +199,4 @@ private:
 	void createListBox(const ConfigListBox& conf);
 
 	tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
-
-	//tgui::Color getCellColorByBacteriumId(int id);
 };

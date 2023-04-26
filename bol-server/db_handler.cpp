@@ -81,6 +81,7 @@ std::map<int, std::vector<DbBacteriumColorState>> DbHandler::getBacteriumData()
 
 void DbHandler::createTable()
 {
+	std::lock_guard<std::mutex> lock(m_);
 	db_ << "CREATE TABLE IF NOT EXISTS room ("
 		"id_room INTEGER PRIMARY KEY,"
 		"name TEXT,"

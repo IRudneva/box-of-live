@@ -24,7 +24,7 @@ void FieldState::addColonyBacterium(int max_count)
 		const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
 		int curr_adjacent = 0; // текущее кол-во соседей
 
-		const auto colony_size = getRandomInt(10, max_count);
+		const auto colony_size = getRandomInt(3, max_count);
 
 		while (count_bacterium < colony_size) {
 
@@ -168,7 +168,7 @@ void FieldState::restart()
 	delta_state_.clear();
 	IdCell::reset();
 	timer_grass_.initInt(config_->grass_update_time);
-	addColonyBacterium(20);
+	addColonyBacterium(5);
 	addGrass(config_->count_grass * 2);
 
 }

@@ -28,7 +28,7 @@ public:
 
 
 private:
-	//std::mutex m_;
+	std::mutex m_;
 	std::map<IdRoom, RoomState> rooms_state_;
 	int last_id_room_ = 0;
 

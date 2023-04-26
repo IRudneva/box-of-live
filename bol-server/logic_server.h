@@ -22,7 +22,6 @@ public:
 	void stopLogicLoop();
 
 private:
-	//std::unique_ptr<SrvManager> srv_manager_ = std::make_unique<SrvManager>();
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
 	std::atomic_bool thread_queue_is_run_ = false;
 	std::thread thread_queue_;

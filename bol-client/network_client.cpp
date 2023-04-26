@@ -80,6 +80,7 @@ void NetworkClient::sendPacket(const client_packet::ClientPacket& packet)
 {
 	if (!checkChannelIsValid())
 		return;
+	std::lock_guard<std::mutex> lock(m_);
 	PacketWriter writer;
 	std::vector<uint8_t> s_packet = writer.serialize(packet);
 	channel_->write(s_packet.data(), (int)s_packet.size());

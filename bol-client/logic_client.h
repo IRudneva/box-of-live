@@ -15,7 +15,6 @@ public:
 	void updateGraphicScene();
 
 private:
-	std::mutex m_;
 	std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> queue_;
 	std::unique_ptr<GraphicScene> graphic_scene_;
 	sf::RenderWindow window_{ {WIDTH_WINDOW, 800}, "Box of Live" };
