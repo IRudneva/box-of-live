@@ -87,8 +87,10 @@ void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, co
 		grass_inf,
 		bact_inf,
 		del_inf);
-
-	NetworkServer::getInstance()->sendPacketAllClients(game_state);
+	for(const auto& client : game_subscription_)
+	{
+		NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), game_state);
+	}
 }
 
 void RoomState::setColorByBacteriumMap(std::map<int, SrvColor> color_map)

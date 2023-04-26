@@ -19,27 +19,22 @@ public:
 		gui_.draw();
 		if (auto canv = game_canvas_.lock(); canv != nullptr) {
 			canv->clear(tgui::Color::White);
-			if (!current_field_state_.grass_info.empty() && !current_field_state_.bact_inf.empty() && !color_bacterium_by_type_.empty())
+
+			sf::RectangleShape cell_shape;
+			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+			for (const auto& grass : current_field_state_.grass_info)
 			{
-				if (id_selected_room_ != -1)
-				{
-					sf::RectangleShape cell_shape;
-					cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-					for (const auto& grass : current_field_state_.grass_info)
-					{
-						cell_shape.setPosition(grass.x, grass.y);
-						cell_shape.setFillColor(tgui::Color::Green);
-						cell_shape.setOutlineColor(sf::Color::Black);
-						canv->draw(cell_shape);
-					}
-					for (const auto& bact : current_field_state_.bact_inf)
-					{
-						cell_shape.setPosition(bact.first.x, bact.first.y);
-						cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
-						cell_shape.setOutlineColor(sf::Color::Black);
-						canv->draw(cell_shape);
-					}
-				}
+				cell_shape.setPosition(grass.x, grass.y);
+				cell_shape.setFillColor(tgui::Color::Green);
+				cell_shape.setOutlineColor(sf::Color::Black);
+				canv->draw(cell_shape);
+			}
+			for (const auto& bact : current_field_state_.bact_inf)
+			{
+				cell_shape.setPosition(bact.first.x, bact.first.y);
+				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
+				cell_shape.setOutlineColor(sf::Color::Black);
+				canv->draw(cell_shape);
 			}
 			drawMarkupField(canv);
 			canv->display();
@@ -57,6 +52,9 @@ public:
 
 	void updateCurrentFieldState(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const std::vector<DeletedPosition>& deleted_pos)
 	{
+		if (grass_info.empty() && bact_inf.empty() && deleted_pos.empty())
+			return;
+
 		for (const auto& del_pos : deleted_pos)
 		{
 			UIPosition ui_pos(del_pos.x, del_pos.y);
@@ -73,13 +71,20 @@ public:
 
 		for (const auto& grass : grass_info)
 		{
-			current_field_state_.grass_info.emplace_back(grass.x, grass.y);
+			UIPosition grass_pos(grass.x, grass.y);
+			auto is_find = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), grass_pos);
+			if (is_find == current_field_state_.grass_info.end())
+			{
+				current_field_state_.grass_info.push_back(grass_pos);
+			}
+
 		}
 
 		for (const auto& bact : bact_inf)
 		{
 			UIPosition ui_pos(bact.x, bact.y);
-			current_field_state_.bact_inf.insert({ ui_pos, bact });
+
+			current_field_state_.bact_inf[ui_pos] = bact;
 		}
 	}
 
