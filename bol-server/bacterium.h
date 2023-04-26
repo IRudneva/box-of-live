@@ -45,7 +45,7 @@ private:
 
 	void increaseEnergy(int count) { energy_base_ += count; }
 
-	void changeDirection(FieldState& field_state);
+	const Position&  changeDirection(FieldState& field_state);
 
 	int findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell type) const;
 

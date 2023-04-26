@@ -16,9 +16,6 @@ void LogicClient::updateGraphicScene()
 	{
 		if (update_state_timer_.timedOut())
 		{
-			//ClientLogger::getInstance()->registerLog("UPDATE::GRAPHIC SCENE");
-			//LOG_DURATION("update LOGIC_CLIENT");
-
 			if (queue_->hasPacket())
 			{
 				auto packet = queue_->popPacket();
@@ -39,14 +36,18 @@ void LogicClient::updateGraphicScene()
 			}
 
 			window_.clear();
-			graphic_scene_->update();
+			{
+				std::lock_guard<std::mutex> lock(m_);
+				graphic_scene_->update();
+			}
 			window_.display();
 		}
 	}
 }
 
-void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
+void LogicClient::handlePacket(std::shared_ptr<Packet> packet)
 {
+	std::lock_guard<std::mutex> lock(m_);
 	switch (packet->type)
 	{
 	case PacketType::SRV_NEW_ROOM: 
@@ -74,13 +75,13 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet) const
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTInitChooseRoom>(packet);
-		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config);
+		ClientLogger::getInstance()->registerLog("COLOR BACT " + std::to_string(pckt->bacterium_color_by_type.size()));
+		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config, pckt->bacterium_color_by_type);
 		break;
 	}
 	case PacketType::SRV_ROOM_STATE:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTRoomState>(packet);
-		//graphic_scene_->drawGameCanvas(pckt->id_room, pckt->grass_info, pckt->bacterium_info/*, pckt->deleted_position*/);
 		graphic_scene_->updateCurrentFieldState(pckt->grass_info, pckt->bacterium_info, pckt->deleted_position);
 		break;
 	}

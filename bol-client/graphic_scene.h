@@ -31,7 +31,7 @@ public:
 			for (const auto& bact : current_field_state_.bact_inf)
 			{
 				cell_shape.setPosition(bact.first.x, bact.first.y);
-				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, getCellColorByBacteriumId(bact.second.id_type)));
+				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy,color_bacterium_by_type_.at(bact.second.id_type)));
 				cell_shape.setOutlineColor(sf::Color::Black);
 				canv->draw(cell_shape);
 			}
@@ -94,13 +94,20 @@ public:
 
 	void onNetworkConnect() const { initConnectionFlag(true); }
 
-	void onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf);
+	void onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color);
 
 	void onCloseRoom(int id_room);
 
 	void setConfig(const GameConfig& conf) { config_.config = conf; }
 
 	tgui::ChatBox::Ptr getLogBox()const { return log_box_; }
+
+	void setColorForBacterium(const std::map<int, SrvColor>& color_map)
+	{
+		for (const auto&[id_type, col] : color_map) {
+			color_bacterium_by_type_.insert({ id_type, tgui::Color(col.red, col.green, col.blue) });
+		}
+	}
 
 private:
 	using IdRoom = int;
@@ -194,5 +201,5 @@ private:
 
 	tgui::Color getCellColorByBacteriumEnergy(int energy, tgui::Color color) const;
 
-	tgui::Color getCellColorByBacteriumId(int id);
+	//tgui::Color getCellColorByBacteriumId(int id);
 };

@@ -218,17 +218,17 @@ void GraphicScene::onNetworkDisconnect()
 	clearRoomList();
 }
 
-void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf)
+void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color)
 {
 	initButtonStart(true);
 	initButtonCloseRoom(true);
 	initConfigGrid(true);
 	setConfig(conf);
 	setGameCanvasSize(conf.delta_game_field_size);
-
+	setColorForBacterium(color);
 	clearCurrentFieldState();
-	std::vector<DeletedPosition> empty_vect;
 
+	std::vector<DeletedPosition> empty_vect;
 	updateCurrentFieldState(grass_info, bact_inf, empty_vect);
 }
 
@@ -419,16 +419,16 @@ tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int energy, tgui::Color 
 		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };
 	return color;
 }
-
-tgui::Color GraphicScene::getCellColorByBacteriumId(int id)
-{
-	if (color_bacterium_by_type_.find(id) != color_bacterium_by_type_.end())
-		return color_bacterium_by_type_.at(id);
-
-	auto red = getRandomInt(0, 255);
-	auto blue = getRandomInt(0, 255);
-	auto green = getRandomInt(0, 255);
-
-	color_bacterium_by_type_.insert({ id,tgui::Color(red, green, blue) });
-	return color_bacterium_by_type_.at(id);
-}
+//
+//tgui::Color GraphicScene::getCellColorByBacteriumId(int id)
+//{
+//	if (color_bacterium_by_type_.find(id) != color_bacterium_by_type_.end())
+//		return color_bacterium_by_type_.at(id);
+//
+//	auto red = getRandomInt(0, 255);
+//	auto blue = getRandomInt(0, 255);
+//	auto green = getRandomInt(0, 255);
+//
+//	color_bacterium_by_type_.insert({ id,tgui::Color(red, green, blue) });
+//	return color_bacterium_by_type_.at(id);
+//}

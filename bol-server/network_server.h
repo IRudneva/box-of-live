@@ -21,7 +21,11 @@ public:
 
 	void sendPacketAllClients(const Packet& packet);
 
-	int getConnectionCount() const { return static_cast<int>(channel_map_.size()); }
+	int getConnectionCount()
+	{
+		std::lock_guard<std::mutex> lock(m_);
+		return static_cast<int>(channel_map_.size());
+	}
 
 	void stop();
 

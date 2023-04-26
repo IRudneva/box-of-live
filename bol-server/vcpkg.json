@@ -3,7 +3,8 @@
   "name": "server",
   "version": "0.1.0",
   "dependencies": [
-    "libhv", 
-    "sqlite3"
+    "libhv",
+    "sqlite3",
+    "sqlite-modern-cpp"
   ]
 }

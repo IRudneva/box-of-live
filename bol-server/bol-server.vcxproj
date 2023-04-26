@@ -165,10 +165,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bacterium.cpp" />
-    <ClCompile Include="bol_database.cpp" />
+    <ClCompile Include="db_handler.cpp" />
     <ClCompile Include="cell.cpp" />
+    <ClCompile Include="db_payload.cpp" />
     <ClCompile Include="field_state.cpp" />
-    <ClCompile Include="request_handler.cpp" />
     <ClCompile Include="room_state.cpp" />
     <ClCompile Include="grass.cpp" />
     <ClCompile Include="logic_server.cpp" />
@@ -183,11 +183,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bacterium.h" />
-    <ClInclude Include="bol_database.h" />
+    <ClInclude Include="db_handler.h" />
     <ClInclude Include="cell.h" />
     <ClInclude Include="data_for_save.h" />
+    <ClInclude Include="db_payload.h" />
     <ClInclude Include="field_state.h" />
-    <ClInclude Include="request_handler.h" />
     <ClInclude Include="room_state.h" />
     <ClInclude Include="grass.h" />
     <ClInclude Include="logic_server.h" />

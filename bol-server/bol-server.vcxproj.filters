@@ -63,13 +63,13 @@
     <ClCompile Include="position.cpp">
       <Filter>game state\game logic</Filter>
     </ClCompile>
-    <ClCompile Include="bol_database.cpp">
-      <Filter>database</Filter>
-    </ClCompile>
     <ClCompile Include="room_state.cpp">
       <Filter>game state\game logic</Filter>
     </ClCompile>
-    <ClCompile Include="request_handler.cpp">
+    <ClCompile Include="db_payload.cpp">
+      <Filter>database</Filter>
+    </ClCompile>
+    <ClCompile Include="db_handler.cpp">
       <Filter>database</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,16 +104,16 @@
     <ClInclude Include="position.h">
       <Filter>game state\game logic</Filter>
     </ClInclude>
-    <ClInclude Include="bol_database.h">
-      <Filter>database</Filter>
-    </ClInclude>
     <ClInclude Include="data_for_save.h">
       <Filter>database</Filter>
     </ClInclude>
     <ClInclude Include="room_state.h">
       <Filter>game state\game logic</Filter>
     </ClInclude>
-    <ClInclude Include="request_handler.h">
+    <ClInclude Include="db_payload.h">
+      <Filter>database</Filter>
+    </ClInclude>
+    <ClInclude Include="db_handler.h">
       <Filter>database</Filter>
     </ClInclude>
   </ItemGroup>

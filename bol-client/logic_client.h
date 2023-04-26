@@ -15,10 +15,11 @@ public:
 	void updateGraphicScene();
 
 private:
+	std::mutex m_;
 	std::shared_ptr<SharedPacketQueue<std::shared_ptr<Packet>>> queue_;
 	std::unique_ptr<GraphicScene> graphic_scene_;
 	sf::RenderWindow window_{ {WIDTH_WINDOW, 800}, "Box of Live" };
 	Timer update_state_timer_{ std::chrono::milliseconds(30) };
 
-	void handlePacket(std::shared_ptr<Packet> packet) const;
+	void handlePacket(std::shared_ptr<Packet> packet);
 };

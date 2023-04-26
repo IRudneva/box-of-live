@@ -5,11 +5,13 @@
 
 void LogicServer::runLogicLoop()
 {
-	//thread_db_is_run_ = true;
-	//thread_db_ = std::thread(std::bind(&LogicServer::handleDatabase, this));
-
 	thread_queue_is_run_ = true;
 	thread_queue_ = std::thread(std::bind(&LogicServer::handleQueue, this));
+
+
+	thread_db_is_run_ = true;
+	thread_db_ = std::thread(std::bind(&LogicServer::handleDatabase, this));
+
 }
 
 void LogicServer::stopLogicLoop()
@@ -20,15 +22,18 @@ void LogicServer::stopLogicLoop()
 	thread_db_.join();
 }
 
-void LogicServer::handleQueue() const
+void LogicServer::handleQueue()
 {
 	while (thread_queue_is_run_)
 	{
 		if (queue_->hasPacket())
 		{
-			srv_manager_->handlePacket(queue_->popPacket());
+			SrvManager::getInstance()->handlePacket(queue_->popPacket());
 		}
-		srv_manager_->updateGameState();
+		if (timer_for_game_.timedOut())
+		{
+			SrvManager::getInstance()->updateGameState();
+		}
 	}
 }
 
@@ -38,14 +43,9 @@ void  LogicServer::handleDatabase()
 	{
 		if (timer_for_save_data_.timedOut())
 		{
-			/*db_handler_->saveConfig(srv_manager_->formConfigForDatabase());
+			DbPayload::getInstance()->save();
 
-			db_handler_->saveFieldsState(srv_manager_->formFieldsStateForDatabase());
-
-			db_handler_->saveBacteruium(srv_manager_->formBacteriumInfoForDatabase());
-
-			Logger::getInstance()->registerLog("__________SERVER::DATABASE::SAVE__________");*/
+			Logger::getInstance()->registerLog("__________SERVER::DATABASE::SAVE__________");
 		}
-		
 	}
 }

@@ -71,7 +71,7 @@ void FieldState::addBacterium(std::shared_ptr<Cell> bacterium)
 	{
 		cells_.insert({ bacterium->getIdCell(), bacterium });
 
-		delta_state_.update_cells.push_back(bacterium->getPosition());
+		delta_state_.addUpdatePosition(bacterium->getPosition());
 	}
 }
 
@@ -99,7 +99,7 @@ void FieldState::addGrass(int amount_grass)
 		cells_.insert({ new_grass->getIdCell(), new_grass });
 
 
-		delta_state_.update_cells.push_back(new_grass->getPosition());
+		delta_state_.addUpdatePosition(new_grass->getPosition());
 		++count;
 	}
 }
@@ -112,7 +112,7 @@ void FieldState::addGrass(int x, int y)
 	cells_.insert({ new_grass->getIdCell(), new_grass });
 
 
-	delta_state_.update_cells.push_back(new_grass->getPosition());
+	delta_state_.addUpdatePosition(new_grass->getPosition());
 
 }
 
@@ -137,6 +137,7 @@ void FieldState::initConfig(std::shared_ptr<GameConfig> config)
 {
 	config_ = std::move(config);
 	delta_field_size_ = static_cast<double>(config_->delta_game_field_size) / 10;
+	
 }
 
 void FieldState::update()
@@ -146,15 +147,12 @@ void FieldState::update()
 
 	if (timer_grass_.timedOut())
 		addGrass(config_->count_grass);
+	for (const auto&[id, cell] : cells_)
 	{
-		//LOG_DURATION("FIELD_STATE::UPDATE CELLS");
-		for (const auto&[id, cell] : cells_)
-		{
-			if (cell != nullptr) {
-				cell->update(*this);
-				if (cell->isReadyToReset())
-					resetCell(id);
-			}
+		if (cell != nullptr) {
+			cell->update(*this);
+			if (cell->isReadyToReset())
+				resetCell(id);
 		}
 	}
 

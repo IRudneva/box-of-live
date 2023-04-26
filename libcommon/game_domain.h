@@ -20,6 +20,19 @@ enum class TypeCell : uint32_t
 	EMPTY
 };
 
+struct SrvColor
+{
+	SrvColor() = default;
+	SrvColor(int r, int g, int b):
+	red(r), green(g), blue(b) {}
+	int red = 0;
+	int green = 0;
+	int blue = 0;
+
+	virtual void pack(msgpack::Packer& packer) const { packer(red, green, blue); }
+	virtual void pack(msgpack::Unpacker& unpacker) { unpacker(red, green, blue); }
+};
+
 static int getRandomInt(int from, int to)
 {
 	std::random_device rd;
@@ -91,10 +104,10 @@ struct GameConfig
 
 };
 
-struct RoomInfo
+struct DbRoomInfo
 {
-	RoomInfo() = default;
-	RoomInfo(bool status, GameConfig conf) : is_active(status), config(conf) {}
+	DbRoomInfo() = default;
+	DbRoomInfo(bool status, GameConfig conf) : is_active(status), config(conf) {}
 	bool is_active = false;
 	GameConfig config;
 };

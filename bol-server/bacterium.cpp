@@ -15,7 +15,7 @@ bool Bacterium::isReadyUpdate()
 {
 	if (auto time = std::chrono::duration_cast<Millisec>(getCurrentTime() - last_action_time_); time >= Millisec(Sec(update_time_)))
 	{
-		last_action_time_ = getCurrentTime();
+		last_action_time_ = std::chrono::steady_clock::now();
 		return true;
 	}
 	return false;
@@ -29,51 +29,47 @@ void Bacterium::spendEnergy(int count)
 
 void Bacterium::update(FieldState& field_state)
 {
-	if (isReadyUpdate())
-	{
-		spendEnergy(config_->energy_action_cost);
-		changeDirection(field_state);
+	if (!isReadyUpdate())
+		return;
 
-		if (energy_base_ <= 0) {
-			field_state.resetTypeCell(getIdCell());
-			// удаляем, если закончилась энергия
-			field_state.delta_state_.deleted_cells.push_back(position_);
-		}
+	spendEnergy(config_->energy_action_cost);
+
+	if (energy_base_ <= 0) {
+		field_state.resetTypeCell(getIdCell());
+		// удаляем, если закончилась энергия
+		field_state.delta_state_.addDeletedPosition(position_);
+	}
+
+	auto old_pos = position_;
+	if (auto new_pos = changeDirection(field_state); old_pos != new_pos)
+	{
+		field_state.delta_state_.addDeletedPosition(old_pos);
+		field_state.delta_state_.addUpdatePosition(new_pos);
 	}
 }
 
-void Bacterium::changeDirection(FieldState& field_state)
+const Position& Bacterium::changeDirection(FieldState& field_state)
 {
 	const auto all_adjacent = field_state.getPositionsAround(position_);
 
 	if (checkAllBacteriumAroundSameType(all_adjacent)) // если все соседние бактерии такого же типа
-		return;
+		return position_;
 
 	const auto id_bacterium = findPriorytyCell(all_adjacent, TypeCell::BACTERIUM);
 	if (id_bacterium != NO_RESULT)
 	{
-		auto old_pos = position_;
 		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium))) // если получилось съесть бауктерию другого типа
 		{
-			// удаляем старую позицию
-			field_state.delta_state_.deleted_cells.push_back(old_pos);
-
-			field_state.delta_state_.update_cells.push_back(position_);
 			field_state.resetTypeCell(id_bacterium);
-			return;
+			return position_;
 		}
 	}
 
 	const auto id_grass = findPriorytyCell(all_adjacent, TypeCell::GRASS);
 	if (id_grass != NO_RESULT)
 	{
-		auto old_pos = position_;
-		// удаляем старую прзицию
-		field_state.delta_state_.deleted_cells.push_back(old_pos);
-
 		eatGrass(field_state.getData().at(id_grass));
-		field_state.delta_state_.update_cells.push_back(position_);
-
+	
 		field_state.resetTypeCell(id_grass);
 		if (canClone())
 		{
@@ -82,16 +78,14 @@ void Bacterium::changeDirection(FieldState& field_state)
 			if (new_bac != nullptr)
 				field_state.addBacterium(new_bac);
 		}
-		return;
+		return position_;
 	}
 
 	auto pos_empty_cell = findEmptyCell(all_adjacent);
-	auto old_pos = position_;
-	// удаляем старую прзицию
-	field_state.delta_state_.deleted_cells.push_back(old_pos);
 
 	position_ = pos_empty_cell;
-	field_state.delta_state_.update_cells.push_back(position_);
+	return position_;
+
 }
 
 int Bacterium::findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell type) const
