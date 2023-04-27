@@ -31,10 +31,13 @@ public:
 			}
 			for (const auto& bact : current_field_state_.bact_inf)
 			{
-				cell_shape.setPosition(bact.first.x, bact.first.y);
-				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
-				cell_shape.setOutlineColor(sf::Color::Black);
-				canv->draw(cell_shape);
+				if (!color_bacterium_by_type_.empty())
+				{
+					cell_shape.setPosition(bact.first.x, bact.first.y);
+					cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
+					cell_shape.setOutlineColor(sf::Color::Black);
+					canv->draw(cell_shape);
+				}
 			}
 			drawMarkupField(canv);
 			canv->display();

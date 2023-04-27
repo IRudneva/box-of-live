@@ -167,7 +167,7 @@ void FieldState::restart()
 	delta_state_.clear();
 	IdCell::reset();
 	timer_grass_.initInt(config_->grass_update_time);
-	addColonyBacterium(3);
+	addColonyBacterium(15);
 	addGrass(config_->count_grass * 2);
 }
 
