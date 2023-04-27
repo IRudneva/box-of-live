@@ -10,8 +10,6 @@
 
 void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>>& cell_inf, const std::map<int, std::vector<DbBacteriumColorState>>& bact_inf)
 {
-	std::lock_guard<std::mutex> lock(m_);
-	
 	for (const auto&[id_room, room_info] : rooms_state)
 	{
 		RoomState state(id_room, room_info.is_active);
@@ -40,8 +38,6 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 
 		for(auto i = cell_inf.at(id_room).begin(); i != cell_inf.at(id_room).end(); ++i)
 		{
-		/*for (const auto&[pos, info] : cell_inf.at(id_room))
-		{*/
 			switch (static_cast<TypeCell>(i->second.cell_type))
 			{
 			case TypeCell::GRASS:
@@ -68,8 +64,6 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 
 void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 {
-	std::lock_guard<std::mutex> lock(m_);
-
 	switch (packet.packet->type)
 	{
 	case PacketType::CLI_CREATE_ROOM:
@@ -198,6 +192,13 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		DbRoomInfo info = { true,  *pt_st->game_config };
 		DbPayload::getInstance()->updateRoomsConfigInfo(static_cast<int>(pt_st->id_room), info);
+
+		DbSaveRoomState state = { static_cast<int>(pt_st->id_room) , false };
+		auto deleted_positions = rooms_state_.at(static_cast<int>(pt_st->id_room)).getDeletedPosition();
+		auto grass_positions = rooms_state_.at(static_cast<int>(pt_st->id_room)).getGrassInfo();
+		auto bacterium_info = rooms_state_.at(static_cast<int>(pt_st->id_room)).getBacteriumInfo();
+		state.formDataCells(/*deleted_positions, */grass_positions, bacterium_info);
+		DbPayload::getInstance()->updateCellsRoomState(static_cast<int>(pt_st->id_room), state);
 	
 		break;
 	}
@@ -223,7 +224,6 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 void SrvManager::updateGameState()
 {
-	std::lock_guard<std::mutex> lock(m_);
 	for (auto&[room, state] : rooms_state_)
 	{
 		state.update();

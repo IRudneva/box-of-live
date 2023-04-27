@@ -11,32 +11,54 @@ void RoomState::init(std::shared_ptr<GameConfig> config)
 	game_state_->initConfig(config_);
 }
 
-void RoomState::update()
+void RoomState::update() const
 {
+	std::cout << "ROOM state UPDATE " << std::this_thread::get_id() << std::endl;
+
 	if (!is_run_)
 		return;
 
-	auto delta = game_state_->getDeltaGameState();
+	auto delta = game_state_->delta_state_;
 
 	if (delta.empty())
 	{
 		game_state_->update();
 	}
 	//////////////////////////?????????????????????????????????????
-	auto deleted_positions = getDeletedPosition(delta);
-	auto grass_positions = getGrassInfo(delta);
-	auto bacterium_info = getBacteriumInfo(delta);
+	auto deleted_positions = getDeletedPosition();
+	auto grass_positions = getGrassInfo();
+	auto bacterium_info = getBacteriumInfo();
 
 	sendSubscription(deleted_positions, grass_positions, bacterium_info);
 
 	DbSaveRoomState info = { id_room_, false };
-	info.formDataCells(deleted_positions, grass_positions, bacterium_info);
+	info.formDataCells(/*deleted_positions, */grass_positions, bacterium_info);
 
 	DbPayload::getInstance()->updateCellsRoomState(id_room_, info);
+
+	game_state_->delta_state_.clear();
 }
 
-std::vector<DeletedPosition> RoomState::getDeletedPosition(const DeltaGameState& delta)
+std::vector<BacteriumInfo> RoomState::getAllBacteriumInfo() const
 {
+	std::vector<BacteriumInfo> data;
+	for (const auto&[id, cell] : game_state_->getData())
+	{
+		const auto pos = cell->getPosition();
+		if (cell->getCellType() == TypeCell::BACTERIUM)
+		{
+			Cell& a = *cell;
+			auto bacterium = dynamic_cast<Bacterium&>(a);
+			BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
+			data.emplace_back(inf_bac);
+		}
+	}
+	return data;
+}
+
+std::vector<DeletedPosition> RoomState::getDeletedPosition() const
+{
+	auto delta = game_state_->getDeltaGameState();
 	std::vector<DeletedPosition> deleted_position;
 	for (const auto& pos : delta.getDeletedPositions())
 	{
@@ -45,8 +67,9 @@ std::vector<DeletedPosition> RoomState::getDeletedPosition(const DeltaGameState&
 	return deleted_position;
 }
 
-std::vector<GrassInfo> RoomState::getGrassInfo(const DeltaGameState& delta)
+std::vector<GrassInfo> RoomState::getGrassInfo() const
 {
+	auto delta = game_state_->getDeltaGameState();
 	std::vector<GrassInfo> grass_state;
 	for (const auto& pos : delta.getUpdatedPositions())
 	{
@@ -62,8 +85,9 @@ std::vector<GrassInfo> RoomState::getGrassInfo(const DeltaGameState& delta)
 	return grass_state;
 }
 
-std::vector<BacteriumInfo> RoomState::getBacteriumInfo(const DeltaGameState& delta)
+std::vector<BacteriumInfo> RoomState::getBacteriumInfo() const
 {
+	auto delta = game_state_->getDeltaGameState();
 	std::vector<BacteriumInfo> bacterium_state;
 	for (const auto& pos : delta.getUpdatedPositions())
 	{
@@ -81,7 +105,7 @@ std::vector<BacteriumInfo> RoomState::getBacteriumInfo(const DeltaGameState& del
 	return bacterium_state;
 }
 
-void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf)
+void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf) const
 {
 	const server_packet::PTRoomState game_state(id_room_,
 		grass_inf,

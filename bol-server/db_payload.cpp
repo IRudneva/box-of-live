@@ -84,7 +84,7 @@ void DbPayload::save()
 			}
 
 			for (const auto &[cell_pos, cell_state] : room_state.cell_states) {
-				if (cell_state.cell_type == TypeCell::EMPTY) {
+			/*	if (cell_state.cell_type == TypeCell::EMPTY) {
 					try
 					{
 						*p_db_ << "DELETE FROM room_cells WHERE id_room = (?) AND pos_x = (?) AND pos_y = (?);" << room_id << cell_pos.first << cell_pos.second;
@@ -93,7 +93,7 @@ void DbPayload::save()
 						std::cout << e.what() << " line: " << __LINE__ << std::endl;
 					}
 					continue;
-				}
+				}*/
 
 				try
 				{
@@ -111,7 +111,6 @@ void DbPayload::save()
 			}
 		}
 		*p_db_ << "commit;";
-		cells_room_states_.clear();
 	} // lock
 }
 
@@ -126,35 +125,35 @@ void DbPayload::updateRoomsConfigInfo(int id, const DbRoomInfo& inf)
 
 void DbPayload::updateCellsRoomState(int id, const DbSaveRoomState& inf)
 {
-	std::lock_guard<std::mutex> lock(m_);
-	if (cells_room_states_.find(id) == cells_room_states_.end())
 	{
-		cells_room_states_.insert({ id, inf });
-		return;
-	}
-
-	cells_room_states_.at(id).is_deleted = inf.is_deleted;
-
-	if (inf.cell_states.empty())
-		return;
-
-	for (const auto&[new_pos, new_cell] : inf.cell_states)
-	{
-		for (auto&[pos, cell] : cells_room_states_.at(id).cell_states)
+		std::lock_guard<std::mutex> lock(m_);
+	
+		if (cells_room_states_.find(id) == cells_room_states_.end())
 		{
-			if (new_pos == pos)
-				cell = new_cell;
-			else
-				cells_room_states_.at(id).cell_states.insert({ pos, cell });
+			cells_room_states_.insert({ id, inf });
+			return;
 		}
-	}
 
+		cells_room_states_.at(id).is_deleted = inf.is_deleted;
+
+		if (inf.cell_states.empty())
+			return;
+
+		for (const auto&[new_pos, new_cell] : inf.cell_states)
+		{
+			for (auto&[pos, cell] : cells_room_states_.at(id).cell_states)
+			{
+				if (new_pos == pos)
+					cell = new_cell;
+				else
+					cells_room_states_.at(id).cell_states.insert({ pos, cell });
+			}
+		}
+	}//lock
 }
 
 void DbPayload::updateBacteriumColorStates(std::vector<DbBacteriumColorState>& inf)
 {
 	std::lock_guard<std::mutex> lock(m_);
-
 	bacterium_color_states_= inf;
-
 }

@@ -24,7 +24,7 @@ void FieldState::addColonyBacterium(int max_count)
 		const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
 		int curr_adjacent = 0; // текущее кол-во соседей
 
-		const auto colony_size = getRandomInt(3, max_count);
+		const auto colony_size = getRandomInt(2, max_count);
 
 		while (count_bacterium < colony_size) {
 
@@ -118,9 +118,8 @@ void FieldState::addGrass(int x, int y)
 
 const DeltaGameState FieldState::getDeltaGameState()
 {
-	const auto buff_delta = delta_state_;
-	delta_state_.clear();
-	return buff_delta;
+	return delta_state_;
+
 }
 
 std::shared_ptr<Cell> FieldState::getCellInPosition(const Position& pos) const
@@ -168,9 +167,8 @@ void FieldState::restart()
 	delta_state_.clear();
 	IdCell::reset();
 	timer_grass_.initInt(config_->grass_update_time);
-	addColonyBacterium(5);
+	addColonyBacterium(3);
 	addGrass(config_->count_grass * 2);
-
 }
 
 Position FieldState::getRandomEmptyPosition() const

@@ -23,27 +23,28 @@ void LogicServer::stopLogicLoop()
 
 void LogicServer::handleQueue()
 {
+	//2й поток
 	while (thread_queue_is_run_)
 	{
 		if (queue_->hasPacket())
 		{
-			SrvManager::getInstance()->handlePacket(queue_->popPacket());
+			manager_->handlePacket(queue_->popPacket());
 		}
 		if (timer_for_game_.timedOut())
 		{
-			SrvManager::getInstance()->updateGameState();
+			manager_->updateGameState();
 		}
 	}
 }
 
-void  LogicServer::handleDatabase() 
+void LogicServer::handleDatabase() 
 {
+	//1й поток
 	while (thread_db_is_run_)
 	{
 		if (timer_for_save_data_.timedOut())
 		{
-			DbPayload::getInstance()->save();
-
+			db_handler_->saveData();
 			Logger::getInstance()->registerLog("__________SERVER::DATABASE::SAVE__________");
 		}
 	}

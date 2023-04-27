@@ -3,6 +3,7 @@
 #include "field_state.h"
 #include "network_server.h"
 #include "server_packet.h"
+#include <mutex>
 
 class RoomState final
 {
@@ -31,7 +32,7 @@ public:
 
 	void activate(bool status) { is_run_ = status; }
 
-	std::shared_ptr<GameConfig> getGameConfig() const {return config_;}
+	std::shared_ptr<GameConfig> getGameConfig() const { return config_; }
 
 	const std::vector<int>& getAllSubscription() const { return game_subscription_; }
 
@@ -41,40 +42,25 @@ public:
 
 	const std::map<int, std::shared_ptr<Cell>>& getAllCellInfo() const { return game_state_->getData(); }
 
-	std::vector<BacteriumInfo> getAllBacteriumInfo() const
-	{
-		std::vector<BacteriumInfo> data;
-		for (const auto&[id, cell] : game_state_->getData())
-		{
-			const auto pos = cell->getPosition();
-			if (cell->getCellType() == TypeCell::BACTERIUM)
-			{
-				Cell& a = *cell;
-				auto bacterium = dynamic_cast<Bacterium&>(a);
-				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
-				data.emplace_back(inf_bac);
-			}
-		}
-		return data;
-	}
+	std::vector<BacteriumInfo> getAllBacteriumInfo() const;
 
-	void update();
+	void update() const;
 
-	void reset() { game_state_->restart(); };;
+	void reset() const { game_state_->restart(); }
 
-	void addGrass(int x, int y) { game_state_->addGrass(x, y); }
+	void addGrass(int x, int y) const { game_state_->addGrass(x, y); }
 
-	void addBacterium(int x, int y, int id_type, int energy) { game_state_->addBacterium(x, y, id_type, energy); }
+	void addBacterium(int x, int y, int id_type, int energy) const { game_state_->addBacterium(x, y, id_type, energy); }
 
-	std::vector<DeletedPosition> getDeletedPosition(const DeltaGameState& delta);
+	std::vector<DeletedPosition> getDeletedPosition() const;
 
-	std::vector<GrassInfo> getGrassInfo(const DeltaGameState& delta);
+	std::vector<GrassInfo> getGrassInfo() const;
 
-	std::vector<BacteriumInfo> getBacteriumInfo(const DeltaGameState& delta);
+	std::vector<BacteriumInfo> getBacteriumInfo() const;
 
-	const std::map<int, SrvColor>& getColorByBacterium() { return color_bacterium_by_type_; }
+	const std::map<int, SrvColor>& getColorByBacterium() const { return color_bacterium_by_type_; }
 
-	void sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf);
+	void sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf) const;
 
 	void setColorByBacteriumMap(std::map<int, SrvColor> color_map);
 

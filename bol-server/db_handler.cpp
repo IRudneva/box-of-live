@@ -15,7 +15,6 @@ DbHandler::DbHandler() : db_("bol_database.db")
 
 std::map<int, DbRoomInfo> DbHandler::getRoomsData()
 {
-	std::lock_guard<std::mutex> lock(m_);
 	std::map<int, DbRoomInfo> result;
 	try {
 		db_ << "SELECT * FROM room" >> [&](
@@ -46,7 +45,6 @@ std::map<int, DbRoomInfo> DbHandler::getRoomsData()
 using XYPos = std::pair<int, int>;
 std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> DbHandler::getFieldStateData()
 {
-	std::lock_guard<std::mutex> lock(m_);
 	std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> result;
 	try {
 		db_ << "SELECT * FROM room_cells" >> [&](int id_room, int pos_x, int pos_y, int type_cell, int bact_type, int energy)
@@ -65,7 +63,6 @@ std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> DbHandler::getFi
 
 std::map<int, std::vector<DbBacteriumColorState>> DbHandler::getBacteriumData()
 {
-	std::lock_guard<std::mutex> lock(m_);
 	std::map<int, std::vector<DbBacteriumColorState>> result;
 	try {
 		db_ << "SELECT * FROM bacterium_color" >> [&](int id_room, int bact_type, int red, int green, int blue)
@@ -81,7 +78,6 @@ std::map<int, std::vector<DbBacteriumColorState>> DbHandler::getBacteriumData()
 
 void DbHandler::createTable()
 {
-	std::lock_guard<std::mutex> lock(m_);
 	db_ << "CREATE TABLE IF NOT EXISTS room ("
 		"id_room INTEGER PRIMARY KEY,"
 		"name TEXT,"

@@ -77,11 +77,12 @@ public:
 	AdjacentCellsUMap getPositionsAround(const Position& pos) const;
 
 	std::shared_ptr<GameConfig> getGameConfig() const { return config_; }
+
 private:
 	std::shared_ptr<GameConfig> config_ = std::make_shared<GameConfig>();
 	using ID = int;
 	std::map<ID, std::shared_ptr<Cell>> cells_;
-	Timer timer_grass_;
+	Timer timer_grass_{std::chrono::milliseconds(3000)};
 
 	double delta_field_size_ = 0.0;
 private:

@@ -18,9 +18,12 @@ public:
 
 	std::map<int, std::vector<DbBacteriumColorState>> getBacteriumData();
 
+	void saveData() const
+	{
+		DbPayload::getInstance()->save();
+	}
 private:
 	database db_;
-	std::mutex m_;
 
 	void createTable();
 };
