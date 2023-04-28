@@ -52,6 +52,7 @@ void NetworkServer::sendPacket(uint32_t id_channel, const Packet& packet)
 	PacketWriter writer;
 	if (findChannel(id_channel))
 	{
+		std::lock_guard<std::mutex> lock(m_);
 		if (auto client = channel_map_[id_channel].lock(); client != nullptr)
 		{
 			auto s_packet = writer.serialize(packet);

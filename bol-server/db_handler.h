@@ -16,7 +16,7 @@ public:
 	using XYPos = std::pair<int, int>;
 	std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> getFieldStateData();
 
-	std::map<int, std::vector<DbBacteriumColorState>> getBacteriumData();
+	std::vector<DbBacteriumColorState> getBacteriumData();
 
 	void saveData() const
 	{

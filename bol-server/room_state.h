@@ -8,18 +8,12 @@
 class RoomState final
 {
 public:
-	RoomState()
-	{
-		srand(static_cast<unsigned int>(time(NULL)));
-		for (int i = 1; i < NUMBER_BACTERIAL_COLONIES; ++i)
-		{
-			setColorByBacteriumId(i);
-		}
-	}
+	RoomState() = default;
 
-	explicit RoomState(int id, bool status) : is_run_(status), id_room_(id)
+	explicit RoomState(int id, bool status) : is_run_(status), id_room_(id) { }
+
+	void initColor()
 	{
-		srand(static_cast<unsigned int>(time(NULL)));
 		for (int i = 1; i < NUMBER_BACTERIAL_COLONIES; ++i)
 		{
 			setColorByBacteriumId(i);

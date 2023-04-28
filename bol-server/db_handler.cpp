@@ -61,13 +61,13 @@ std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> DbHandler::getFi
 	return result;
 }
 
-std::map<int, std::vector<DbBacteriumColorState>> DbHandler::getBacteriumData()
+std::vector<DbBacteriumColorState> DbHandler::getBacteriumData()
 {
-	std::map<int, std::vector<DbBacteriumColorState>> result;
+	std::vector<DbBacteriumColorState> result;
 	try {
 		db_ << "SELECT * FROM bacterium_color" >> [&](int id_room, int bact_type, int red, int green, int blue)
 		{
-			result[id_room].push_back(DbBacteriumColorState(id_room, bact_type, red, green, blue));
+			result.push_back(DbBacteriumColorState(id_room, bact_type, red, green, blue));
 		};
 	}
 	catch (const std::exception& e) {

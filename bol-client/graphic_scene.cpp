@@ -259,52 +259,6 @@ void GraphicScene::clearGameCanvas() const
 		canv->display();
 	}
 }
-//
-//void GraphicScene::saveLastDeltaForRoom(int id_room, const std::vector<GrassInfo>& cell_info, const std::vector<BacteriumInfo>& bact_inf)
-//{
-//	last_state_for_room_[static_cast<int>(id_room)].bact_inf = bact_inf;
-//	last_state_for_room_[static_cast<int>(id_room)].grass_info = cell_info;
-//}
-
-//void GraphicScene::drawGameCanvas(uint32_t id_room, const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf/*, const std::vector<DeletedPosition>& deleted_positions*/)
-//{
-//	//LOG_DURATION("draw");
-//
-//	if (auto canv = game_canvas_.lock(); canv != nullptr) {
-//		canv->clear(tgui::Color::White);
-//		sf::RectangleShape cell_shape;
-//		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-//		for (const auto& grass : grass_info)
-//		{
-//			const float pos_x = static_cast<float>(grass.x *CELL_SIZE);
-//			const float pos_y = static_cast<float>(grass.y * CELL_SIZE);
-//			cell_shape.setPosition(pos_x, pos_y); 
-//			cell_shape.setFillColor(tgui::Color::Green);
-//			cell_shape.setOutlineColor(sf::Color::Black);
-//			canv->draw(cell_shape);
-//		}
-//		for (const auto& bact : bact_inf)
-//		{
-//			const float pos_x = static_cast<float>(bact.x *CELL_SIZE);
-//			const float pos_y = static_cast<float>(bact.y * CELL_SIZE);
-//			cell_shape.setPosition(pos_x, pos_y);
-//			cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.energy, getCellColorByBacteriumId(bact.id_type)));
-//			cell_shape.setOutlineColor(sf::Color::Black);
-//			canv->draw(cell_shape);
-//		}
-//		/*for(const auto& pos:deleted_positions)
-//		{
-//			const float pos_x = static_cast<float>(pos.x *CELL_SIZE);
-//			const float pos_y = static_cast<float>(pos.y * CELL_SIZE);
-//			cell_shape.setPosition(pos_x, pos_y);
-//			cell_shape.setFillColor(tgui::Color::White);
-//			cell_shape.setOutlineColor(sf::Color::White);
-//			canv->draw(cell_shape);
-//		}*/
-//		drawMarkupField(canv);
-//		canv->display();
-//	}
-//}
 
 void GraphicScene::drawMarkupField(std::shared_ptr<tgui::CanvasSFML> canvas) const
 {
@@ -424,16 +378,3 @@ tgui::Color GraphicScene::getCellColorByBacteriumEnergy(int energy, tgui::Color 
 		return { color.getRed(), color.getGreen(), color.getBlue(), static_cast<uint8_t>(color.getAlpha() * 0.8) };
 	return color;
 }
-//
-//tgui::Color GraphicScene::getCellColorByBacteriumId(int id)
-//{
-//	if (color_bacterium_by_type_.find(id) != color_bacterium_by_type_.end())
-//		return color_bacterium_by_type_.at(id);
-//
-//	auto red = getRandomInt(0, 255);
-//	auto blue = getRandomInt(0, 255);
-//	auto green = getRandomInt(0, 255);
-//
-//	color_bacterium_by_type_.insert({ id,tgui::Color(red, green, blue) });
-//	return color_bacterium_by_type_.at(id);
-//}

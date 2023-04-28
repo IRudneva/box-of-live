@@ -43,15 +43,15 @@ struct DbSaveRoomState
 	using XYPos = std::pair<int, int>;
 	std::unordered_map<XYPos, DbCellState, pairhash> cell_states;
 
-	void formDataCells(/*const std::vector<DeletedPosition>& del_inf, */const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf)
-	{/*
+	void formDataCells(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf)
+	{
 		for (const auto& pos : del_inf)
 		{
 			DbCellState state = { TypeCell::EMPTY };
 			XYPos key = { pos.x, pos.y };
 			cell_states.insert({ key, state });
 		}
-*/
+
 		for (const auto& grass : grass_inf)
 		{
 			DbCellState state = { TypeCell::GRASS, 0, 0 };

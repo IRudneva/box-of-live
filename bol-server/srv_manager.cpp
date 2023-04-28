@@ -8,22 +8,20 @@
 #include "logger.h"
 #include "server_packet.h"
 
-void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>>& cell_inf, const std::map<int, std::vector<DbBacteriumColorState>>& bact_inf)
+void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>>& cell_inf, const std::vector<DbBacteriumColorState>& bact_inf)
 {
 	for (const auto&[id_room, room_info] : rooms_state)
 	{
 		RoomState state(id_room, room_info.is_active);
+
 		state.init(std::make_shared<GameConfig>(room_info.config));
 
 		std::map<int, SrvColor> color_map;
-		for (const auto&[room, vec_col] : bact_inf)
+		for (const auto& col : bact_inf)
 		{
-			if (id_room == room)
+			if (id_room == col.id_room)
 			{
-				for (const auto& p : vec_col)
-				{
-					color_map.insert({ p.id_type, SrvColor(p.red, p.green, p.blue) });
-				}
+				color_map.insert({ col.id_type, SrvColor(col.red, col.green, col.blue) });
 			}
 		}
 
@@ -68,9 +66,12 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 	{
 	case PacketType::CLI_CREATE_ROOM:
 	{
+		srand(static_cast<unsigned int>(time(NULL)));
 		auto pt_cl = std::static_pointer_cast<client_packet::PTCreateRoom>(packet.packet);
 
 		RoomState game_field_state(last_id_room_, false);
+
+		game_field_state.initColor();
 
 		game_field_state.init(pt_cl->game_config);
 
@@ -112,7 +113,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		NetworkServer::getInstance()->sendPacketAllClients(pt_close_room);
 
 		DbSaveRoomState state = { static_cast<int>(pt_close_room.id_room) , true };
-		DbPayload::getInstance()->updateCellsRoomState(static_cast<int>(pt_close_room.id_room), state);
+		DbPayload::getInstance()->updateCellsRoomState(state);
 		
 		break;
 	}
@@ -197,8 +198,8 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		auto deleted_positions = rooms_state_.at(static_cast<int>(pt_st->id_room)).getDeletedPosition();
 		auto grass_positions = rooms_state_.at(static_cast<int>(pt_st->id_room)).getGrassInfo();
 		auto bacterium_info = rooms_state_.at(static_cast<int>(pt_st->id_room)).getBacteriumInfo();
-		state.formDataCells(/*deleted_positions, */grass_positions, bacterium_info);
-		DbPayload::getInstance()->updateCellsRoomState(static_cast<int>(pt_st->id_room), state);
+		state.formDataCells(deleted_positions, grass_positions, bacterium_info);
+		DbPayload::getInstance()->updateCellsRoomState(state);
 	
 		break;
 	}

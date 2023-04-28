@@ -13,7 +13,7 @@ void RoomState::init(std::shared_ptr<GameConfig> config)
 
 void RoomState::update() const
 {
-	std::cout << "ROOM state UPDATE " << std::this_thread::get_id() << std::endl;
+	LOG_DURATION("RoomState::update");
 
 	if (!is_run_)
 		return;
@@ -32,9 +32,9 @@ void RoomState::update() const
 	sendSubscription(deleted_positions, grass_positions, bacterium_info);
 
 	DbSaveRoomState info = { id_room_, false };
-	info.formDataCells(/*deleted_positions, */grass_positions, bacterium_info);
+	info.formDataCells(deleted_positions, grass_positions, bacterium_info);
 
-	DbPayload::getInstance()->updateCellsRoomState(id_room_, info);
+	DbPayload::getInstance()->updateCellsRoomState(info);
 
 	game_state_->delta_state_.clear();
 }
@@ -119,7 +119,7 @@ void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, co
 
 void RoomState::setColorByBacteriumMap(std::map<int, SrvColor> color_map)
 {
-	color_bacterium_by_type_ = color_map;
+	color_bacterium_by_type_ = std::move(color_map);
 }
 
 void RoomState::setColorByBacteriumId(int id)

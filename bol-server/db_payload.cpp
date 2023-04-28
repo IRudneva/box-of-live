@@ -1,6 +1,9 @@
 #include "pch_server.h"
 #include "db_payload.h"
 
+#include "logger.h"
+#include "log_duration.h"
+
 void DbPayload::save()
 {
 	{
@@ -84,7 +87,7 @@ void DbPayload::save()
 			}
 
 			for (const auto &[cell_pos, cell_state] : room_state.cell_states) {
-			/*	if (cell_state.cell_type == TypeCell::EMPTY) {
+				if (cell_state.cell_type == TypeCell::EMPTY) {
 					try
 					{
 						*p_db_ << "DELETE FROM room_cells WHERE id_room = (?) AND pos_x = (?) AND pos_y = (?);" << room_id << cell_pos.first << cell_pos.second;
@@ -93,7 +96,7 @@ void DbPayload::save()
 						std::cout << e.what() << " line: " << __LINE__ << std::endl;
 					}
 					continue;
-				}*/
+				}
 
 				try
 				{
@@ -123,31 +126,55 @@ void DbPayload::updateRoomsConfigInfo(int id, const DbRoomInfo& inf)
 	rooms_info_.at(id) = inf;
 }
 
-void DbPayload::updateCellsRoomState(int id, const DbSaveRoomState& inf)
+void DbPayload::updateCellsRoomState(const DbSaveRoomState& delta_info)
 {
 	{
 		std::lock_guard<std::mutex> lock(m_);
+		LOG_DURATION("DpPayload::update");
+	//	cells_room_states_.at(id) = inf;
 	
-		if (cells_room_states_.find(id) == cells_room_states_.end())
+		if (cells_room_states_.find(delta_info.id_room) == cells_room_states_.end())
 		{
-			cells_room_states_.insert({ id, inf });
-			return;
+			cells_room_states_.insert({ delta_info.id_room, delta_info });
+
 		}
-
-		cells_room_states_.at(id).is_deleted = inf.is_deleted;
-
-		if (inf.cell_states.empty())
-			return;
-
-		for (const auto&[new_pos, new_cell] : inf.cell_states)
+		else
 		{
-			for (auto&[pos, cell] : cells_room_states_.at(id).cell_states)
+			cells_room_states_.at(delta_info.id_room).is_deleted = delta_info.is_deleted;
+			if (delta_info.cell_states.empty()) //если нечего обновлять 
+				return;
+
+			for (const auto&[new_pos, new_cell] : delta_info.cell_states)
 			{
-				if (new_pos == pos)
-					cell = new_cell;
-				else
-					cells_room_states_.at(id).cell_states.insert({ pos, cell });
+				for (auto&[pos, cell] : cells_room_states_.at(delta_info.id_room).cell_states)
+				{
+					if (new_pos == pos)
+						cell = new_cell;
+				}
 			}
+
+			for (const auto&[new_pos, new_cell] : delta_info.cell_states)
+			{
+				for (auto&[pos, cell] : cells_room_states_.at(delta_info.id_room).cell_states)
+				{
+					if (new_pos != pos)
+						cells_room_states_.at(delta_info.id_room).cell_states.insert({ new_pos, new_cell });
+				}
+			}
+			
+			/*for (const auto&[new_pos, new_cell] : delta_info.cell_states)
+			{
+				auto cont = cells_room_states_.at(delta_info.id_room).cell_states;
+				if (const auto is_find = std::find_if(cont.begin(), cont.end(), [&new_pos](const auto& cell) {return cell.first == new_pos;}); is_find == cont.end())
+				{
+					cells_room_states_.at(delta_info.id_room).cell_states.insert({ new_pos, new_cell });
+				}
+				else
+				{
+					cells_room_states_.at(delta_info.id_room).cell_states.at(is_find->first) = new_cell;
+				}
+				
+			}*/
 		}
 	}//lock
 }

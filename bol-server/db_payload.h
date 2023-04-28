@@ -21,7 +21,7 @@ public:
 
 	void updateRoomsConfigInfo(int id, const DbRoomInfo& inf);
 
-	void updateCellsRoomState(int id, const DbSaveRoomState& inf);
+	void updateCellsRoomState(const DbSaveRoomState& inf);
 
 	void updateBacteriumColorStates(std::vector<DbBacteriumColorState>& inf);
 

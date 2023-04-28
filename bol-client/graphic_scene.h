@@ -112,7 +112,7 @@ public:
 	void setColorForBacterium(const std::map<int, SrvColor>& color_map)
 	{
 		for (const auto&[id_type, col] : color_map) {
-			color_bacterium_by_type_.insert({ id_type, tgui::Color(col.red, col.green, col.blue) });
+			color_bacterium_by_type_[id_type] = tgui::Color(static_cast<uint8_t>(col.red), static_cast<uint8_t>(col.green), static_cast<uint8_t>(col.blue));
 		}
 	}
 
