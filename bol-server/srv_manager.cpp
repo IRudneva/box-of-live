@@ -180,6 +180,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		);
 
 		NetworkServer::getInstance()->sendPacket(packet.id_channel, pt_init_game);
+
 		break;
 	}
 	case PacketType::CLI_START_GAME:

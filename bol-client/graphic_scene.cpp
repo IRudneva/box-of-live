@@ -230,8 +230,8 @@ void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const 
 	initButtonCloseRoom(true);
 	setConfig(conf);
 	setGameCanvasSize(conf.delta_game_field_size);
-	setColorForBacterium(color);
 	clearCurrentFieldState();
+	setColorForBacterium(color);
 
 	std::vector<DeletedPosition> empty_vect;
 	updateCurrentFieldState(grass_info, bact_inf, empty_vect);

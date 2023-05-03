@@ -13,7 +13,7 @@ void RoomState::init(std::shared_ptr<GameConfig> config)
 
 void RoomState::update() const
 {
-	LOG_DURATION("RoomState::update");
+	//LOG_DURATION("RoomState::update");
 
 	if (!is_run_)
 		return;
