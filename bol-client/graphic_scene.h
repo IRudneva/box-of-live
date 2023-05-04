@@ -1,6 +1,4 @@
 #pragma once
-#include <iostream>
-
 #include "packet_domain.h"
 #include "gui_config.h"
 #include <queue>
@@ -14,82 +12,13 @@ public:
 
 	void initGraphicScene();
 
-	void update()
-	{
-		gui_.draw();
-		if (auto canv = game_canvas_.lock(); canv != nullptr) {
-			canv->clear(tgui::Color::White);
+	void update();
 
-			sf::RectangleShape cell_shape;
-			cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
-			for (const auto& grass : current_field_state_.grass_info)
-			{
-				cell_shape.setPosition(grass.x, grass.y);
-				cell_shape.setFillColor(tgui::Color::Green);
-				cell_shape.setOutlineColor(sf::Color::Black);
-				canv->draw(cell_shape);
-			}
-			for (const auto& bact : current_field_state_.bact_inf)
-			{
-				if (!color_bacterium_by_type_.empty())
-				{
-					cell_shape.setPosition(bact.first.x, bact.first.y);
-					cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
-					cell_shape.setOutlineColor(sf::Color::Black);
-					canv->draw(cell_shape);
-				}
-			}
-			drawMarkupField(canv);
-			canv->display();
-		}
-	}
-
-	void setGameCanvasSize(int delta) const
-	{
-		if (auto canv = game_canvas_.lock(); canv != nullptr)
-			canv->setSize(WIDTH_PLAYING_FIELD * static_cast<double>(delta) / 10,
-				HEIGHT_PLAYING_FIELD * static_cast<double>(delta) / 10);
-	}
+	void setGameCanvasSize(int delta) const;
 
 	void clearCurrentFieldState() { current_field_state_.reset(); }
 
-	void updateCurrentFieldState(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const std::vector<DeletedPosition>& deleted_pos)
-	{
-		if (grass_info.empty() && bact_inf.empty() && deleted_pos.empty())
-			return;
-
-		for (const auto& del_pos : deleted_pos)
-		{
-			UIPosition ui_pos(del_pos.x, del_pos.y);
-
-			auto it_del_grass = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), ui_pos);
-			if (it_del_grass != current_field_state_.grass_info.end())
-				current_field_state_.grass_info.erase(it_del_grass);
-
-			for (auto it = current_field_state_.bact_inf.begin(); it != current_field_state_.bact_inf.end(); )
-			{
-				it->first == ui_pos ? it = current_field_state_.bact_inf.erase(it) : ++it;
-			}
-		}
-
-		for (const auto& grass : grass_info)
-		{
-			UIPosition grass_pos(grass.x, grass.y);
-			auto is_find = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), grass_pos);
-			if (is_find == current_field_state_.grass_info.end())
-			{
-				current_field_state_.grass_info.push_back(grass_pos);
-			}
-
-		}
-
-		for (const auto& bact : bact_inf)
-		{
-			UIPosition ui_pos(bact.x, bact.y);
-
-			current_field_state_.bact_inf[ui_pos] = bact;
-		}
-	}
+	void updateCurrentFieldState(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const std::vector<DeletedPosition>& deleted_pos);
 
 	void handleEvent(const sf::Event& event) { gui_.handleEvent(event); }
 
@@ -109,12 +38,11 @@ public:
 
 	tgui::ChatBox::Ptr getLogBox()const { return log_box_; }
 
-	void setColorForBacterium(const std::map<int, SrvColor>& color_map)
-	{
-		for (const auto&[id_type, col] : color_map) {
-			color_bacterium_by_type_[id_type] = tgui::Color(static_cast<uint8_t>(col.red), static_cast<uint8_t>(col.green), static_cast<uint8_t>(col.blue));
-		}
-	}
+	void setColorForBacterium(const std::map<int, SrvColor>& color_map);
+
+	void initButtonStart(bool is_active) const;
+
+	void initConfigGrid(bool status) const;
 
 private:
 	using IdRoom = int;
@@ -181,11 +109,7 @@ private:
 
 	void initConnectionFlag(bool status) const;
 
-	void initButtonStart(bool status) const { gui_.get("button_start")->setEnabled(status); }
-
 	void initButtonCloseRoom(bool status) const { gui_.get("button_close_room")->setEnabled(status); }
-
-	void initConfigGrid(bool status) const;
 
 	void deleteRoom(uint32_t id_room) const;
 

@@ -17,6 +17,8 @@ public:
 
 	void updateBacteriumColorStates(std::vector<DbBacteriumColorState>& inf);
 
+	void clear();
+
 private:
 	std::mutex m_;
 	std::shared_ptr<sqlite::database> p_db_;

@@ -71,8 +71,7 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet)
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTInitChooseRoom>(packet);
-		bool status = pckt->status == "active" ? true : false;
-		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config, pckt->bacterium_color_by_type, status);
+		graphic_scene_->onChooseRoom(pckt->grass_info, pckt->bacterium_info, *pckt->config, pckt->bacterium_color_by_type, pckt->is_active);
 		break;
 	}
 	case PacketType::SRV_ROOM_STATE:
@@ -85,6 +84,13 @@ void LogicClient::handlePacket(std::shared_ptr<Packet> packet)
 	{
 		auto pckt = std::static_pointer_cast<server_packet::PTCloseRoom>(packet);
 		graphic_scene_->onCloseRoom(static_cast<int>(pckt->id_room));
+		break;
+	}
+	case PacketType::SRV_ACTIVATE_ROOM:
+	{
+		auto pckt = std::static_pointer_cast<server_packet::PTActivateRoom>(packet);
+		graphic_scene_->initButtonStart(!pckt->is_active);
+		graphic_scene_->initConfigGrid(!pckt->is_active);
 		break;
 	}
 	default:

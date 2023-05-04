@@ -20,7 +20,7 @@ std::map<int, DbRoomInfo> DbHandler::getRoomsData()
 		db_ << "SELECT * FROM room" >> [&](
 			int id_room,
 			std::string name,
-			std::string status,
+			int is_active,
 			int conf_energy_base,
 			int conf_energy_action_cost,
 			int conf_energy_to_clone,
@@ -30,8 +30,7 @@ std::map<int, DbRoomInfo> DbHandler::getRoomsData()
 			int conf_count_grass,
 			int conf_energy_from_grass,
 			int conf_delta_game_field_size) {
-			bool is_active = (status == "active" ? true : false);
-			result[id_room] = DbRoomInfo(is_active, GameConfig(conf_energy_base, conf_energy_action_cost, conf_energy_to_clone, conf_min_update_time,
+			result[id_room] = DbRoomInfo(static_cast<bool>(is_active), GameConfig(conf_energy_base, conf_energy_action_cost, conf_energy_to_clone, conf_min_update_time,
 				conf_max_update_time, conf_grass_update_time, conf_count_grass, conf_energy_from_grass, conf_delta_game_field_size
 			));
 		};
@@ -81,7 +80,7 @@ void DbHandler::createTable()
 	db_ << "CREATE TABLE IF NOT EXISTS room ("
 		"id_room INTEGER PRIMARY KEY,"
 		"name TEXT,"
-		"status TEXT,"
+		"is_active INTEGER,"
 		"conf_energy_base INTEGER,"
 		"conf_energy_action_cost INTEGER,"
 		"conf_energy_to_clone INTEGER,"

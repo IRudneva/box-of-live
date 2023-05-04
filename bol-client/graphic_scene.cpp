@@ -2,13 +2,11 @@
 #include "graphic_scene.h"
 #include <memory>
 #include <game_domain.h>
-#include <iostream>
 #include <utility>
 
 #include "client_packet.h"
 #include "network_client.h"
 #include "client_logger.h"
-#include "log_duration.h"
 
 void GraphicScene::initGraphicScene()
 {
@@ -16,6 +14,95 @@ void GraphicScene::initGraphicScene()
 	initCanvas();
 	initGrid();
 	initButtons();
+}
+
+void GraphicScene::update()
+{
+	gui_.draw();
+	if (auto canv = game_canvas_.lock(); canv != nullptr) {
+		canv->clear(tgui::Color::White);
+
+		sf::RectangleShape cell_shape;
+		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
+		for (const auto& grass : current_field_state_.grass_info)
+		{
+			cell_shape.setPosition(grass.x, grass.y);
+			cell_shape.setFillColor(tgui::Color::Green);
+			cell_shape.setOutlineColor(sf::Color::Black);
+			canv->draw(cell_shape);
+		}
+		for (const auto& bact : current_field_state_.bact_inf)
+		{
+			if (!color_bacterium_by_type_.empty())
+			{
+				cell_shape.setPosition(bact.first.x, bact.first.y);
+				cell_shape.setFillColor(getCellColorByBacteriumEnergy(bact.second.energy, color_bacterium_by_type_.at(bact.second.id_type)));
+				cell_shape.setOutlineColor(sf::Color::Black);
+				canv->draw(cell_shape);
+			}
+		}
+		drawMarkupField(canv);
+		canv->display();
+	}
+}
+
+void GraphicScene::setGameCanvasSize(int delta) const
+{
+	if (auto canv = game_canvas_.lock(); canv != nullptr)
+		canv->setSize(WIDTH_PLAYING_FIELD * static_cast<double>(delta) / 10,
+			HEIGHT_PLAYING_FIELD * static_cast<double>(delta) / 10);
+}
+
+void GraphicScene::updateCurrentFieldState(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const std::vector<DeletedPosition>& deleted_pos)
+{
+	if (grass_info.empty() && bact_inf.empty() && deleted_pos.empty())
+		return;
+
+	for (const auto& del_pos : deleted_pos)
+	{
+		UIPosition ui_pos(del_pos.x, del_pos.y);
+
+		auto it_del_grass = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), ui_pos);
+		if (it_del_grass != current_field_state_.grass_info.end())
+			current_field_state_.grass_info.erase(it_del_grass);
+
+		for (auto it = current_field_state_.bact_inf.begin(); it != current_field_state_.bact_inf.end(); )
+		{
+			it->first == ui_pos ? it = current_field_state_.bact_inf.erase(it) : ++it;
+		}
+	}
+
+	for (const auto& grass : grass_info)
+	{
+		UIPosition grass_pos(grass.x, grass.y);
+		auto is_find = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), grass_pos);
+		if (is_find == current_field_state_.grass_info.end())
+		{
+			current_field_state_.grass_info.push_back(grass_pos);
+		}
+
+	}
+
+	for (const auto& bact : bact_inf)
+	{
+		UIPosition ui_pos(bact.x, bact.y);
+
+		current_field_state_.bact_inf[ui_pos] = bact;
+	}
+}
+
+void GraphicScene::setColorForBacterium(const std::map<int, SrvColor>& color_map)
+{
+	for (const auto&[id_type, col] : color_map) {
+		color_bacterium_by_type_[id_type] = tgui::Color(static_cast<uint8_t>(col.red), static_cast<uint8_t>(col.green), static_cast<uint8_t>(col.blue));
+	}
+}
+
+void GraphicScene::initButtonStart(bool is_active) const
+{
+	auto button = gui_.get("button_start");
+	if (button->isEnabled() != is_active)
+		button->setEnabled(is_active);
 }
 
 void GraphicScene::initLayout()
@@ -48,8 +135,8 @@ void GraphicScene::initLayout()
 
 	auto game_layout = createLayout({ tgui::Color::White,
 		{ settings_layout->getPosition().x, settings_layout->getPosition().y + settings_layout->getSize().y},
-		/*HEIGHT_WINDOW - settings_layout->getSize().y*/HEIGHT_PLAYING_FIELD,
-		/*WIDTH_WINDOW - room_list_->getSize().x*/WIDTH_PLAYING_FIELD }
+		HEIGHT_PLAYING_FIELD,
+		WIDTH_PLAYING_FIELD }
 	);
 
 	common_layout->add(room_list_, "room_list");
@@ -136,11 +223,9 @@ void GraphicScene::initButtons()
 
 	button_start->onPress([this] {
 		client_packet::PTStartGame packet(static_cast<uint32_t>(id_selected_room_), std::make_shared<GameConfig>(config_.config));
-		NetworkClient::getInstance()->sendPacket(packet); //////////////////////////////////// ТУТ ОТПРАВЛЯЕТСЯ КОНФИГ, РАЗМЕР ПОЛЯ ПРОКИНУТЬ В NServer
+		NetworkClient::getInstance()->sendPacket(packet); 
 		clearGameCanvas();
 		clearCurrentFieldState();
-		initConfigGrid(false);
-		initButtonStart(false);
 	});
 
 	buttons->add(button_create_room, "button_create_room");
@@ -226,13 +311,10 @@ void GraphicScene::onNetworkDisconnect()
 	clearRoomList();
 }
 
-void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color, bool status)
+void GraphicScene::onChooseRoom(const std::vector<GrassInfo>& grass_info, const std::vector<BacteriumInfo>& bact_inf, const GameConfig& conf, const std::map<int, SrvColor>& color, bool is_active)
 {
-	if (!status)
-	{
-		initButtonStart(true);
-		initConfigGrid(true);
-	}
+	initButtonStart(!is_active);
+	initConfigGrid(!is_active);
 	initButtonCloseRoom(true);
 	setConfig(conf);
 	setGameCanvasSize(conf.delta_game_field_size);
@@ -254,8 +336,11 @@ void GraphicScene::onCloseRoom(int id_room)
 
 void GraphicScene::initConfigGrid(bool status) const
 {
-	config_.grid->setEnabled(status);
-	config_.grid->setVisible(status);
+	if (config_.grid->isEnabled() != status)
+	{
+		config_.grid->setEnabled(status);
+		config_.grid->setVisible(status);
+	}
 }
 
 void GraphicScene::clearGameCanvas() const

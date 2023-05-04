@@ -83,8 +83,7 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 	case PacketType::SRV_INIT_CHOOSE_ROOM:
 	{
 		auto packet = msgpack::unpack<server_packet::PTInitChooseRoom>(data);
-		bool status = packet.status == "active" ? true : false;
-		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room, status, packet.grass_info, packet.bacterium_info, packet.config, packet.bacterium_color_by_type);
+		auto pt_init = std::make_shared<server_packet::PTInitChooseRoom>(packet.id_room, packet.is_active, packet.grass_info, packet.bacterium_info, packet.config, packet.bacterium_color_by_type);
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_init);
 		return result;
 	}
@@ -93,6 +92,13 @@ std::shared_ptr<Packet> ServerPacketBuilder::getPacket(PacketType type, const st
 		auto packet = msgpack::unpack<server_packet::PTCloseRoom>(data);
 		auto pt_close_room = std::make_shared<server_packet::PTCloseRoom>(packet.id_room);
 		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_close_room);
+		return result;
+	}
+	case PacketType::SRV_ACTIVATE_ROOM:
+	{
+		auto packet = msgpack::unpack<server_packet::PTActivateRoom>(data);
+		auto pt_activate_room = std::make_shared<server_packet::PTActivateRoom>(packet.is_active);
+		auto result = std::static_pointer_cast<server_packet::ServerPacket>(pt_activate_room);
 		return result;
 	}
 	default:

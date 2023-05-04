@@ -23,7 +23,18 @@ public:
 
 	bool getStatus() const { return is_run_; }
 
-	void setActivateStatus(bool status) { is_run_ = status; }
+	void setActivateStatus(bool status)
+	{
+		is_run_ = status;
+
+		const server_packet::PTActivateRoom pt_init_game(
+			is_run_
+		);
+		for (const auto& client : game_subscription_)
+		{
+			NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), pt_init_game);
+		}
+	}
 
 	std::shared_ptr<GameConfig> getGameConfig() const { return game_state_->getGameConfig(); }
 
