@@ -17,28 +17,13 @@ struct DeltaGameState
 
 	const std::vector<Position>& getUpdatedPositions() const { return  update_cells_; }
 
-	void addDeletedPosition(const Position& pos)
-	{
-		if (auto cell = std::find(deleted_cells_.begin(), deleted_cells_.end(), pos); cell == deleted_cells_.end())
-			deleted_cells_.push_back(pos);
-	}
+	void addDeletedPosition(const Position& pos);
 
-	void addUpdatePosition(const Position& pos)
-	{
-		if (auto cell = std::find(update_cells_.begin(), update_cells_.end(), pos); cell == update_cells_.end())
-			update_cells_.push_back(pos);
-	}
+	void addUpdatePosition(const Position& pos);
 
-	bool empty() const
-	{
-		return deleted_cells_.empty() && update_cells_.empty();
-	}
+	bool empty() const { return deleted_cells_.empty() && update_cells_.empty(); }
 
-	void clear()
-	{
-		deleted_cells_.clear();
-		update_cells_.clear();
-	}
+	void clear();
 
 private:
 	std::vector<Position> deleted_cells_;
@@ -49,9 +34,7 @@ class FieldState final
 {
 public:
 	DeltaGameState delta_state_;
-
-	const DeltaGameState getDeltaGameState();
-
+public:
 	std::shared_ptr<Cell> getCellInPosition(const Position& pos) const;
 
 	void initConfig(std::shared_ptr<GameConfig> config);
@@ -83,7 +66,6 @@ private:
 	using ID = int;
 	std::map<ID, std::shared_ptr<Cell>> cells_;
 	Timer timer_grass_{std::chrono::milliseconds(3000)};
-
 	double delta_field_size_ = 0.0;
 private:
 	Position getRandomEmptyPosition() const;

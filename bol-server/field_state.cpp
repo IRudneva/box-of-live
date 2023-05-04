@@ -4,6 +4,25 @@
 #include "grass.h"
 #include "log_duration.h"
 
+void DeltaGameState::addDeletedPosition(const Position& pos)
+{
+	if (auto cell = std::find(deleted_cells_.begin(), deleted_cells_.end(), pos); cell == deleted_cells_.end())
+		deleted_cells_.push_back(pos);
+}
+
+void DeltaGameState::addUpdatePosition(const Position& pos)
+{
+	if (auto cell = std::find(update_cells_.begin(), update_cells_.end(), pos); cell == update_cells_.end())
+		update_cells_.push_back(pos);
+}
+
+void DeltaGameState::clear()
+{
+	deleted_cells_.clear();
+	update_cells_.clear();
+}
+
+
 void FieldState::addColonyBacterium(int max_count)
 {
 	srand(static_cast<unsigned int>(time(NULL)));
@@ -24,7 +43,7 @@ void FieldState::addColonyBacterium(int max_count)
 		const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
 		int curr_adjacent = 0; // текущее кол-во соседей
 
-		const auto colony_size = getRandomInt(2, max_count);
+		const auto colony_size = getRandomInt(6, max_count);
 
 		while (count_bacterium < colony_size) {
 
@@ -116,12 +135,6 @@ void FieldState::addGrass(int x, int y)
 
 }
 
-const DeltaGameState FieldState::getDeltaGameState()
-{
-	return delta_state_;
-
-}
-
 std::shared_ptr<Cell> FieldState::getCellInPosition(const Position& pos) const
 {
 	for (const auto&[id, cell] : cells_)
@@ -146,6 +159,7 @@ void FieldState::update()
 
 	if (timer_grass_.timedOut())
 		addGrass(config_->count_grass);
+
 	for (const auto&[id, cell] : cells_)
 	{
 		if (cell != nullptr) {

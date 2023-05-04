@@ -13,7 +13,7 @@ class NetworkServer
 public:
 	static NetworkServer* getInstance();
 
-	void init();
+	void init(int port);
 
 	void initQueue(std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue) { queue_ = queue; }
 
@@ -21,21 +21,15 @@ public:
 
 	void sendPacketAllClients(const Packet& packet);
 
-	int getConnectionCount()
-	{
-		std::lock_guard<std::mutex> lock(m_);
-		return static_cast<int>(channel_map_.size());
-	}
-
-	void stop();
+	void stop() { server_.stop(); }
 
 private:
-	using IdChannel = uint32_t;
+	std::mutex m_;
 
+	using IdChannel = uint32_t;
 	std::map<IdChannel, std::weak_ptr<BOLSocketChannel>> channel_map_;
 	BOLTcpServer server_;
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue_;
-	std::mutex m_;
 
 	Timer count_byte_timer_{ std::chrono::milliseconds(1000) };
 	size_t count_bytes_ = 0;

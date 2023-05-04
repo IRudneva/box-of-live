@@ -8,9 +8,9 @@ NetworkServer* NetworkServer::getInstance() {
 	return &inst;
 }
 
-void NetworkServer::init()
+void NetworkServer::init(int port)
 {
-	if (initSocket(1234))
+	if (initSocket(port))
 	{
 		Logger::getInstance()->registerLog("SERVER::LISTEN ON PORT::" + std::to_string(1234));
 		
@@ -109,9 +109,4 @@ bool NetworkServer::initSocket(int port)
 		return false;
 	}
 	return true;
-}
-
-void NetworkServer::stop()
-{
-	server_.stop();
 }

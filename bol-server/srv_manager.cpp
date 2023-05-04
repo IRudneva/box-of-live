@@ -12,10 +12,6 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 {
 	for (const auto&[id_room, room_info] : rooms_state)
 	{
-		RoomState state(id_room, room_info.is_active);
-
-		state.init(std::make_shared<GameConfig>(room_info.config));
-
 		std::map<int, SrvColor> color_map;
 		for (const auto& col : bact_inf)
 		{
@@ -25,7 +21,7 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 			}
 		}
 
-		state.setColorByBacteriumMap(color_map);
+		auto state = createRoom(id_room, room_info.is_active, room_info.config, color_map);
 
 		if (cell_inf.find(id_room) == cell_inf.end())
 		{
@@ -60,6 +56,23 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 		++last_id_room_;
 }
 
+RoomState SrvManager::createRoom(int id, bool status, const GameConfig& config,
+                                 const std::map<int, SrvColor>& color_bacterium) const
+{
+	RoomState state(id, status);
+	state.initConfig(std::make_shared<GameConfig>(config));
+	state.setColorByBacteriumMap(color_bacterium);
+	return state;
+}
+
+RoomState SrvManager::createRoom(int id, bool status, std::shared_ptr<GameConfig> config) const
+{
+	RoomState state(id, status);
+	state.initConfig(config);
+	state.initBacteriumColors();
+	return state;
+}
+
 void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 {
 	switch (packet.packet->type)
@@ -69,26 +82,21 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		srand(static_cast<unsigned int>(time(NULL)));
 		auto pt_cl = std::static_pointer_cast<client_packet::PTCreateRoom>(packet.packet);
 
-		RoomState game_field_state(last_id_room_, false);
-
-		game_field_state.initColor();
-
-		game_field_state.init(pt_cl->game_config);
-
-		rooms_state_.insert({ last_id_room_, game_field_state });
+		auto new_room_state = createRoom(last_id_room_, false, pt_cl->game_config);
+	
+		rooms_state_.insert({ last_id_room_, new_room_state });
 
 		Logger::getInstance()->registerLog("SERVER::RECEIVED::CREATE ROOM::" + std::to_string(last_id_room_));
 
-		const server_packet::PTNewRoom pt_new_room(last_id_room_, "room", game_field_state.getGameConfig());
+		const server_packet::PTNewRoom pt_new_room(last_id_room_, "room", pt_cl->game_config);
 		NetworkServer::getInstance()->sendPacketAllClients(pt_new_room);
 
-		DbPayload::getInstance()->updateRoomsConfigInfo(last_id_room_, DbRoomInfo(false, *game_field_state.getGameConfig()));
+		DbPayload::getInstance()->updateRoomsConfigInfo(last_id_room_, DbRoomInfo(false, *pt_cl->game_config));
 
 		std::vector<DbBacteriumColorState> color_state;
-		for (const auto&[id_type, color] : game_field_state.getColorByBacterium())
+		for (const auto&[id_type, color] : new_room_state.getColorsBacterium())
 		{
 			color_state.emplace_back(last_id_room_, id_type, color.red, color.green, color.blue);
-			
 		}
 		DbPayload::getInstance()->updateBacteriumColorStates(color_state);
 		++last_id_room_;
@@ -142,13 +150,15 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		}
 		rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).addSubscription(static_cast<int>(packet.id_channel));
 
-		auto current_state = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getAllCellInfo();
+		auto current_room = rooms_state_.at(static_cast<int>(pt_choose_room->id_room));
 
-		auto current_config = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getGameConfig();
+		auto current_state = current_room.getAllCellInfo();
 
-		auto bacterium_color = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getColorByBacterium();
+		auto current_config = current_room.getGameConfig();
 
-		auto current_status = rooms_state_.at(static_cast<int>(pt_choose_room->id_room)).getStatus();
+		auto bacterium_color = current_room.getColorsBacterium();
+
+		auto current_status = current_room.getStatus();
 
 		std::vector<GrassInfo> grass_info;
 		std::vector<BacteriumInfo> bacterium_info;
@@ -188,20 +198,14 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		Logger::getInstance()->registerLog("SERVER::RECEIVED::START GAMES");
 
 		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
-		rooms_state_.at(static_cast<int>(pt_st->id_room)).init(pt_st->game_config);
-		rooms_state_.at(static_cast<int>(pt_st->id_room)).activate(true);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).initConfig(pt_st->game_config);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).setActivateStatus(true);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).reset();
 
 		DbRoomInfo info = { true,  *pt_st->game_config };
 		DbPayload::getInstance()->updateRoomsConfigInfo(static_cast<int>(pt_st->id_room), info);
 
-		DbSaveRoomState state = { static_cast<int>(pt_st->id_room) , false };
-		auto deleted_positions = rooms_state_.at(static_cast<int>(pt_st->id_room)).getDeletedPosition();
-		auto grass_positions = rooms_state_.at(static_cast<int>(pt_st->id_room)).getGrassInfo();
-		auto bacterium_info = rooms_state_.at(static_cast<int>(pt_st->id_room)).getBacteriumInfo();
-		state.formDataCells(deleted_positions, grass_positions, bacterium_info);
-		DbPayload::getInstance()->updateCellsRoomState(state);
-	
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).update();
 		break;
 	}
 	case PacketType::MSG_DISABLE:
@@ -226,7 +230,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 void SrvManager::updateGameState()
 {
-	for (auto&[room, state] : rooms_state_)
+	for (const auto& [room, state] : rooms_state_)
 	{
 		state.update();
 	}

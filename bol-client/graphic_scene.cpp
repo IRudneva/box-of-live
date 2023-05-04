@@ -112,7 +112,13 @@ void GraphicScene::initButtons()
 		"CREATE ROOM" });
 
 	button_create_room->onPress([this] {
-		config_.helper->init(config_.config);
+		/*if(room_list_->getItemCount() == 0)
+			config_.is_init = false;
+		*/
+		if (!config_.is_init) {
+			config_.helper->init(config_.config);
+			config_.is_init = true;
+		}
 		const client_packet::PTCreateRoom packet(std::make_shared<GameConfig>(config_.config));
 		NetworkClient::getInstance()->sendPacket(packet);
 	});

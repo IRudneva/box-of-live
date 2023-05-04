@@ -2,7 +2,6 @@
 #include <map>
 #include "db_handler.h"
 #include "room_state.h"
-#include "bol_timer.h"
 
 struct Room;
 struct PacketWithIdChannel;
@@ -22,4 +21,9 @@ public:
 private:
 	std::map<IdRoom, RoomState> rooms_state_;
 	int last_id_room_ = 0;
+
+	RoomState createRoom(int id, bool status, const GameConfig& config,
+		const std::map<int, SrvColor>& color_bacterium) const;
+
+	RoomState createRoom(int id, bool status, std::shared_ptr<GameConfig> config) const;
 };

@@ -5,16 +5,32 @@
 #include "db_payload.h"
 #include "log_duration.h"
 
-void RoomState::init(std::shared_ptr<GameConfig> config)
+void RoomState::initConfig(std::shared_ptr<GameConfig> config) const { game_state_->initConfig(std::move(config)); }
+
+void RoomState::initBacteriumColors()
 {
-	config_ = std::move(config);
-	game_state_->initConfig(config_);
+	for (int i = 1; i < NUMBER_BACTERIAL_COLONIES; ++i)
+	{
+		color_bacterium_by_type_.insert({ i, createColorByBacteriumId(i) });
+	}
+}
+
+SrvColor RoomState::createColorByBacteriumId(int id) const
+{
+	SrvColor color;
+	color.red = getRandomInt(0, 255);
+	color.blue = getRandomInt(0, 255);
+	color.green = getRandomInt(0, 255);
+	return color;
+}
+
+void RoomState::setColorByBacteriumMap(const std::map<int, SrvColor>& color_map)
+{
+	color_bacterium_by_type_ = std::move(color_map);
 }
 
 void RoomState::update() const
 {
-	//LOG_DURATION("RoomState::update");
-
 	if (!is_run_)
 		return;
 
@@ -24,10 +40,36 @@ void RoomState::update() const
 	{
 		game_state_->update();
 	}
-	//////////////////////////?????????????????????????????????????
-	auto deleted_positions = getDeletedPosition();
-	auto grass_positions = getGrassInfo();
-	auto bacterium_info = getBacteriumInfo();
+
+	std::vector<DeletedPosition> deleted_positions;
+	std::vector<GrassInfo> grass_positions;
+	std::vector<BacteriumInfo> bacterium_info;
+
+	for (const auto& pos : game_state_->delta_state_.getDeletedPositions())
+	{
+		deleted_positions.emplace_back(pos.x, pos.y);
+	}
+	for (const auto& pos : game_state_->delta_state_.getUpdatedPositions())
+	{
+		if (auto cell = game_state_->getCellInPosition(pos); cell != nullptr)
+		{
+			auto type = cell->getCellType();
+			if (type == TypeCell::GRASS)
+			{
+				GrassInfo inf_grass(pos.x, pos.y);
+				grass_positions.emplace_back(inf_grass);
+				continue;
+			}
+			if (type == TypeCell::BACTERIUM)
+			{
+				Cell& a = *cell;
+				auto bacterium = dynamic_cast<Bacterium&>(a);
+				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
+				bacterium_info.emplace_back(inf_bac);
+				continue;
+			}
+		}
+	}
 
 	sendSubscription(deleted_positions, grass_positions, bacterium_info);
 
@@ -37,73 +79,9 @@ void RoomState::update() const
 	DbPayload::getInstance()->updateCellsRoomState(info);
 
 	game_state_->delta_state_.clear();
+
 }
 
-std::vector<BacteriumInfo> RoomState::getAllBacteriumInfo() const
-{
-	std::vector<BacteriumInfo> data;
-	for (const auto&[id, cell] : game_state_->getData())
-	{
-		const auto pos = cell->getPosition();
-		if (cell->getCellType() == TypeCell::BACTERIUM)
-		{
-			Cell& a = *cell;
-			auto bacterium = dynamic_cast<Bacterium&>(a);
-			BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
-			data.emplace_back(inf_bac);
-		}
-	}
-	return data;
-}
-
-std::vector<DeletedPosition> RoomState::getDeletedPosition() const
-{
-	auto delta = game_state_->getDeltaGameState();
-	std::vector<DeletedPosition> deleted_position;
-	for (const auto& pos : delta.getDeletedPositions())
-	{
-		deleted_position.emplace_back(pos.x, pos.y);
-	}
-	return deleted_position;
-}
-
-std::vector<GrassInfo> RoomState::getGrassInfo() const
-{
-	auto delta = game_state_->getDeltaGameState();
-	std::vector<GrassInfo> grass_state;
-	for (const auto& pos : delta.getUpdatedPositions())
-	{
-		if (auto cell = game_state_->getCellInPosition(pos); cell != nullptr)
-		{
-			if (cell->getCellType() == TypeCell::GRASS)
-			{
-				GrassInfo inf_grass(pos.x, pos.y);
-				grass_state.emplace_back(inf_grass);
-			}
-		}
-	}
-	return grass_state;
-}
-
-std::vector<BacteriumInfo> RoomState::getBacteriumInfo() const
-{
-	auto delta = game_state_->getDeltaGameState();
-	std::vector<BacteriumInfo> bacterium_state;
-	for (const auto& pos : delta.getUpdatedPositions())
-	{
-		if (auto cell = game_state_->getCellInPosition(pos); cell != nullptr)
-		{
-			if (cell->getCellType() == TypeCell::BACTERIUM)
-			{
-				Cell& a = *cell;
-				auto bacterium = dynamic_cast<Bacterium&>(a);
-				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
-				bacterium_state.emplace_back(inf_bac);
-			}
-		}
-	}
-	return bacterium_state;
-}
 
 void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf) const
 {
@@ -116,19 +94,3 @@ void RoomState::sendSubscription(const std::vector<DeletedPosition>& del_inf, co
 		NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), game_state);
 	}
 }
-
-void RoomState::setColorByBacteriumMap(std::map<int, SrvColor> color_map)
-{
-	color_bacterium_by_type_ = std::move(color_map);
-}
-
-void RoomState::setColorByBacteriumId(int id)
-{
-	SrvColor color;
-	color.red = getRandomInt(0, 255);
-	color.blue = getRandomInt(0, 255);
-	color.green = getRandomInt(0, 255);
-
-	color_bacterium_by_type_.insert({ id,color });
-}
-

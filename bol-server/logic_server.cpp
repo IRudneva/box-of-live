@@ -3,6 +3,13 @@
 
 #include "logger.h"
 
+LogicServer::LogicServer(std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> queue)
+	: queue_(std::move(queue))
+{
+	//основной
+	manager_->initState(db_handler_->getRoomsData(), db_handler_->getFieldStateData(), db_handler_->getBacteriumData());
+}
+
 void LogicServer::runLogicLoop()
 {
 	thread_db_is_run_ = true;

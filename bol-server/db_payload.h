@@ -5,17 +5,9 @@
 class DbPayload
 {
 public:
-	static DbPayload* getInstance()
-	{
-		static DbPayload inst;
-		return &inst;
-	}
+	static DbPayload* getInstance();
 
-	void initDb(std::shared_ptr<sqlite::database> p_db)
-	{
-		std::lock_guard<std::mutex> lock(m_);
-		p_db_ = p_db;
-	}
+	void initDb(std::shared_ptr<sqlite::database> p_db);
 
 	void save();
 

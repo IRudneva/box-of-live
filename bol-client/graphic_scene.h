@@ -131,6 +131,7 @@ private:
 		tgui::Grid::Ptr grid = tgui::Grid::create();
 		GameConfig config;
 		std::unique_ptr<ConfigHelper> helper = std::make_unique<ConfigHelper>();
+		bool is_init = false;
 	} config_;
 
 	int id_selected_room_ = -1;
@@ -169,8 +170,6 @@ private:
 			bact_inf.clear();
 		}
 	} current_field_state_;
-
-	//std::map<IdRoom, DeltaState> last_state_for_room_;
 
 	void initLayout();
 

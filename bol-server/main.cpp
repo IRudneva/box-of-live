@@ -7,10 +7,17 @@
 
 int main()
 {
+	Logger::getInstance()->registerLog("PORT: ");
+	std::string port;
+	std::getline(std::cin, port);
+	if (stoi(port) < 1025) {
+		return -10;
+	}
+
 	std::shared_ptr<SharedPacketQueue<client_packet::PacketWithIdChannel>> shared_packet_queue = std::make_shared<SharedPacketQueue<client_packet::PacketWithIdChannel>>();
 	
 	NetworkServer::getInstance()->initQueue(shared_packet_queue);
-	NetworkServer::getInstance()->init();
+	NetworkServer::getInstance()->init(stoi(port));
 
 	LogicServer server(shared_packet_queue);
 	server.runLogicLoop();
