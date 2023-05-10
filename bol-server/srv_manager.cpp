@@ -1,6 +1,8 @@
 #include "pch_server.h"
 #include "client_packet.h"
 #include "srv_manager.h"
+
+#include "grass.h"
 #include "packet_writer.h"  
 #include "network_server.h"
 #include "room_state.h"
@@ -36,7 +38,10 @@ void SrvManager::initState(const std::map<int, DbRoomInfo>& rooms_state, const s
 			{
 			case TypeCell::GRASS:
 			{
-				state.addGrass(i->first.first, i->first.second);
+				if (i->second.is_super_grass)
+					state.addSuperGrass(i->first.first, i->first.second);
+				else
+					state.addGrass(i->first.first, i->first.second);
 				break;
 			}
 			case TypeCell::BACTERIUM:
@@ -169,13 +174,15 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 			if (cell->getCellType() == TypeCell::BACTERIUM)
 			{
 				Cell& a = *cell;
-				auto bacterium = dynamic_cast<Bacterium&>(a);
+				auto bacterium = std::move(dynamic_cast<Bacterium&>(a));
 				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
 				bacterium_info.emplace_back(inf_bac);
 			}
 			else if (cell->getCellType() == TypeCell::GRASS)
 			{
-				GrassInfo inf_grass(pos.x, pos.y);
+				Cell& a = *cell;
+				auto grass = std::move(dynamic_cast<Grass&>(a));
+				GrassInfo inf_grass(pos.x, pos.y, grass.isSuperGrass());
 				grass_info.emplace_back(inf_grass);
 			}
 		}
@@ -206,6 +213,13 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		DbPayload::getInstance()->updateRoomsConfigInfo(static_cast<int>(pt_st->id_room), info);
 
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).update();
+		break;
+	}
+	case PacketType::CLI_ADD_SUPER_GRASS:
+	{
+		Logger::getInstance()->registerLog("SERVER::RECEIVED::ADD SUPER GRASS");
+		auto pt_st = std::static_pointer_cast<client_packet::PTAddSuperGrass>(packet.packet);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).addSuperGrass(static_cast<int>(pt_st->pos_x), static_cast<int>(pt_st->pos_y));
 		break;
 	}
 	case PacketType::MSG_DISABLE:

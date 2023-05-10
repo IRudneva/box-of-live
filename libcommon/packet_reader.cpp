@@ -43,6 +43,13 @@ std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(Pack
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_start);
 		return result;
 	}
+	case PacketType::CLI_ADD_SUPER_GRASS:
+	{
+		auto packet = msgpack::unpack<client_packet::PTAddSuperGrass>(data);
+		auto pt_grass = std::make_shared<client_packet::PTAddSuperGrass>(packet.id_room, packet.pos_x, packet.pos_y);
+		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_grass);
+		return result;
+	}
 	default:
 		return nullptr;
 	}

@@ -46,6 +46,8 @@ public:
 
 	void addGrass(int x, int y) const { game_state_->addGrass(x, y); }
 
+	void addSuperGrass(int x, int y) { game_state_->addSuperGrass(x, y); }
+
 	void addBacterium(int x, int y, int id_type, int energy) const { game_state_->addBacterium(x, y, id_type, energy); }
 
 	const std::map<int, SrvColor>& getColorsBacterium() const { return color_bacterium_by_type_; }

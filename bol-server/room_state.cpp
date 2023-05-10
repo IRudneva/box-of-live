@@ -3,6 +3,7 @@
 #include <utility>
 #include "data_for_save.h"
 #include "db_payload.h"
+#include "grass.h"
 #include "log_duration.h"
 
 void RoomState::initConfig(std::shared_ptr<GameConfig> config) const { game_state_->initConfig(std::move(config)); }
@@ -56,14 +57,16 @@ void RoomState::update() const
 			auto type = cell->getCellType();
 			if (type == TypeCell::GRASS)
 			{
-				GrassInfo inf_grass(pos.x, pos.y);
+				Cell& a = *cell;
+				auto grass = std::move(dynamic_cast<Grass&>(a));
+				GrassInfo inf_grass(pos.x, pos.y, grass.isSuperGrass());
 				grass_positions.emplace_back(inf_grass);
 				continue;
 			}
 			if (type == TypeCell::BACTERIUM)
 			{
 				Cell& a = *cell;
-				auto bacterium = dynamic_cast<Bacterium&>(a);
+				auto bacterium = std::move(dynamic_cast<Bacterium&>(a));
 				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
 				bacterium_info.emplace_back(inf_bac);
 				continue;

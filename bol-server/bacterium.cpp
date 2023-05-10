@@ -2,13 +2,15 @@
 #include "bacterium.h"
 
 #include "bol_timer.h"
+#include "effect.h"
 #include "field_state.h"
+#include "grass.h"
 
-Bacterium::Bacterium(int id_type, std::shared_ptr<GameConfig> config) :id_type_(id_type), config_(std::move(config))
+Bacterium::Bacterium(int id_type, std::shared_ptr<GameConfig> config) :id_type_(id_type), config_(*config)
 {
 	setCellType(TypeCell::BACTERIUM);
-	energy_base_ = config_->energy_base;
-	update_time_ = getRandomInt(config_->min_update_time, config_->max_update_time);
+	energy_base_ = config_.energy_base;
+	update_time_ = getRandomInt(config_.min_update_time, config_.max_update_time);
 }
 
 bool Bacterium::isReadyUpdate()
@@ -23,16 +25,20 @@ bool Bacterium::isReadyUpdate()
 
 void Bacterium::spendEnergy(int count)
 {
-	if (energy_base_ >= count)
+	if (energy_base_ >= count && can_spend_energy_)
 		energy_base_ -= count;
 }
 
 void Bacterium::update(FieldState& field_state)
 {
+	updateEffects();
+
+	//onUpdate(*this, field_state);
+
 	if (!isReadyUpdate())
 		return;
 
-	spendEnergy(config_->energy_action_cost);
+	spendEnergy(config_.energy_action_cost);
 
 	if (energy_base_ <= 0) {
 		field_state.resetTypeCell(getIdCell());
@@ -48,6 +54,19 @@ void Bacterium::update(FieldState& field_state)
 	}
 }
 
+void Bacterium::updateEffects()
+{
+	effects_.erase(std::remove_if(effects_.begin(), effects_.end(), [this](auto effect)
+	{
+		if (effect->isOverAction())
+		{
+			effect->detachEffect(*this);
+			return true;
+		}
+		return false;
+	}), effects_.end());
+}
+
 const Position& Bacterium::changeDirection(FieldState& field_state)
 {
 	const auto all_adjacent = field_state.getPositionsAround(position_);
@@ -60,6 +79,7 @@ const Position& Bacterium::changeDirection(FieldState& field_state)
 	{
 		if (tryEatAnotherBacterium(field_state.getData().at(id_bacterium))) // если получилось съесть бауктерию другого типа
 		{
+		//	onEatAnotherBacterium(*this, config_.energy_from_grass);
 			field_state.resetTypeCell(id_bacterium);
 			return position_;
 		}
@@ -68,7 +88,7 @@ const Position& Bacterium::changeDirection(FieldState& field_state)
 	const auto id_grass = findPriorytyCell(all_adjacent, TypeCell::GRASS);
 	if (id_grass != NO_RESULT)
 	{
-		eatGrass(field_state.getData().at(id_grass));
+		eatGrass(field_state, id_grass);
 	
 		field_state.resetTypeCell(id_grass);
 		if (canClone())
@@ -76,6 +96,8 @@ const Position& Bacterium::changeDirection(FieldState& field_state)
 			const auto new_all_adjacent = field_state.getPositionsAround(position_);
 			auto new_bac = clone(new_all_adjacent);
 			if (new_bac != nullptr)
+				new_bac->setEnergy(static_cast<int>(energy_base_ * 0.5));
+				spendEnergy(static_cast<int>(energy_base_ * 0.5));
 				field_state.addBacterium(new_bac);
 		}
 		return position_;
@@ -99,7 +121,7 @@ int Bacterium::findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell typ
 			if (type == TypeCell::BACTERIUM)
 			{
 				Cell& c = *cell;
-				const auto bacterium = dynamic_cast<Bacterium&>(c);
+				const auto bacterium = std::move(dynamic_cast<Bacterium&>(c));
 				if (bacterium.getIdType() == id_type_)
 					continue;
 			}
@@ -112,7 +134,7 @@ int Bacterium::findPriorytyCell(const AdjacentCellsUMap& adj_cells, TypeCell typ
 bool Bacterium::tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium)
 {
 	Cell& cell = *another_bacterium;
-	const auto bacterium = dynamic_cast<Bacterium&>(cell);
+	const auto bacterium = std::move(dynamic_cast<Bacterium&>(cell));
 	if (energy_base_ > bacterium.getEnergy())
 	{
 		position_ = cell.getPosition();
@@ -122,10 +144,23 @@ bool Bacterium::tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium)
 	return false;
 }
 
-void Bacterium::eatGrass(std::shared_ptr<Cell> grass)
+void Bacterium::eatGrass(FieldState& field_state, int id_grass)
 {
+	auto grass = field_state.getData().at(id_grass);
+	Cell& c = *grass;
+	const auto gr = dynamic_cast<Grass&>(c);
+	if (gr.isSuperGrass())
+	{
+		//auto speed_effect = std::make_shared<SpeedEffect>();
+		/*auto energy_effect = std::make_shared<EnergyEffect>();
+		auto clone_effect = std::make_shared<CloneEffect>();*/
+
+	/*	effects_.push_back(std::move(energy_effect));
+		effects_[0]->applyEffect(*this);*/
+	}
+
 	position_ = grass->getPosition();
-	increaseEnergy(config_->energy_from_grass);
+	increaseEnergy(config_.energy_from_grass);
 }
 
 std::shared_ptr<Bacterium> Bacterium::clone(const AdjacentCellsUMap& adj_cells)
@@ -134,10 +169,10 @@ std::shared_ptr<Bacterium> Bacterium::clone(const AdjacentCellsUMap& adj_cells)
 
 	if (child_pos != position_)
 	{
-		auto child_bacterium = std::make_shared<Bacterium>(id_type_, config_);
+		auto child_bacterium = std::make_shared<Bacterium>(id_type_, std::make_shared<GameConfig>(config_));
 		child_bacterium->setPosition(child_pos);
-		child_bacterium->setEnergy(static_cast<int>(energy_base_ * 0.5));
-		spendEnergy(static_cast<int>(energy_base_ * 0.5));
+		/*child_bacterium->setEnergy(static_cast<int>(energy_base_ * 0.5));
+		spendEnergy(static_cast<int>(energy_base_ * 0.5));*/
 		return child_bacterium;
 	}
 	return nullptr;
@@ -172,7 +207,7 @@ bool Bacterium::checkAllBacteriumAroundSameType(const AdjacentCellsUMap& adj_cel
 		if (cell->getCellType() == TypeCell::BACTERIUM)
 		{
 			Cell& c = *cell;
-			const auto bacterium = dynamic_cast<Bacterium&>(c);
+			const auto bacterium = std::move(dynamic_cast<Bacterium&>(c));
 			if (bacterium.getIdType() == id_type_)
 				++count;
 		}

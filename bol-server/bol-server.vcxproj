@@ -94,7 +94,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions);ODB_CXX11</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\libcommon;$(ProjectDir)\..\hdr;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\boost_1_81_0;$(ProjectDir)\..\libcommon;$(ProjectDir)\..\hdr;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/EHsc %(AdditionalOptions)</AdditionalOptions>
       <PrecompiledHeaderFile>pch_server.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
@@ -150,7 +150,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions);ODB_CXX11</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\libcommon;$(ProjectDir)\..\hdr;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\boost_1_81_0;$(ProjectDir)\..\libcommon;$(ProjectDir)\..\hdr;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <PrecompiledHeaderFile>pch_server.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -168,6 +168,7 @@
     <ClCompile Include="db_handler.cpp" />
     <ClCompile Include="cell.cpp" />
     <ClCompile Include="db_payload.cpp" />
+    <ClCompile Include="effect.cpp" />
     <ClCompile Include="field_state.cpp" />
     <ClCompile Include="room_state.cpp" />
     <ClCompile Include="grass.cpp" />
@@ -187,6 +188,7 @@
     <ClInclude Include="cell.h" />
     <ClInclude Include="data_for_save.h" />
     <ClInclude Include="db_payload.h" />
+    <ClInclude Include="effect.h" />
     <ClInclude Include="field_state.h" />
     <ClInclude Include="room_state.h" />
     <ClInclude Include="grass.h" />

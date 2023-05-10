@@ -51,6 +51,8 @@ public:
 
 	void addGrass(int x, int y);
 
+	void addSuperGrass(int x, int y);
+
 	void resetTypeCell(int id_cell) const;
 
 	void resetCell(int id_cell);

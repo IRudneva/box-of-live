@@ -26,8 +26,16 @@ void GraphicScene::update()
 		cell_shape.setSize(sf::Vector2f(CELL_SIZE, CELL_SIZE));
 		for (const auto& grass : current_field_state_.grass_info)
 		{
-			cell_shape.setPosition(grass.x, grass.y);
-			cell_shape.setFillColor(tgui::Color::Green);
+			cell_shape.setPosition(grass.first.x, grass.first.y);
+			if(grass.second)
+			{
+				cell_shape.setFillColor(tgui::Color::Red);
+			}
+			else
+			{
+				cell_shape.setFillColor(tgui::Color::Green);
+			}
+			
 			cell_shape.setOutlineColor(sf::Color::Black);
 			canv->draw(cell_shape);
 		}
@@ -62,9 +70,10 @@ void GraphicScene::updateCurrentFieldState(const std::vector<GrassInfo>& grass_i
 	{
 		UIPosition ui_pos(del_pos.x, del_pos.y);
 
-		auto it_del_grass = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), ui_pos);
-		if (it_del_grass != current_field_state_.grass_info.end())
-			current_field_state_.grass_info.erase(it_del_grass);
+		for (auto it = current_field_state_.grass_info.begin(); it != current_field_state_.grass_info.end(); )
+		{
+			it->first == ui_pos ? it = current_field_state_.grass_info.erase(it) : ++it;
+		}
 
 		for (auto it = current_field_state_.bact_inf.begin(); it != current_field_state_.bact_inf.end(); )
 		{
@@ -75,12 +84,8 @@ void GraphicScene::updateCurrentFieldState(const std::vector<GrassInfo>& grass_i
 	for (const auto& grass : grass_info)
 	{
 		UIPosition grass_pos(grass.x, grass.y);
-		auto is_find = std::find(current_field_state_.grass_info.begin(), current_field_state_.grass_info.end(), grass_pos);
-		if (is_find == current_field_state_.grass_info.end())
-		{
-			current_field_state_.grass_info.push_back(grass_pos);
-		}
 
+		current_field_state_.grass_info[grass_pos] = grass.is_super_grass;
 	}
 
 	for (const auto& bact : bact_inf)
@@ -164,6 +169,18 @@ void GraphicScene::initCanvas()
 	const auto game_layout = gui_.get("game_layout")->cast<tgui::Panel>();
 
 	game_layout->add(canvas, "game_canvas");
+
+	canvas->onMousePress([this](tgui::Vector2f pos)
+	{
+		if (id_selected_room_ == -1)
+			return;
+
+		int pos_rectangle_x = static_cast<int>(pos.x / static_cast<float>(CELL_SIZE));
+		int pos_rectangle_y = static_cast<int>(pos.y / static_cast<float>(CELL_SIZE));
+
+		const client_packet::PTAddSuperGrass packet(id_selected_room_, pos_rectangle_x, pos_rectangle_y);
+		NetworkClient::getInstance()->sendPacket(packet);
+	});
 
 	game_canvas_ = canvas;
 

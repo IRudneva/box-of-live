@@ -46,10 +46,10 @@ std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> DbHandler::getFi
 {
 	std::map<int, std::unordered_map<XYPos, DbCellState, pairhash>> result;
 	try {
-		db_ << "SELECT * FROM room_cells" >> [&](int id_room, int pos_x, int pos_y, int type_cell, int bact_type, int energy)
+		db_ << "SELECT * FROM room_cells" >> [&](int id_room, int pos_x, int pos_y, int type_cell, int grass_type, int bact_type, int energy)
 		{
 			XYPos key = { pos_x, pos_y };
-			DbCellState state{ static_cast<TypeCell>(type_cell), bact_type, energy };
+			DbCellState state{ static_cast<TypeCell>(type_cell), static_cast<bool>(grass_type), bact_type, energy };
 			result[id_room].insert({ key, state });
 			
 		};
@@ -106,6 +106,7 @@ void DbHandler::createTable()
 		"pos_x INTEGER,"
 		"pos_y INTEGER,"
 		"type_cell INTEGER,"
+		"grass_type INTEGER,"
 		"bact_type INTEGER,"
 		"energy INTEGER,"
 		"PRIMARY KEY(id_room, pos_x, pos_y)"

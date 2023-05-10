@@ -114,11 +114,12 @@ void DbPayload::save()
 
 				try
 				{
-					*p_db_ << "INSERT OR REPLACE INTO room_cells (id_room, pos_x, pos_y, type_cell, bact_type, energy) VALUES (?,?,?,?,?,?);"
+					*p_db_ << "INSERT OR REPLACE INTO room_cells (id_room, pos_x, pos_y, type_cell, grass_type, bact_type, energy) VALUES (?,?,?,?,?,?,?);"
 						<< room_id
 						<< cell_pos.first
 						<< cell_pos.second
 						<< static_cast<int>(cell_state.cell_type)
+						<< static_cast<int>(cell_state.is_super_grass)
 						<< cell_state.bact_type
 						<< cell_state.energy;
 				}

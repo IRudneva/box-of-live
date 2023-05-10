@@ -132,7 +132,24 @@ void FieldState::addGrass(int x, int y)
 
 
 	delta_state_.addUpdatePosition(new_grass->getPosition());
+}
 
+void FieldState::addSuperGrass(int x, int y)
+{
+	Position pos = { x, y };
+	for(const auto& [id, cell] : cells_)
+	{
+		if (pos == cell->getPosition())
+			return;
+	}
+	auto super_grass = std::make_shared<Grass>(true);
+	super_grass->setPosition(pos);
+	cells_.insert({ super_grass->getIdCell(), super_grass });
+
+
+	delta_state_.addUpdatePosition(super_grass->getPosition());
+	// проверить, свободна ли эта позиция
+	// добавить на поле с флагом супер травы
 }
 
 std::shared_ptr<Cell> FieldState::getCellInPosition(const Position& pos) const

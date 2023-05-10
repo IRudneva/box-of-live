@@ -44,13 +44,13 @@ static int getRandomInt(int from, int to)
 
 struct GrassInfo {
 	GrassInfo() = default;
-	GrassInfo(int ox, int oy) : x(ox), y(oy) {}
+	GrassInfo(int ox, int oy, bool is_super) : x(ox), y(oy), is_super_grass(is_super) {}
 	int x = 0;
 	int y = 0;
-	virtual ~GrassInfo() = default;
+	bool is_super_grass = false;
 
-	virtual void pack(msgpack::Packer& packer) const { packer(x, y); }
-	virtual void pack(msgpack::Unpacker& unpacker) { unpacker(x, y); }
+	virtual void pack(msgpack::Packer& packer) const { packer(x, y, is_super_grass); }
+	virtual void pack(msgpack::Unpacker& unpacker) { unpacker(x, y, is_super_grass); }
 }; 
 
 struct BacteriumInfo 

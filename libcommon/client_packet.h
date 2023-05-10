@@ -53,21 +53,11 @@ namespace client_packet {
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room); }
 	};
 
-	/*struct PTChangeConfig :ClientPacket
-	{
-		PTChangeConfig() : ClientPacket(PacketType::CLI_CHANGE_CONFIG) {}
-		PTChangeConfig(uint32_t id, std::shared_ptr<GameConfig> conf) : ClientPacket(PacketType::CLI_CHANGE_CONFIG), id_room(id), game_config(std::move(conf)) {}
-		uint32_t id_room;
-		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
-		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
-		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *game_config); }
-	};*/
-
 	struct PTStartGame : ClientPacket
 	{
 		PTStartGame() :ClientPacket(PacketType::CLI_START_GAME) {}
 		PTStartGame(uint32_t id, std::shared_ptr<GameConfig> conf):ClientPacket(PacketType::CLI_START_GAME),id_room(id), game_config(std::move(conf)) {}
-		uint32_t id_room;
+		uint32_t id_room = 0;
 		std::shared_ptr<GameConfig> game_config = std::make_shared<GameConfig>();
 		void pack(msgpack::Packer& packer) const override { packer(id_room, *game_config); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, *game_config); }
@@ -80,5 +70,18 @@ namespace client_packet {
 
 		std::shared_ptr<Packet> packet = nullptr;
 		uint32_t id_channel;
+	};
+
+	struct PTAddSuperGrass : ClientPacket
+	{
+		PTAddSuperGrass() :ClientPacket(PacketType::CLI_ADD_SUPER_GRASS){}
+		PTAddSuperGrass(uint32_t id, uint32_t ox, uint32_t oy) :ClientPacket(PacketType::CLI_ADD_SUPER_GRASS),id_room(id), pos_x(ox), pos_y(oy) {}
+
+		uint32_t id_room = 0;
+		uint32_t pos_x = 0;
+		uint32_t pos_y = 0;
+
+		void pack(msgpack::Packer& packer) const override { packer(id_room, pos_x, pos_y); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,pos_x, pos_y); }
 	};
 } // namespace client_packet

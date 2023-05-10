@@ -72,6 +72,9 @@
     <ClCompile Include="db_handler.cpp">
       <Filter>database</Filter>
     </ClCompile>
+    <ClCompile Include="effect.cpp">
+      <Filter>game state\game logic</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch_server.h">
@@ -115,6 +118,9 @@
     </ClInclude>
     <ClInclude Include="db_handler.h">
       <Filter>database</Filter>
+    </ClInclude>
+    <ClInclude Include="effect.h">
+      <Filter>game state\game logic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

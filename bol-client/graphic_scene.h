@@ -89,7 +89,7 @@ private:
 
 	struct DeltaState
 	{
-		std::vector<UIPosition> grass_info;
+		std::unordered_map<UIPosition, bool, UIPositionHasher> grass_info;
 		std::unordered_map<UIPosition, BacteriumInfo, UIPositionHasher> bact_inf;
 
 		void reset() 

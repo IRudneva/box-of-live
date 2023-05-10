@@ -5,6 +5,7 @@
   "dependencies": [
     "libhv",
     "sqlite3",
-    "sqlite-modern-cpp"
+    "sqlite-modern-cpp",
+    "boost-signals2"
   ]
 }

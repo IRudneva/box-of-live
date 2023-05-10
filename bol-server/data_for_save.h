@@ -30,6 +30,7 @@ private:
 struct DbCellState
 {
 	TypeCell cell_type;
+	bool is_super_grass;
 	int bact_type;
 	int energy;
 };
@@ -54,14 +55,14 @@ struct DbSaveRoomState
 
 		for (const auto& grass : grass_inf)
 		{
-			DbCellState state = { TypeCell::GRASS, 0, 0 };
+			DbCellState state = { TypeCell::GRASS, grass.is_super_grass, 0, 0 };
 			XYPos key = { grass.x, grass.y };
 			cell_states.insert({ key, state });
 		}
 
 		for (const auto& bact : bact_inf)
 		{
-			DbCellState state = { TypeCell::BACTERIUM, bact.id_type, bact.energy };
+			DbCellState state = { TypeCell::BACTERIUM, false,bact.id_type, bact.energy };
 			XYPos key = { bact.x, bact.y };
 			cell_states.insert({ key, state });
 		}
