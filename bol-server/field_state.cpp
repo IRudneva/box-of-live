@@ -6,13 +6,13 @@
 
 void DeltaGameState::addDeletedPosition(const Position& pos)
 {
-	if (auto cell = std::find(deleted_cells_.begin(), deleted_cells_.end(), pos); cell == deleted_cells_.end())
+	if (const auto cell_delete = std::find(deleted_cells_.begin(), deleted_cells_.end(), pos); cell_delete == deleted_cells_.end())
 		deleted_cells_.push_back(pos);
 }
 
 void DeltaGameState::addUpdatePosition(const Position& pos)
 {
-	if (auto cell = std::find(update_cells_.begin(), update_cells_.end(), pos); cell == update_cells_.end())
+	if (const auto cell_update = std::find(update_cells_.begin(), update_cells_.end(), pos); cell_update == update_cells_.end())
 		update_cells_.push_back(pos);
 }
 
@@ -23,10 +23,10 @@ void DeltaGameState::clear()
 }
 
 
-void FieldState::addColonyBacterium(int max_count)
+void FieldState::addColonyBacterium()
 {
 	srand(static_cast<unsigned int>(time(NULL)));
-	for (unsigned int id_bacterium = 1; id_bacterium < NUMBER_BACTERIAL_COLONIES; id_bacterium++)
+	for (unsigned int id_bacterium = 1; id_bacterium <= config_->count_colonies; id_bacterium++)
 	{
 		auto base_bacterium = std::make_shared<Bacterium>(id_bacterium, config_); // создаем базовую бактерию
 
@@ -43,7 +43,7 @@ void FieldState::addColonyBacterium(int max_count)
 		const int max_adjacent = 3; // максимальное кол-во соседей для одной клетки
 		int curr_adjacent = 0; // текущее кол-во соседей
 
-		const auto colony_size = getRandomInt(6, max_count);
+		const auto colony_size = config_->count_bacterium;
 
 		while (count_bacterium < colony_size) {
 
@@ -134,22 +134,39 @@ void FieldState::addGrass(int x, int y)
 	delta_state_.addUpdatePosition(new_grass->getPosition());
 }
 
+void FieldState::addEffectByBacterium(int x, int y)
+{
+	Position pos = { x, y };
+	auto cell_is_find = std::find_if(cells_.begin(), cells_.end(), [&](auto& cell)
+	{
+		return cell.second->getPosition() == pos;
+	});
+	if (cell_is_find == cells_.end())
+		return;
+	if (cell_is_find->second->getCellType() == TypeCell::BACTERIUM)
+	{
+		auto bacterium = std::dynamic_pointer_cast<Bacterium>(cell_is_find->second);
+		bacterium->addEffect(std::make_shared<CloneEffect>());
+	}
+}
+
 void FieldState::addSuperGrass(int x, int y)
 {
 	Position pos = { x, y };
-	for(const auto& [id, cell] : cells_)
+
+	auto cell_is_find = std::find_if(cells_.begin(), cells_.end(), [&](auto& cell)
 	{
-		if (pos == cell->getPosition())
-			return;
-	}
+		return cell.second->getPosition() == pos;
+	});
+
+	if (cell_is_find != cells_.end())
+		return;
+
 	auto super_grass = std::make_shared<Grass>(true);
 	super_grass->setPosition(pos);
 	cells_.insert({ super_grass->getIdCell(), super_grass });
 
-
 	delta_state_.addUpdatePosition(super_grass->getPosition());
-	// проверить, свободна ли эта позиция
-	// добавить на поле с флагом супер травы
 }
 
 std::shared_ptr<Cell> FieldState::getCellInPosition(const Position& pos) const
@@ -198,7 +215,7 @@ void FieldState::restart()
 	delta_state_.clear();
 	IdCell::reset();
 	timer_grass_.initInt(config_->grass_update_time);
-	addColonyBacterium(15);
+	addColonyBacterium();
 	addGrass(config_->count_grass * 2);
 }
 

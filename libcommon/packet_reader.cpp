@@ -50,6 +50,13 @@ std::shared_ptr<client_packet::ClientPacket> ClientPacketBuilder::getPacket(Pack
 		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_grass);
 		return result;
 	}
+	case PacketType::CLI_ADD_EFFECT:
+	{
+		auto packet = msgpack::unpack<client_packet::PTAddEffect>(data);
+		auto pt_effect = std::make_shared<client_packet::PTAddEffect>(packet.id_room, packet.pos_x, packet.pos_y);
+		auto result = std::static_pointer_cast<client_packet::ClientPacket>(pt_effect);
+		return result;
+	}
 	default:
 		return nullptr;
 	}

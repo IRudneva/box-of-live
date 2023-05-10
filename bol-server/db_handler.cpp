@@ -24,14 +24,18 @@ std::map<int, DbRoomInfo> DbHandler::getRoomsData()
 			int conf_energy_base,
 			int conf_energy_action_cost,
 			int conf_energy_to_clone,
+			int conf_count_colonies,
+			int conf_count_bacterium,
 			int conf_min_update_time,
 			int conf_max_update_time,
 			int conf_grass_update_time,
 			int conf_count_grass,
 			int conf_energy_from_grass,
 			int conf_delta_game_field_size) {
-			result[id_room] = DbRoomInfo(static_cast<bool>(is_active), GameConfig(conf_energy_base, conf_energy_action_cost, conf_energy_to_clone, conf_min_update_time,
-				conf_max_update_time, conf_grass_update_time, conf_count_grass, conf_energy_from_grass, conf_delta_game_field_size
+			result[id_room] = DbRoomInfo(static_cast<bool>(is_active), GameConfig(conf_energy_base, conf_energy_action_cost, conf_energy_to_clone,
+				conf_count_colonies, conf_count_bacterium, conf_min_update_time,
+				conf_max_update_time, conf_grass_update_time, conf_count_grass,
+				conf_energy_from_grass, conf_delta_game_field_size
 			));
 		};
 	}
@@ -84,6 +88,8 @@ void DbHandler::createTable()
 		"conf_energy_base INTEGER,"
 		"conf_energy_action_cost INTEGER,"
 		"conf_energy_to_clone INTEGER,"
+		"conf_count_colonies INTEGER,"
+		"conf_count_bacterium INTEGER,"
 		"conf_min_update_time  INTEGER,"
 		"conf_max_update_time INTEGER,"
 		"conf_grass_update_time INTEGER,"

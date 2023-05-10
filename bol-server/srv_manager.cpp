@@ -74,7 +74,7 @@ RoomState SrvManager::createRoom(int id, bool status, std::shared_ptr<GameConfig
 {
 	RoomState state(id, status);
 	state.initConfig(config);
-	state.initBacteriumColors();
+	state.initBacteriumColors(config->count_colonies);
 	return state;
 }
 
@@ -157,46 +157,7 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 
 		auto current_room = rooms_state_.at(static_cast<int>(pt_choose_room->id_room));
 
-		auto current_state = current_room.getAllCellInfo();
-
-		auto current_config = current_room.getGameConfig();
-
-		auto bacterium_color = current_room.getColorsBacterium();
-
-		auto current_status = current_room.getStatus();
-
-		std::vector<GrassInfo> grass_info;
-		std::vector<BacteriumInfo> bacterium_info;
-		for (const auto&[id, cell] : current_state)
-		{
-			auto pos = cell->getPosition();
-
-			if (cell->getCellType() == TypeCell::BACTERIUM)
-			{
-				Cell& a = *cell;
-				auto bacterium = std::move(dynamic_cast<Bacterium&>(a));
-				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
-				bacterium_info.emplace_back(inf_bac);
-			}
-			else if (cell->getCellType() == TypeCell::GRASS)
-			{
-				Cell& a = *cell;
-				auto grass = std::move(dynamic_cast<Grass&>(a));
-				GrassInfo inf_grass(pos.x, pos.y, grass.isSuperGrass());
-				grass_info.emplace_back(inf_grass);
-			}
-		}
-
-		const server_packet::PTInitChooseRoom pt_init_game(
-			pt_choose_room->id_room,
-			current_status,
-			grass_info,
-			bacterium_info,
-			current_config,
-			bacterium_color
-		);
-
-		NetworkServer::getInstance()->sendPacket(packet.id_channel, pt_init_game);
+		sendCurrentState(current_room, static_cast<int>(packet.id_channel));
 
 		break;
 	}
@@ -207,12 +168,19 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		auto pt_st = std::static_pointer_cast<client_packet::PTStartGame>(packet.packet);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).initConfig(pt_st->game_config);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).setActivateStatus(true);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).initBacteriumColors(pt_st->game_config->count_colonies);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).reset();
 
 		DbRoomInfo info = { true,  *pt_st->game_config };
 		DbPayload::getInstance()->updateRoomsConfigInfo(static_cast<int>(pt_st->id_room), info);
 
-		rooms_state_.at(static_cast<int>(pt_st->id_room)).update();
+		auto current_room = rooms_state_.at(static_cast<int>(pt_st->id_room));
+
+		for (const auto& client : current_room.getSubscription())
+		{
+			sendCurrentState(current_room, client);
+		}
+
 		break;
 	}
 	case PacketType::CLI_ADD_SUPER_GRASS:
@@ -220,6 +188,13 @@ void SrvManager::handlePacket(const client_packet::PacketWithIdChannel& packet)
 		Logger::getInstance()->registerLog("SERVER::RECEIVED::ADD SUPER GRASS");
 		auto pt_st = std::static_pointer_cast<client_packet::PTAddSuperGrass>(packet.packet);
 		rooms_state_.at(static_cast<int>(pt_st->id_room)).addSuperGrass(static_cast<int>(pt_st->pos_x), static_cast<int>(pt_st->pos_y));
+		break;
+	}
+	case PacketType::CLI_ADD_EFFECT:
+	{
+		Logger::getInstance()->registerLog("SERVER::RECEIVED::ADD EFFECT");
+		auto pt_st = std::static_pointer_cast<client_packet::PTAddEffect>(packet.packet);
+		rooms_state_.at(static_cast<int>(pt_st->id_room)).addEffect(static_cast<int>(pt_st->pos_x), static_cast<int>(pt_st->pos_y));
 		break;
 	}
 	case PacketType::MSG_DISABLE:
@@ -248,4 +223,47 @@ void SrvManager::updateGameState()
 	{
 		state.update();
 	}
+}
+
+void SrvManager::sendCurrentState(const RoomState& current_room, int client) const
+{
+	auto current_state = current_room.getAllCellInfo();
+
+	const auto current_config = current_room.getGameConfig();
+
+	const auto bacterium_color = current_room.getColorsBacterium();
+
+	const auto current_status = current_room.getStatus();
+
+	std::vector<GrassInfo> grass_info;
+	std::vector<BacteriumInfo> bacterium_info;
+
+	for (const auto&[id, cell] : current_state)
+	{
+		auto pos = cell->getPosition();
+
+		if (cell->getCellType() == TypeCell::BACTERIUM)
+		{
+			const auto bacterium = std::dynamic_pointer_cast<Bacterium>(cell);
+			BacteriumInfo inf_bac(pos.x, pos.y, bacterium->getIdType(), bacterium->getEnergy());
+			bacterium_info.emplace_back(inf_bac);
+		}
+		else if (cell->getCellType() == TypeCell::GRASS)
+		{
+			const auto grass = std::dynamic_pointer_cast<Grass>(cell);
+			GrassInfo inf_grass(pos.x, pos.y, grass->isSuperGrass());
+			grass_info.emplace_back(inf_grass);
+		}
+	}
+
+	const server_packet::PTInitChooseRoom pt_init_game(
+		current_room.getIdRoom(),
+		current_status,
+		grass_info,
+		bacterium_info,
+		current_config,
+		bacterium_color
+	);
+
+	NetworkServer::getInstance()->sendPacket(static_cast<uint32_t>(client), pt_init_game);
 }

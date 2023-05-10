@@ -45,5 +45,10 @@ public:
 private:
 	int id_ = 0;
 	TypeCell type_ = TypeCell::EMPTY;
+
+	Cell(const Cell&) = delete;
+	Cell(Cell&&) = delete;
+	Cell& operator=(Cell&) = delete;
+
 };
 

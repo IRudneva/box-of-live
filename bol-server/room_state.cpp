@@ -8,9 +8,9 @@
 
 void RoomState::initConfig(std::shared_ptr<GameConfig> config) const { game_state_->initConfig(std::move(config)); }
 
-void RoomState::initBacteriumColors()
+void RoomState::initBacteriumColors(int count)
 {
-	for (int i = 1; i < NUMBER_BACTERIAL_COLONIES; ++i)
+	for (int i = 1; i <= count; i++)
 	{
 		color_bacterium_by_type_.insert({ i, createColorByBacteriumId(i) });
 	}
@@ -57,17 +57,15 @@ void RoomState::update() const
 			auto type = cell->getCellType();
 			if (type == TypeCell::GRASS)
 			{
-				Cell& a = *cell;
-				auto grass = std::move(dynamic_cast<Grass&>(a));
-				GrassInfo inf_grass(pos.x, pos.y, grass.isSuperGrass());
+				const auto grass = std::dynamic_pointer_cast<Grass>(cell);
+				GrassInfo inf_grass(pos.x, pos.y, grass->isSuperGrass());
 				grass_positions.emplace_back(inf_grass);
 				continue;
 			}
 			if (type == TypeCell::BACTERIUM)
 			{
-				Cell& a = *cell;
-				auto bacterium = std::move(dynamic_cast<Bacterium&>(a));
-				BacteriumInfo inf_bac(pos.x, pos.y, bacterium.getIdType(), bacterium.getEnergy());
+				const auto bacterium = std::dynamic_pointer_cast<Bacterium>(cell);
+				BacteriumInfo inf_bac(pos.x, pos.y, bacterium->getIdType(), bacterium->getEnergy());
 				bacterium_info.emplace_back(inf_bac);
 				continue;
 			}

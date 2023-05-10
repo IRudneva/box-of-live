@@ -182,6 +182,18 @@ void GraphicScene::initCanvas()
 		NetworkClient::getInstance()->sendPacket(packet);
 	});
 
+	canvas->onRightMousePress([this](tgui::Vector2f pos)
+	{
+		if (id_selected_room_ == -1)
+			return;
+
+		int pos_rectangle_x = static_cast<int>(pos.x / static_cast<float>(CELL_SIZE));
+		int pos_rectangle_y = static_cast<int>(pos.y / static_cast<float>(CELL_SIZE));
+
+		const client_packet::PTAddEffect packet(id_selected_room_, pos_rectangle_x, pos_rectangle_y);
+		NetworkClient::getInstance()->sendPacket(packet);
+	});
+
 	game_canvas_ = canvas;
 
 	clearGameCanvas();

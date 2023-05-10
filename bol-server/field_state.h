@@ -53,6 +53,8 @@ public:
 
 	void addSuperGrass(int x, int y);
 
+	void addEffectByBacterium(int x, int y);
+
 	void resetTypeCell(int id_cell) const;
 
 	void resetCell(int id_cell);
@@ -74,7 +76,7 @@ private:
 
 	Position getRandomEmptyAdjacent(const Position& position) const;
 
-	void addColonyBacterium(int max_count);
+	void addColonyBacterium();
 
 };
 

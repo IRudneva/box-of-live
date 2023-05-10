@@ -17,11 +17,15 @@ public:
 
 	void sendSubscription(const std::vector<DeletedPosition>& del_inf, const std::vector<GrassInfo>& grass_inf, const std::vector<BacteriumInfo>& bact_inf) const;
 
+	const std::vector<int>& getSubscription() const { return game_subscription_; }
+
 	void initConfig(std::shared_ptr<GameConfig> config) const;
 
-	void initBacteriumColors();
+	void initBacteriumColors(int count);
 
 	bool getStatus() const { return is_run_; }
+
+	int getIdRoom() const { return id_room_; }
 
 	void setActivateStatus(bool status)
 	{
@@ -47,6 +51,8 @@ public:
 	void addGrass(int x, int y) const { game_state_->addGrass(x, y); }
 
 	void addSuperGrass(int x, int y) { game_state_->addSuperGrass(x, y); }
+
+	void addEffect(int x, int y) { game_state_->addEffectByBacterium(x, y); }
 
 	void addBacterium(int x, int y, int id_type, int energy) const { game_state_->addBacterium(x, y, id_type, energy); }
 

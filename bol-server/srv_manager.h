@@ -26,4 +26,6 @@ private:
 		const std::map<int, SrvColor>& color_bacterium) const;
 
 	RoomState createRoom(int id, bool status, std::shared_ptr<GameConfig> config) const;
+
+	void sendCurrentState(const RoomState& current_room, int client) const;
 };

@@ -1,5 +1,4 @@
 #pragma once
-#include <optional>
 #include <random>
 
 constexpr static int unsigned HEIGHT_WINDOW = 600;
@@ -7,7 +6,6 @@ constexpr static unsigned int WIDTH_WINDOW = 800;
 constexpr static int HEIGHT_PLAYING_FIELD = static_cast<int>(HEIGHT_WINDOW * 0.75);
 constexpr static int WIDTH_PLAYING_FIELD = static_cast<int>(WIDTH_WINDOW * 0.75);
 constexpr static int CELL_SIZE = 8;
-constexpr static int NUMBER_BACTERIAL_COLONIES = 4;
 constexpr static int MAX_COUNT_POSITION_X = WIDTH_PLAYING_FIELD / CELL_SIZE;
 constexpr static int MAX_COUNT_POSITION_Y = HEIGHT_PLAYING_FIELD / CELL_SIZE;
 constexpr static int NO_RESULT = -1;
@@ -79,14 +77,16 @@ struct DeletedPosition
 struct GameConfig
 {
 	GameConfig() = default;
-	GameConfig(int eb, int eac, int etc, int miut, int maut, int gut, int cgr, int efg, int dgfs)
-		:energy_base(eb),energy_action_cost(eac), energy_to_clone(etc),
+	GameConfig(int eb, int eac, int etc, int cc, int cb, int miut, int maut, int gut, int cgr, int efg, int dgfs)
+		:energy_base(eb),energy_action_cost(eac), energy_to_clone(etc), count_colonies(cc), count_bacterium(cb),
 	min_update_time(miut), max_update_time(maut), grass_update_time(gut), count_grass(cgr),
 	energy_from_grass(efg), delta_game_field_size(dgfs){}
 
 	int energy_base = 0;
 	int energy_action_cost = 0;
 	int energy_to_clone = 0;
+	int count_colonies = 0;
+	int count_bacterium = 0;
 	int min_update_time = 0;
 	int max_update_time = 0;
 	int grass_update_time = 0;
@@ -94,11 +94,11 @@ struct GameConfig
 	int energy_from_grass = 0;
 	int delta_game_field_size = 10;
 
-	void pack(msgpack::Packer& packer) const { packer(energy_base, energy_action_cost, energy_to_clone,
+	void pack(msgpack::Packer& packer) const { packer(energy_base, energy_action_cost, energy_to_clone, count_colonies, count_bacterium,
 		min_update_time, max_update_time, grass_update_time,
 		count_grass, energy_from_grass, delta_game_field_size); }
 
-	void pack(msgpack::Unpacker& unpacker) { unpacker(energy_base, energy_action_cost, energy_to_clone,
+	void pack(msgpack::Unpacker& unpacker) { unpacker(energy_base, energy_action_cost, energy_to_clone, count_colonies, count_bacterium,
 		min_update_time, max_update_time, grass_update_time,
 		count_grass, energy_from_grass, delta_game_field_size); }
 

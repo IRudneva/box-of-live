@@ -25,11 +25,25 @@ public:
 
 	int getIdType() const { return id_type_; }
 
-	GameConfig getConfig() const { return config_; }
+
+	std::shared_ptr<GameConfig> getConfig() const { return config_; }
 
 	int getEnergy() const { return energy_base_; }
 
 	void setUpdateTime(int new_time) { update_time_ = new_time; }
+
+	void addEffect(std::shared_ptr<Effect> effect)
+	{
+		effects_.push_back(effect);
+		effects_.back()->applyEffect(*this);
+	}
+
+	void addRandomEffect()
+	{
+		std::vector<std::shared_ptr<Effect>> effects = { std::make_shared<SpeedEffect>() ,  std::make_shared<EnergyEffect>() , std::make_shared<CloneEffect>() };
+		auto rand_i = getRandomInt(0, static_cast<int>(effects.size())- 1);
+		addEffect(effects[rand_i]);
+	}
 
 	int getUpdateTime() const { return update_time_; }
 
@@ -45,15 +59,15 @@ private:
 	int energy_base_ = 0;
 	TimePoint last_action_time_;
 	int update_time_ = 0;
-	/*std::shared_ptr<*/GameConfig config_;
-
+	std::shared_ptr<GameConfig> config_;
 	std::vector<std::shared_ptr<Effect>> effects_;
 	bool can_spend_energy_ = true;
+	bool is_created_now_ = true;
 
 private:
 	bool isReadyUpdate();
 
-	bool canClone() const { return energy_base_ >= config_.energy_to_clone; }
+	bool canClone() const { return energy_base_ >= config_->energy_to_clone; }
 
 	bool tryEatAnotherBacterium(std::shared_ptr<Cell> another_bacterium);
 

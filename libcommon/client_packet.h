@@ -84,4 +84,17 @@ namespace client_packet {
 		void pack(msgpack::Packer& packer) const override { packer(id_room, pos_x, pos_y); }
 		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room,pos_x, pos_y); }
 	};
+
+	struct PTAddEffect : ClientPacket
+	{
+		PTAddEffect() :ClientPacket(PacketType::CLI_ADD_EFFECT) {}
+		PTAddEffect(uint32_t id, uint32_t ox, uint32_t oy) :ClientPacket(PacketType::CLI_ADD_EFFECT), id_room(id), pos_x(ox), pos_y(oy) {}
+
+		uint32_t id_room = 0;
+		uint32_t pos_x = 0;
+		uint32_t pos_y = 0;
+
+		void pack(msgpack::Packer& packer) const override { packer(id_room, pos_x, pos_y); }
+		void pack(msgpack::Unpacker& unpacker) override { unpacker(id_room, pos_x, pos_y); }
+	};
 } // namespace client_packet

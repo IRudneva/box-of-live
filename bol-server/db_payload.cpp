@@ -33,6 +33,8 @@ void DbPayload::save()
 						"conf_energy_base,"
 						"conf_energy_action_cost,"
 						"conf_energy_to_clone,"
+						"conf_count_colonies,"
+						"conf_count_bacterium,"
 						"conf_min_update_time,"
 						"conf_max_update_time,"
 						"conf_grass_update_time,"
@@ -40,13 +42,15 @@ void DbPayload::save()
 						"conf_energy_from_grass,"
 						"conf_delta_game_field_size)"
 						" VALUES "
-						"(?,?,?,?,?,?,?,?,?,?,?,?);"
+						"(?,?,?,?,?,?,?,?,?,?,?,?,?,?);"
 						<< room_id
 						<< "room"
 						<< static_cast<int>(info.is_active)
 						<< info.config.energy_base
 						<< info.config.energy_action_cost
 						<< info.config.energy_to_clone
+						<< info.config.count_colonies
+						<< info.config.count_bacterium
 						<< info.config.min_update_time
 						<< info.config.max_update_time
 						<< info.config.grass_update_time

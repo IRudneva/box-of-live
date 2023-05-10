@@ -1,7 +1,7 @@
 #pragma once
 #include "bacterium.h"
-#include "bacterium.h"
 #include "bol_timer.h"
+#include <boost/signals2.hpp>
 
 class Bacterium;
 
@@ -36,23 +36,14 @@ public:
 	void applyEffect(Bacterium& bacterium) override;
 
 	bool isOverAction() override {
-		return  (is_applied_ ? timer_.timedOut() : false);
+		return  timer_.timedOut();
 	}
 
 	void detachEffect(Bacterium& bacterium) override;
-/*
-	void reset() override
-	{
-		Timer timer;
-		timer_ = std::move(timer);
-		is_applied_ = false;
-		old_speed_ = 0;
-	}
-*/
+
 private:
 	const int speed_boost_ = 10;
 	int old_speed_ = 0;
-	bool is_applied_ = false;
 };
 
 class EnergyEffect : public Effect
@@ -68,10 +59,9 @@ public :
 
 private:
 	const int energy_boost_ = 10;
-	bool is_applied_ = false;
-	bool logic_is_complete_ = false;
+	boost::signals2::connection connection_;
 
-	void logicEffect(Bacterium& bacterium, int grass_energy);
+	void boostBactriumEnergy(Bacterium& bacterium, int grass_energy) const;
 	
 };
 
@@ -87,10 +77,9 @@ public:
 	void detachEffect(Bacterium& bacterium) override {}
 
 private:
-	bool is_applied_ = false;
-	bool logic_is_complete_;
+	boost::signals2::connection connection_;
 
-	void logicEffect(Bacterium& bacterium, FieldState& state);
+	void boostBacteriumClone(Bacterium& bacterium, FieldState& state);
 
 	void totalClone(Bacterium& bacterium,FieldState& state);
 };
